@@ -1,0 +1,97 @@
+CREATE TABLE IF NOT EXISTS clients (
+  id VARCHAR(64) PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  status ENUM('online', 'offline', 'unknown') NOT NULL DEFAULT 'unknown',
+  current_manifest_id VARCHAR(64) NULL,
+  last_seen_at TIMESTAMP NULL,
+  last_error TEXT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS display_groups (
+  id VARCHAR(64) PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY display_groups_name_unique (name)
+);
+
+CREATE TABLE IF NOT EXISTS client_groups (
+  client_id VARCHAR(64) NOT NULL,
+  group_id VARCHAR(64) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (client_id, group_id),
+  CONSTRAINT client_groups_client_id_fk
+    FOREIGN KEY (client_id) REFERENCES clients (id)
+    ON DELETE CASCADE,
+  CONSTRAINT client_groups_group_id_fk
+    FOREIGN KEY (group_id) REFERENCES display_groups (id)
+    ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS assets (
+  id VARCHAR(64) PRIMARY KEY,
+  type ENUM('image', 'video') NOT NULL,
+  original_filename VARCHAR(255) NOT NULL,
+  mime_type VARCHAR(255) NOT NULL,
+  size_bytes BIGINT UNSIGNED NOT NULL,
+  sha256 CHAR(64) NOT NULL,
+  storage_path VARCHAR(1024) NOT NULL,
+  public_url VARCHAR(1024) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY assets_sha256_unique (sha256)
+);
+
+CREATE TABLE IF NOT EXISTS manifests (
+  id VARCHAR(64) PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  version INT UNSIGNED NOT NULL DEFAULT 1,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS manifest_items (
+  id VARCHAR(64) PRIMARY KEY,
+  manifest_id VARCHAR(64) NOT NULL,
+  position INT UNSIGNED NOT NULL,
+  type ENUM('image', 'video', 'text', 'webpage') NOT NULL,
+  asset_id VARCHAR(64) NULL,
+  remote_url VARCHAR(1024) NULL,
+  local_path VARCHAR(1024) NULL,
+  duration_seconds INT UNSIGNED NOT NULL,
+  fit ENUM('contain', 'cover') NULL,
+  sha256 CHAR(64) NULL,
+  text_body TEXT NULL,
+  url VARCHAR(2048) NULL,
+  presentation_json JSON NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY manifest_items_manifest_position_unique (manifest_id, position),
+  CONSTRAINT manifest_items_manifest_id_fk
+    FOREIGN KEY (manifest_id) REFERENCES manifests (id)
+    ON DELETE CASCADE,
+  CONSTRAINT manifest_items_asset_id_fk
+    FOREIGN KEY (asset_id) REFERENCES assets (id)
+    ON DELETE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS assignments (
+  id VARCHAR(64) PRIMARY KEY,
+  target_type ENUM('client', 'group', 'global') NOT NULL,
+  target_id VARCHAR(64) NULL,
+  target_key VARCHAR(64) GENERATED ALWAYS AS (COALESCE(target_id, 'global')) STORED,
+  manifest_id VARCHAR(64) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY assignments_target_unique (target_type, target_key),
+  CONSTRAINT assignments_manifest_id_fk
+    FOREIGN KEY (manifest_id) REFERENCES manifests (id)
+    ON DELETE CASCADE,
+  CONSTRAINT assignments_target_consistency_check
+    CHECK (
+      (target_type = 'global' AND target_id IS NULL)
+      OR (target_type IN ('client', 'group') AND target_id IS NOT NULL)
+    )
+);
