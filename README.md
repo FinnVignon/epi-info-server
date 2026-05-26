@@ -30,3 +30,12 @@ docker compose up --build
 ```
 
 The server listens on `http://localhost:4000`.
+
+Docker Compose starts MySQL with a persistent volume and runs the SQL files in
+`docker/mysql/init` when the database volume is created for the first time. This
+means contributors do not need MySQL installed on their machine for local
+development. MySQL is only exposed inside the Docker network by default, so it
+does not conflict with a local database already using port `3306`.
+
+If the schema changes after the MySQL volume already exists, use a migration or
+recreate the local volume intentionally.

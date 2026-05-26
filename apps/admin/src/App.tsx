@@ -4,7 +4,10 @@ import { SUPPORTED_MANIFEST_ITEM_TYPES } from "../../shared/contracts";
 import "./App.css";
 
 interface HealthResponse {
-  database: string;
+  database: {
+    missingTables: string[];
+    status: string;
+  };
   service: string;
   supportedManifestItemTypes: string[];
 }
@@ -53,7 +56,10 @@ export function App() {
         <article className="panel">
           <h2>Server</h2>
           <p className="metric">Service: {health?.service ?? "not connected"}</p>
-          <p className="metric">Database: {health?.database ?? "unknown"}</p>
+          <p className="metric">Database: {health?.database.status ?? "unknown"}</p>
+          {health?.database.missingTables.length ? (
+            <p className="metric">Missing tables: {health.database.missingTables.join(", ")}</p>
+          ) : null}
         </article>
 
         <article className="panel">
