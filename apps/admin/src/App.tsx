@@ -12,7 +12,23 @@ interface HealthResponse {
   supportedManifestItemTypes: string[];
 }
 
+interface DashboardResponse {
+  clients: Array<{
+    currentManifestId: string | null;
+    id: string;
+    lastSeenAt: string | null;
+    name: string;
+    status: "online" | "offline" | "unknown";
+  }>;
+  groups: Array<{
+    clientCount: number;
+    id: string;
+    name: string;
+  }>;
+}
+
 export function App() {
+  const [dashboard, setDashboard] = useState<DashboardResponse | null>(null);
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [status, setStatus] = useState<"checking" | "ok" | "error">("checking");
 
@@ -21,11 +37,18 @@ export function App() {
 
     async function loadHealth() {
       try {
-        const response = await fetch("/api/health");
-        const body = (await response.json()) as HealthResponse;
+        const [healthResponse, dashboardResponse] = await Promise.all([
+          fetch("/api/health"),
+          fetch("/api/dashboard"),
+        ]);
+        const healthBody = (await healthResponse.json()) as HealthResponse;
+        const dashboardBody = dashboardResponse.ok
+          ? ((await dashboardResponse.json()) as DashboardResponse)
+          : null;
 
         if (!cancelled) {
-          setHealth(body);
+          setDashboard(dashboardBody);
+          setHealth(healthBody);
           setStatus("ok");
         }
       } catch {
@@ -74,8 +97,40 @@ export function App() {
         </article>
 
         <article className="panel">
-          <h2>Next Build Step</h2>
-          <p className="metric">Add clients, assets, manifests, and assignments.</p>
+          <h2>Clients And Groups</h2>
+          <div className="summary-grid">
+            <section>
+              <h3>Clients</h3>
+              {dashboard?.clients.length ? (
+                <ul className="summary-list">
+                  {dashboard.clients.map((client) => (
+                    <li key={client.id}>
+                      <span>{client.name}</span>
+                      <small>{client.status}</small>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="metric">No clients registered yet.</p>
+              )}
+            </section>
+
+            <section>
+              <h3>Groups</h3>
+              {dashboard?.groups.length ? (
+                <ul className="summary-list">
+                  {dashboard.groups.map((group) => (
+                    <li key={group.id}>
+                      <span>{group.name}</span>
+                      <small>{group.clientCount} clients</small>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="metric">No groups created yet.</p>
+              )}
+            </section>
+          </div>
         </article>
       </section>
     </main>

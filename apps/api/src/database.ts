@@ -3,6 +3,9 @@ import { createPool, Pool, RowDataPacket } from "mysql2/promise";
 import { ServerConfig } from "./config.js";
 
 export const DATABASE_TABLES = [
+  "admin_users",
+  "admin_permissions",
+  "admin_sessions",
   "clients",
   "display_groups",
   "client_groups",
@@ -23,6 +26,39 @@ export interface DatabaseHealth {
 
 interface TableRow extends RowDataPacket {
   tableName: string;
+}
+
+interface ClientSummaryRow extends RowDataPacket {
+  currentManifestId: string | null;
+  id: string;
+  lastSeenAt: Date | null;
+  name: string;
+  status: "online" | "offline" | "unknown";
+}
+
+interface GroupSummaryRow extends RowDataPacket {
+  clientCount: number | string;
+  id: string;
+  name: string;
+}
+
+export interface DashboardClientSummary {
+  currentManifestId: string | null;
+  id: string;
+  lastSeenAt: string | null;
+  name: string;
+  status: "online" | "offline" | "unknown";
+}
+
+export interface DashboardGroupSummary {
+  clientCount: number;
+  id: string;
+  name: string;
+}
+
+export interface DashboardSummary {
+  clients: DashboardClientSummary[];
+  groups: DashboardGroupSummary[];
 }
 
 export function createDatabasePool(config: ServerConfig["mysql"]): Pool {
@@ -69,4 +105,48 @@ export async function checkDatabaseHealth(
       status: "unavailable",
     };
   }
+}
+
+export async function getDashboardSummary(pool: Pool): Promise<DashboardSummary> {
+  const [clients] = await pool.query<ClientSummaryRow[]>(
+    `
+      SELECT
+        id,
+        name,
+        status,
+        current_manifest_id AS currentManifestId,
+        last_seen_at AS lastSeenAt
+      FROM clients
+      ORDER BY updated_at DESC
+      LIMIT 8
+    `,
+  );
+  const [groups] = await pool.query<GroupSummaryRow[]>(
+    `
+      SELECT
+        display_groups.id,
+        display_groups.name,
+        COUNT(client_groups.client_id) AS clientCount
+      FROM display_groups
+      LEFT JOIN client_groups ON client_groups.group_id = display_groups.id
+      GROUP BY display_groups.id, display_groups.name
+      ORDER BY display_groups.updated_at DESC
+      LIMIT 8
+    `,
+  );
+
+  return {
+    clients: clients.map((client) => ({
+      currentManifestId: client.currentManifestId,
+      id: client.id,
+      lastSeenAt: client.lastSeenAt?.toISOString() ?? null,
+      name: client.name,
+      status: client.status,
+    })),
+    groups: groups.map((group) => ({
+      clientCount: Number(group.clientCount),
+      id: group.id,
+      name: group.name,
+    })),
+  };
 }
