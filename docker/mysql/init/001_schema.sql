@@ -1,3 +1,53 @@
+CREATE TABLE IF NOT EXISTS admin_users (
+  id VARCHAR(64) PRIMARY KEY,
+  email VARCHAR(320) NOT NULL,
+  display_name VARCHAR(255) NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  status ENUM('active', 'disabled') NOT NULL DEFAULT 'active',
+  is_super_admin BOOLEAN NOT NULL DEFAULT FALSE,
+  last_login_at TIMESTAMP NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY admin_users_email_unique (email)
+);
+
+CREATE TABLE IF NOT EXISTS admin_permissions (
+  id VARCHAR(64) PRIMARY KEY,
+  user_id VARCHAR(64) NOT NULL,
+  target_type ENUM('global', 'group', 'client') NOT NULL,
+  target_id VARCHAR(64) NULL,
+  target_key VARCHAR(64) GENERATED ALWAYS AS (COALESCE(target_id, 'global')) STORED,
+  can_manage_users BOOLEAN NOT NULL DEFAULT FALSE,
+  can_manage_clients BOOLEAN NOT NULL DEFAULT FALSE,
+  can_manage_groups BOOLEAN NOT NULL DEFAULT FALSE,
+  can_manage_content BOOLEAN NOT NULL DEFAULT FALSE,
+  can_manage_assignments BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY admin_permissions_scope_unique (user_id, target_type, target_key),
+  CONSTRAINT admin_permissions_user_id_fk
+    FOREIGN KEY (user_id) REFERENCES admin_users (id)
+    ON DELETE CASCADE,
+  CONSTRAINT admin_permissions_target_consistency_check
+    CHECK (
+      (target_type = 'global' AND target_id IS NULL)
+      OR (target_type IN ('group', 'client') AND target_id IS NOT NULL)
+    )
+);
+
+CREATE TABLE IF NOT EXISTS admin_sessions (
+  id VARCHAR(64) PRIMARY KEY,
+  user_id VARCHAR(64) NOT NULL,
+  token_hash CHAR(64) NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  last_seen_at TIMESTAMP NULL,
+  UNIQUE KEY admin_sessions_token_hash_unique (token_hash),
+  CONSTRAINT admin_sessions_user_id_fk
+    FOREIGN KEY (user_id) REFERENCES admin_users (id)
+    ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS clients (
   id VARCHAR(64) PRIMARY KEY,
   name VARCHAR(255) NOT NULL,

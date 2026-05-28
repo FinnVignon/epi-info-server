@@ -5,7 +5,7 @@ import path from "node:path";
 import { WebSocketServer } from "ws";
 
 import { readConfig } from "./config.js";
-import { checkDatabaseHealth, createDatabasePool } from "./database.js";
+import { checkDatabaseHealth, createDatabasePool, getDashboardSummary } from "./database.js";
 import { SUPPORTED_MANIFEST_ITEM_TYPES } from "../../shared/contracts.js";
 
 const config = readConfig();
@@ -32,6 +32,16 @@ app.get("/api/config", (_request, response) => {
     publicBaseUrl: config.publicBaseUrl,
     supportedManifestItemTypes: SUPPORTED_MANIFEST_ITEM_TYPES,
   });
+});
+
+app.get("/api/dashboard", async (_request, response) => {
+  try {
+    response.json(await getDashboardSummary(mysqlPool));
+  } catch (error) {
+    response.status(503).json({
+      error: error instanceof Error ? error.message : "Unable to load dashboard summary",
+    });
+  }
 });
 
 if (config.adminDistPath) {
