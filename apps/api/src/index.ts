@@ -6,6 +6,7 @@ import { WebSocketServer } from "ws";
 
 import { readConfig } from "./config.js";
 import { checkDatabaseHealth, createDatabasePool, getDashboardSummary } from "./database.js";
+import { createAdminAuthRouter } from "./routes/adminAuthRoutes.js";
 import { SUPPORTED_MANIFEST_ITEM_TYPES } from "../../shared/contracts.js";
 
 const config = readConfig();
@@ -44,6 +45,8 @@ app.get("/api/dashboard", async (_request, response) => {
   }
 });
 
+app.use("/api/admin", createAdminAuthRouter(mysqlPool, config));
+
 if (config.adminDistPath) {
   const adminDistPath = path.resolve(config.adminDistPath);
 
@@ -57,6 +60,18 @@ if (config.adminDistPath) {
     response.sendFile(path.join(adminDistPath, "index.html"));
   });
 }
+
+app.use(
+  (
+    error: unknown,
+    _request: express.Request,
+    response: express.Response,
+    _next: express.NextFunction,
+  ) => {
+    console.error(error);
+    response.status(500).json({ error: "Internal server error" });
+  },
+);
 
 const httpServer = app.listen(config.port, () => {
   console.log(`Epi Info server listening on port ${config.port}`);
