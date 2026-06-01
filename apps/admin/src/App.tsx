@@ -3,6 +3,24 @@ import { useEffect, useState } from "react";
 import { SUPPORTED_MANIFEST_ITEM_TYPES } from "../../shared/contracts";
 import "./App.css";
 
+interface AdminUser {
+  displayName: string;
+  email: string;
+  id: string;
+  isSuperAdmin: boolean;
+}
+
+interface AuthResponse {
+  session: {
+    expiresAt: string;
+  };
+  user: AdminUser;
+}
+
+interface BootstrapStatusResponse {
+  needsBootstrap: boolean;
+}
+
 interface HealthResponse {
   database: {
     missingTables: string[];
@@ -27,52 +45,171 @@ interface DashboardResponse {
   }>;
 }
 
+type AuthMode = "checking" | "bootstrap" | "login" | "authenticated";
+
+async function readJsonResponse<T>(response: Response): Promise<T> {
+  const body = (await response.json()) as unknown;
+
+  if (!response.ok) {
+    const error =
+      typeof body === "object" && body !== null && "error" in body && typeof body.error === "string"
+        ? body.error
+        : "Request failed";
+
+    throw new Error(error);
+  }
+
+  return body as T;
+}
+
 export function App() {
   const [dashboard, setDashboard] = useState<DashboardResponse | null>(null);
   const [health, setHealth] = useState<HealthResponse | null>(null);
-  const [status, setStatus] = useState<"checking" | "ok" | "error">("checking");
+  const [apiStatus, setApiStatus] = useState<"checking" | "ok" | "error">("checking");
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [authMode, setAuthMode] = useState<AuthMode>("checking");
+  const [currentUser, setCurrentUser] = useState<AdminUser | null>(null);
 
   useEffect(() => {
     let cancelled = false;
 
-    async function loadHealth() {
+    async function loadSession() {
       try {
-        const [healthResponse, dashboardResponse] = await Promise.all([
-          fetch("/api/health"),
-          fetch("/api/dashboard"),
-        ]);
-        const healthBody = (await healthResponse.json()) as HealthResponse;
-        const dashboardBody = dashboardResponse.ok
-          ? ((await dashboardResponse.json()) as DashboardResponse)
-          : null;
+        const response = await fetch("/api/admin/me");
 
         if (!cancelled) {
-          setDashboard(dashboardBody);
-          setHealth(healthBody);
-          setStatus("ok");
+          if (response.ok) {
+            const body = (await response.json()) as AuthResponse;
+
+            setCurrentUser(body.user);
+            setAuthMode("authenticated");
+            return;
+          }
+
+          if (response.status !== 401) {
+            throw new Error("Unable to check admin session");
+          }
         }
-      } catch {
+
+        const bootstrapStatus = await readJsonResponse<BootstrapStatusResponse>(
+          await fetch("/api/admin/bootstrap/status"),
+        );
+
         if (!cancelled) {
-          setStatus("error");
+          setAuthMode(bootstrapStatus.needsBootstrap ? "bootstrap" : "login");
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setAuthError(error instanceof Error ? error.message : "Unable to check admin session");
+          setAuthMode("login");
         }
       }
     }
 
-    void loadHealth();
+    void loadSession();
 
     return () => {
       cancelled = true;
     };
   }, []);
 
+  useEffect(() => {
+    if (authMode !== "authenticated") {
+      return;
+    }
+
+    let cancelled = false;
+
+    async function loadDashboard() {
+      try {
+        const [healthResponse, dashboardResponse] = await Promise.all([
+          fetch("/api/health"),
+          fetch("/api/dashboard"),
+        ]);
+        const healthBody = await readJsonResponse<HealthResponse>(healthResponse);
+        const dashboardBody = await readJsonResponse<DashboardResponse>(dashboardResponse);
+
+        if (!cancelled) {
+          setDashboard(dashboardBody);
+          setHealth(healthBody);
+          setApiStatus("ok");
+        }
+      } catch {
+        if (!cancelled) {
+          setApiStatus("error");
+        }
+      }
+    }
+
+    void loadDashboard();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authMode]);
+
+  async function handleAuthenticated(response: Response): Promise<void> {
+    const body = await readJsonResponse<AuthResponse>(response);
+
+    setAuthError(null);
+    setCurrentUser(body.user);
+    setAuthMode("authenticated");
+  }
+
+  async function handleLogout(): Promise<void> {
+    await fetch("/api/admin/logout", {
+      method: "POST",
+    });
+
+    setCurrentUser(null);
+    setDashboard(null);
+    setHealth(null);
+    setApiStatus("checking");
+
+    const bootstrapStatus = await readJsonResponse<BootstrapStatusResponse>(
+      await fetch("/api/admin/bootstrap/status"),
+    );
+
+    setAuthMode(bootstrapStatus.needsBootstrap ? "bootstrap" : "login");
+  }
+
+  if (authMode === "checking") {
+    return (
+      <main className="auth-shell">
+        <section className="auth-panel">
+          <div className="brand auth-brand">
+            <h1>Epi Info Admin</h1>
+            <span>Checking admin session</span>
+          </div>
+        </section>
+      </main>
+    );
+  }
+
+  if (authMode === "bootstrap" || authMode === "login") {
+    return (
+      <AuthScreen
+        error={authError}
+        mode={authMode}
+        onAuthenticated={handleAuthenticated}
+        onError={setAuthError}
+      />
+    );
+  }
+
   return (
     <main className="app-shell">
       <header className="topbar">
         <div className="brand">
           <h1>Epi Info Admin</h1>
-          <span>Controller server</span>
+          <span>{currentUser ? currentUser.email : "Controller server"}</span>
         </div>
-        <span className={`status-pill ${status}`}>API {status}</span>
+        <div className="topbar-actions">
+          <span className={`status-pill ${apiStatus}`}>API {apiStatus}</span>
+          <button className="secondary-button" onClick={() => void handleLogout()} type="button">
+            Log out
+          </button>
+        </div>
       </header>
 
       <section className="content">
@@ -132,6 +269,115 @@ export function App() {
             </section>
           </div>
         </article>
+      </section>
+    </main>
+  );
+}
+
+interface AuthScreenProps {
+  error: string | null;
+  mode: "bootstrap" | "login";
+  onAuthenticated: (response: Response) => Promise<void>;
+  onError: (error: string | null) => void;
+}
+
+function AuthScreen({ error, mode, onAuthenticated, onError }: AuthScreenProps) {
+  const [displayName, setDisplayName] = useState("");
+  const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [password, setPassword] = useState("");
+  const isBootstrap = mode === "bootstrap";
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setIsSubmitting(true);
+    onError(null);
+
+    try {
+      const response = await fetch(isBootstrap ? "/api/admin/bootstrap" : "/api/admin/login", {
+        body: JSON.stringify(
+          isBootstrap
+            ? {
+                displayName,
+                email,
+                password,
+              }
+            : {
+                email,
+                password,
+              },
+        ),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        await readJsonResponse(response);
+      }
+
+      await onAuthenticated(response);
+    } catch (submitError) {
+      onError(submitError instanceof Error ? submitError.message : "Unable to sign in");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  return (
+    <main className="auth-shell">
+      <section className="auth-panel">
+        <div className="brand auth-brand">
+          <h1>Epi Info Admin</h1>
+          <span>{isBootstrap ? "Create the first administrator" : "Admin sign in"}</span>
+        </div>
+
+        <form className="auth-form" onSubmit={(event) => void handleSubmit(event)}>
+          {isBootstrap ? (
+            <label>
+              <span>Display name</span>
+              <input
+                autoComplete="name"
+                minLength={2}
+                onChange={(event) => setDisplayName(event.target.value)}
+                required
+                type="text"
+                value={displayName}
+              />
+            </label>
+          ) : null}
+
+          <label>
+            <span>Email</span>
+            <input
+              autoComplete="email"
+              inputMode="email"
+              onChange={(event) => setEmail(event.target.value)}
+              required
+              type="email"
+              value={email}
+            />
+          </label>
+
+          <label>
+            <span>Password</span>
+            <input
+              autoComplete={isBootstrap ? "new-password" : "current-password"}
+              minLength={10}
+              onChange={(event) => setPassword(event.target.value)}
+              required
+              type="password"
+              value={password}
+            />
+          </label>
+
+          {error ? <p className="form-error">{error}</p> : null}
+
+          <button className="primary-button" disabled={isSubmitting} type="submit">
+            {isSubmitting ? "Please wait" : isBootstrap ? "Create admin" : "Sign in"}
+          </button>
+        </form>
       </section>
     </main>
   );

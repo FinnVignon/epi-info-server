@@ -4,6 +4,7 @@ import { mkdirSync } from "node:fs";
 import path from "node:path";
 import { WebSocketServer } from "ws";
 
+import { createAdminAuthMiddleware } from "./auth/adminAuth.js";
 import { readConfig } from "./config.js";
 import { checkDatabaseHealth, createDatabasePool, getDashboardSummary } from "./database.js";
 import { createAdminAuthRouter } from "./routes/adminAuthRoutes.js";
@@ -12,6 +13,7 @@ import { SUPPORTED_MANIFEST_ITEM_TYPES } from "../../shared/contracts.js";
 const config = readConfig();
 const app = express();
 const mysqlPool = createDatabasePool(config.mysql);
+const requireAdminAuth = createAdminAuthMiddleware(mysqlPool, config.adminAuth.sessionCookieName);
 
 mkdirSync(config.assetStoragePath, { recursive: true });
 
@@ -35,7 +37,7 @@ app.get("/api/config", (_request, response) => {
   });
 });
 
-app.get("/api/dashboard", async (_request, response) => {
+app.get("/api/dashboard", requireAdminAuth, async (_request, response) => {
   try {
     response.json(await getDashboardSummary(mysqlPool));
   } catch (error) {

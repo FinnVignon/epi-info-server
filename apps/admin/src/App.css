@@ -1,7 +1,13 @@
 :root {
   color: #172026;
   font-family:
-    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
   background: #f4f6f8;
 }
 
@@ -13,8 +19,109 @@ body {
   margin: 0;
 }
 
+button,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
 .app-shell {
   min-height: 100vh;
+}
+
+.auth-shell {
+  align-items: center;
+  display: grid;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.auth-panel {
+  background: #ffffff;
+  border: 1px solid #d8e0e7;
+  border-radius: 8px;
+  margin: 0 auto;
+  max-width: 420px;
+  padding: 24px;
+  width: min(100%, 420px);
+}
+
+.auth-brand {
+  margin-bottom: 24px;
+}
+
+.auth-form {
+  display: grid;
+  gap: 16px;
+}
+
+.auth-form label {
+  display: grid;
+  gap: 6px;
+}
+
+.auth-form label span {
+  color: #33424f;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.auth-form input {
+  background: #ffffff;
+  border: 1px solid #b9c7d2;
+  border-radius: 6px;
+  color: #172026;
+  min-height: 42px;
+  outline: none;
+  padding: 9px 10px;
+  width: 100%;
+}
+
+.auth-form input:focus {
+  border-color: #2d6cdf;
+  box-shadow: 0 0 0 3px rgb(45 108 223 / 14%);
+}
+
+.form-error {
+  background: #fdeeee;
+  border: 1px solid #efb4b4;
+  border-radius: 6px;
+  color: #9a2d2d;
+  font-size: 13px;
+  margin: 0;
+  padding: 10px;
+}
+
+.primary-button,
+.secondary-button {
+  align-items: center;
+  border-radius: 6px;
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 700;
+  justify-content: center;
+  min-height: 38px;
+  padding: 8px 12px;
+}
+
+.primary-button {
+  background: #2d6cdf;
+  border: 1px solid #255bc0;
+  color: #ffffff;
+}
+
+.secondary-button {
+  background: #ffffff;
+  border: 1px solid #ccd6dd;
+  color: #33424f;
 }
 
 .topbar {
@@ -41,6 +148,12 @@ body {
 .brand span {
   color: #5d6b78;
   font-size: 13px;
+}
+
+.topbar-actions {
+  align-items: center;
+  display: flex;
+  gap: 10px;
 }
 
 .status-pill {
@@ -160,5 +273,21 @@ body {
     align-items: flex-start;
     flex-direction: column;
     gap: 12px;
+  }
+
+  .topbar-actions {
+    justify-content: space-between;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-shell {
+    align-items: start;
+    padding: 16px;
+  }
+
+  .auth-panel {
+    padding: 18px;
   }
 }
