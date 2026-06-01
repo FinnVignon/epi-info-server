@@ -7,6 +7,18 @@ export {
 export type { AdminUserWithPasswordHash, CreateAdminUserInput } from "./database/adminUsers.js";
 
 export {
+  adminUserHasPermission,
+  createAdminPermission,
+  deleteAdminPermission,
+  deleteAdminPermissionsForUser,
+  listAdminPermissionsForUser,
+} from "./database/adminPermissions.js";
+export type {
+  AdminPermissionCheckInput,
+  CreateAdminPermissionInput,
+} from "./database/adminPermissions.js";
+
+export {
   createAdminSession,
   deleteAdminSession,
   findAdminSessionByTokenHash,

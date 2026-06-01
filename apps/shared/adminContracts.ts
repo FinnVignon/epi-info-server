@@ -9,6 +9,51 @@ export interface AdminUser {
   updatedAt: string;
 }
 
+export const ADMIN_PERMISSION_ACTIONS = [
+  "manage_users",
+  "manage_clients",
+  "manage_groups",
+  "manage_content",
+  "manage_assignments",
+] as const;
+
+export const ADMIN_PERMISSION_TARGET_TYPES = ["global", "group", "client"] as const;
+
+export type AdminPermissionAction = (typeof ADMIN_PERMISSION_ACTIONS)[number];
+
+export type AdminPermissionTargetType = (typeof ADMIN_PERMISSION_TARGET_TYPES)[number];
+
+export type AdminPermissionTarget =
+  | {
+      targetId: null;
+      targetType: "global";
+    }
+  | {
+      targetId: string;
+      targetType: "client" | "group";
+    };
+
+export interface AdminPermissionActions {
+  canManageAssignments: boolean;
+  canManageClients: boolean;
+  canManageContent: boolean;
+  canManageGroups: boolean;
+  canManageUsers: boolean;
+}
+
+export interface AdminPermission extends AdminPermissionActions {
+  createdAt: string;
+  id: string;
+  targetId: string | null;
+  targetType: AdminPermissionTargetType;
+  updatedAt: string;
+  userId: string;
+}
+
+export type AdminPermissionGrant = AdminPermissionTarget & {
+  actions: AdminPermissionAction[];
+};
+
 export interface AdminSessionSummary {
   expiresAt: string;
   id?: string;

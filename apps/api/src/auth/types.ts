@@ -1,16 +1,13 @@
-export const ADMIN_PERMISSION_ACTIONS = [
-  "manage_users",
-  "manage_clients",
-  "manage_groups",
-  "manage_content",
-  "manage_assignments",
-] as const;
+export {
+  ADMIN_PERMISSION_ACTIONS,
+  ADMIN_PERMISSION_TARGET_TYPES as ADMIN_PERMISSION_SCOPES,
+} from "../../../shared/adminContracts.js";
 
-export const ADMIN_PERMISSION_SCOPES = ["global", "group", "client"] as const;
-
-export type AdminPermissionAction = (typeof ADMIN_PERMISSION_ACTIONS)[number];
-
-export type AdminPermissionScope = (typeof ADMIN_PERMISSION_SCOPES)[number];
+export type {
+  AdminPermissionAction,
+  AdminPermissionGrant,
+  AdminPermissionTargetType as AdminPermissionScope,
+} from "../../../shared/adminContracts.js";
 
 export interface AdminUserSession {
   expiresAt: string;
@@ -22,10 +19,4 @@ export interface AdminUserSession {
     isSuperAdmin: boolean;
     status: "active" | "disabled";
   };
-}
-
-export interface AdminPermissionGrant {
-  actions: AdminPermissionAction[];
-  scope: AdminPermissionScope;
-  targetId: string | null;
 }
