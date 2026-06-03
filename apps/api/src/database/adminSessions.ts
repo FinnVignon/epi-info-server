@@ -55,6 +55,10 @@ export async function deleteAdminSession(pool: Pool, tokenHash: string): Promise
   ]);
 }
 
+export async function deleteAdminSessionsForUser(pool: Pool, userId: string): Promise<void> {
+  await pool.execute<ResultSetHeader>("DELETE FROM admin_sessions WHERE user_id = ?", [userId]);
+}
+
 export async function findAdminSessionByTokenHash(
   pool: Pool,
   tokenHash: string,

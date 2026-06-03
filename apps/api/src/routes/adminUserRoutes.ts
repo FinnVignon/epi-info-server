@@ -8,6 +8,7 @@ import { hashAdminPassword, isValidAdminPassword } from "../auth/passwords.js";
 import { ServerConfig } from "../config.js";
 import {
   createAdminUser,
+  deleteAdminSessionsForUser,
   findAdminUserById,
   listAdminPermissionsForUser,
   listAdminUsers,
@@ -327,7 +328,7 @@ export function createAdminUserRouter(pool: Pool, config: ServerConfig): Router 
 
   router.post("/", async (request, response, next) => {
     try {
-      const body = readCreateUserBody(request.body as Partial<CreateAdminUserRequest>);
+      const body = readCreateUserBody((request.body ?? {}) as Partial<CreateAdminUserRequest>);
 
       if (typeof body === "string") {
         response.status(400).json({ error: body });
@@ -387,7 +388,9 @@ export function createAdminUserRouter(pool: Pool, config: ServerConfig): Router 
   router.patch("/:userId/profile", async (request, response, next) => {
     try {
       const userId = readUserId(request.params);
-      const profile = readProfileBody(request.body as Partial<UpdateAdminUserProfileRequest>);
+      const profile = readProfileBody(
+        (request.body ?? {}) as Partial<UpdateAdminUserProfileRequest>,
+      );
 
       if (!userId) {
         response.status(400).json({ error: "User id is required" });
@@ -424,7 +427,7 @@ export function createAdminUserRouter(pool: Pool, config: ServerConfig): Router 
   router.patch("/:userId/status", async (request, response, next) => {
     try {
       const userId = readUserId(request.params);
-      const status = readStatusBody(request.body as Partial<UpdateAdminUserStatusRequest>);
+      const status = readStatusBody((request.body ?? {}) as Partial<UpdateAdminUserStatusRequest>);
 
       if (!userId) {
         response.status(400).json({ error: "User id is required" });
@@ -449,6 +452,7 @@ export function createAdminUserRouter(pool: Pool, config: ServerConfig): Router 
       }
 
       await updateAdminUserStatus(pool, { status: status.status, userId });
+      await deleteAdminSessionsForUser(pool, userId);
       const user = await findUserWithPermissions(pool, userId);
 
       if (!user) {
@@ -467,7 +471,9 @@ export function createAdminUserRouter(pool: Pool, config: ServerConfig): Router 
   router.post("/:userId/password", async (request, response, next) => {
     try {
       const userId = readUserId(request.params);
-      const password = readPasswordBody(request.body as Partial<ResetAdminUserPasswordRequest>);
+      const password = readPasswordBody(
+        (request.body ?? {}) as Partial<ResetAdminUserPasswordRequest>,
+      );
 
       if (!userId) {
         response.status(400).json({ error: "User id is required" });
@@ -492,6 +498,7 @@ export function createAdminUserRouter(pool: Pool, config: ServerConfig): Router 
         return;
       }
 
+      await deleteAdminSessionsForUser(pool, userId);
       response.status(204).send();
     } catch (error) {
       next(error);
@@ -502,7 +509,7 @@ export function createAdminUserRouter(pool: Pool, config: ServerConfig): Router 
     try {
       const userId = readUserId(request.params);
       const permissions = readPermissionsBody(
-        request.body as Partial<ReplaceAdminUserPermissionsRequest>,
+        (request.body ?? {}) as Partial<ReplaceAdminUserPermissionsRequest>,
       );
 
       if (!userId) {
