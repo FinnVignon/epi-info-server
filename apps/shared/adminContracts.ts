@@ -54,6 +54,10 @@ export type AdminPermissionGrant = AdminPermissionTarget & {
   actions: AdminPermissionAction[];
 };
 
+export interface AdminUserWithPermissions extends AdminUser {
+  permissions: AdminPermission[];
+}
+
 export interface AdminSessionSummary {
   expiresAt: string;
   id?: string;
@@ -77,4 +81,32 @@ export interface BootstrapStatusResponse {
 export interface LoginAdminRequest {
   email: string;
   password: string;
+}
+
+export interface AdminUserListResponse {
+  users: AdminUserWithPermissions[];
+}
+
+export interface AdminUserResponse {
+  user: AdminUserWithPermissions;
+}
+
+export interface CreateAdminUserRequest {
+  displayName: string;
+  email: string;
+  isSuperAdmin?: boolean;
+  password: string;
+  permissions?: AdminPermissionGrant[];
+}
+
+export interface ReplaceAdminUserPermissionsRequest {
+  permissions: AdminPermissionGrant[];
+}
+
+export interface ResetAdminUserPasswordRequest {
+  password: string;
+}
+
+export interface UpdateAdminUserStatusRequest {
+  status: AdminUser["status"];
 }

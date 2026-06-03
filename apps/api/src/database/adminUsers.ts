@@ -31,6 +31,11 @@ export interface CreateAdminUserInput {
   passwordHash: string;
 }
 
+export interface UpdateAdminUserStatusInput {
+  status: AdminUser["status"];
+  userId: string;
+}
+
 function mapAdminUser(row: AdminUserRow): AdminUser {
   return {
     createdAt: row.createdAt.toISOString(),
@@ -110,8 +115,78 @@ export async function findAdminUserByEmail(
   return user ? mapAdminUserWithPasswordHash(user) : null;
 }
 
+export async function findAdminUserById(pool: Pool, userId: string): Promise<AdminUser | null> {
+  const [rows] = await pool.execute<AdminUserRow[]>(
+    `
+      SELECT
+        id,
+        email,
+        display_name AS displayName,
+        password_hash AS passwordHash,
+        status,
+        is_super_admin AS isSuperAdmin,
+        last_login_at AS lastLoginAt,
+        created_at AS createdAt,
+        updated_at AS updatedAt
+      FROM admin_users
+      WHERE id = ?
+      LIMIT 1
+    `,
+    [userId],
+  );
+  const user = rows[0];
+
+  return user ? mapAdminUser(user) : null;
+}
+
+export async function listAdminUsers(pool: Pool): Promise<AdminUser[]> {
+  const [rows] = await pool.query<AdminUserRow[]>(
+    `
+      SELECT
+        id,
+        email,
+        display_name AS displayName,
+        password_hash AS passwordHash,
+        status,
+        is_super_admin AS isSuperAdmin,
+        last_login_at AS lastLoginAt,
+        created_at AS createdAt,
+        updated_at AS updatedAt
+      FROM admin_users
+      ORDER BY created_at DESC
+    `,
+  );
+
+  return rows.map(mapAdminUser);
+}
+
 export async function updateAdminLastLogin(pool: Pool, userId: string): Promise<void> {
   await pool.execute<ResultSetHeader>("UPDATE admin_users SET last_login_at = NOW() WHERE id = ?", [
     userId,
   ]);
+}
+
+export async function updateAdminUserPasswordHash(
+  pool: Pool,
+  userId: string,
+  passwordHash: string,
+): Promise<boolean> {
+  const [result] = await pool.execute<ResultSetHeader>(
+    "UPDATE admin_users SET password_hash = ? WHERE id = ?",
+    [passwordHash, userId],
+  );
+
+  return result.affectedRows > 0;
+}
+
+export async function updateAdminUserStatus(
+  pool: Pool,
+  input: UpdateAdminUserStatusInput,
+): Promise<boolean> {
+  const [result] = await pool.execute<ResultSetHeader>(
+    "UPDATE admin_users SET status = ? WHERE id = ?",
+    [input.status, input.userId],
+  );
+
+  return result.affectedRows > 0;
 }

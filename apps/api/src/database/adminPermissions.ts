@@ -103,6 +103,58 @@ export async function deleteAdminPermissionsForUser(pool: Pool, userId: string):
   await pool.execute<ResultSetHeader>("DELETE FROM admin_permissions WHERE user_id = ?", [userId]);
 }
 
+export async function replaceAdminPermissionsForUser(
+  pool: Pool,
+  userId: string,
+  permissions: CreateAdminPermissionInput[],
+): Promise<void> {
+  const connection = await pool.getConnection();
+
+  try {
+    await connection.beginTransaction();
+    await connection.execute<ResultSetHeader>("DELETE FROM admin_permissions WHERE user_id = ?", [
+      userId,
+    ]);
+
+    for (const permission of permissions) {
+      await connection.execute<ResultSetHeader>(
+        `
+          INSERT INTO admin_permissions (
+            id,
+            user_id,
+            target_type,
+            target_id,
+            can_manage_users,
+            can_manage_clients,
+            can_manage_groups,
+            can_manage_content,
+            can_manage_assignments
+          )
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `,
+        [
+          permission.id,
+          userId,
+          permission.target.targetType,
+          permission.target.targetId,
+          permission.canManageUsers,
+          permission.canManageClients,
+          permission.canManageGroups,
+          permission.canManageContent,
+          permission.canManageAssignments,
+        ],
+      );
+    }
+
+    await connection.commit();
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
+}
+
 export async function listAdminPermissionsForUser(
   pool: Pool,
   userId: string,

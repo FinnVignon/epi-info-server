@@ -1,10 +1,18 @@
 export {
   countAdminUsers,
   createAdminUser,
+  findAdminUserById,
   findAdminUserByEmail,
+  listAdminUsers,
   updateAdminLastLogin,
+  updateAdminUserPasswordHash,
+  updateAdminUserStatus,
 } from "./database/adminUsers.js";
-export type { AdminUserWithPasswordHash, CreateAdminUserInput } from "./database/adminUsers.js";
+export type {
+  AdminUserWithPasswordHash,
+  CreateAdminUserInput,
+  UpdateAdminUserStatusInput,
+} from "./database/adminUsers.js";
 
 export {
   adminUserHasPermission,
@@ -12,6 +20,7 @@ export {
   deleteAdminPermission,
   deleteAdminPermissionsForUser,
   listAdminPermissionsForUser,
+  replaceAdminPermissionsForUser,
 } from "./database/adminPermissions.js";
 export type {
   AdminPermissionCheckInput,

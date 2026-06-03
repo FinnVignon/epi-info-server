@@ -8,6 +8,7 @@ import { createAdminAuthMiddleware } from "./auth/adminAuth.js";
 import { readConfig } from "./config.js";
 import { checkDatabaseHealth, createDatabasePool, getDashboardSummary } from "./database.js";
 import { createAdminAuthRouter } from "./routes/adminAuthRoutes.js";
+import { createAdminUserRouter } from "./routes/adminUserRoutes.js";
 import { SUPPORTED_MANIFEST_ITEM_TYPES } from "../../shared/contracts.js";
 
 const config = readConfig();
@@ -47,6 +48,7 @@ app.get("/api/dashboard", requireAdminAuth, async (_request, response) => {
   }
 });
 
+app.use("/api/admin/users", createAdminUserRouter(mysqlPool, config));
 app.use("/api/admin", createAdminAuthRouter(mysqlPool, config));
 
 if (config.adminDistPath) {
