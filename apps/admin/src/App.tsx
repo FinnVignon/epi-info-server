@@ -1,138 +1,170 @@
 import { useEffect, useState } from "react";
 
-import { SUPPORTED_MANIFEST_ITEM_TYPES } from "../../shared/contracts";
+import {
+  ApiError,
+  getBootstrapStatus,
+  getCurrentAdminSession,
+  loadDashboardData,
+  logoutAdmin,
+} from "./api/adminApi";
+import { AdminDashboard } from "./components/AdminDashboard";
+import { AdminShell } from "./components/AdminShell";
+import type { AdminScreen } from "./components/AdminShell";
+import { AdminUsersScreen } from "./components/AdminUsersScreen";
+import { AuthScreen } from "./components/AuthScreen";
+import { LoadingScreen } from "./components/LoadingScreen";
+import type { AdminAuthResponse, AdminUser } from "../../shared/adminContracts";
+import type { DashboardResponse, HealthResponse } from "../../shared/dashboardContracts";
 import "./App.css";
 
-interface HealthResponse {
-  database: {
-    missingTables: string[];
-    status: string;
-  };
-  service: string;
-  supportedManifestItemTypes: string[];
-}
-
-interface DashboardResponse {
-  clients: Array<{
-    currentManifestId: string | null;
-    id: string;
-    lastSeenAt: string | null;
-    name: string;
-    status: "online" | "offline" | "unknown";
-  }>;
-  groups: Array<{
-    clientCount: number;
-    id: string;
-    name: string;
-  }>;
-}
+type ApiStatus = "checking" | "ok" | "error";
+type AuthMode = "checking" | "bootstrap" | "login" | "authenticated";
 
 export function App() {
+  const [activeScreen, setActiveScreen] = useState<AdminScreen>("dashboard");
+  const [apiStatus, setApiStatus] = useState<ApiStatus>("checking");
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [authMode, setAuthMode] = useState<AuthMode>("checking");
+  const [currentUser, setCurrentUser] = useState<AdminUser | null>(null);
   const [dashboard, setDashboard] = useState<DashboardResponse | null>(null);
   const [health, setHealth] = useState<HealthResponse | null>(null);
-  const [status, setStatus] = useState<"checking" | "ok" | "error">("checking");
 
   useEffect(() => {
     let cancelled = false;
 
-    async function loadHealth() {
+    async function loadSession() {
       try {
-        const [healthResponse, dashboardResponse] = await Promise.all([
-          fetch("/api/health"),
-          fetch("/api/dashboard"),
-        ]);
-        const healthBody = (await healthResponse.json()) as HealthResponse;
-        const dashboardBody = dashboardResponse.ok
-          ? ((await dashboardResponse.json()) as DashboardResponse)
-          : null;
+        const session = await getCurrentAdminSession();
+
+        if (cancelled) {
+          return;
+        }
+
+        if (session) {
+          setCurrentUser(session.user);
+          setAuthMode("authenticated");
+          return;
+        }
+
+        const loggedOutMode = await resolveLoggedOutMode();
 
         if (!cancelled) {
-          setDashboard(dashboardBody);
-          setHealth(healthBody);
-          setStatus("ok");
+          setAuthMode(loggedOutMode);
         }
-      } catch {
+      } catch (error) {
         if (!cancelled) {
-          setStatus("error");
+          setAuthError(error instanceof Error ? error.message : "Unable to check admin session");
+          setAuthMode("login");
         }
       }
     }
 
-    void loadHealth();
+    void loadSession();
 
     return () => {
       cancelled = true;
     };
   }, []);
 
-  return (
-    <main className="app-shell">
-      <header className="topbar">
-        <div className="brand">
-          <h1>Epi Info Admin</h1>
-          <span>Controller server</span>
-        </div>
-        <span className={`status-pill ${status}`}>API {status}</span>
-      </header>
+  useEffect(() => {
+    if (authMode !== "authenticated") {
+      return;
+    }
 
-      <section className="content">
-        <article className="panel">
-          <h2>Server</h2>
-          <p className="metric">Service: {health?.service ?? "not connected"}</p>
-          <p className="metric">Database: {health?.database.status ?? "unknown"}</p>
-          {health?.database.missingTables.length ? (
-            <p className="metric">Missing tables: {health.database.missingTables.join(", ")}</p>
-          ) : null}
-        </article>
+    let cancelled = false;
 
-        <article className="panel">
-          <h2>Display Types</h2>
-          <div className="content-types">
-            {(health?.supportedManifestItemTypes ?? SUPPORTED_MANIFEST_ITEM_TYPES).map((type) => (
-              <span className="content-type" key={type}>
-                {type}
-              </span>
-            ))}
-          </div>
-        </article>
+    async function refreshDashboard() {
+      try {
+        const data = await loadDashboardData();
 
-        <article className="panel">
-          <h2>Clients And Groups</h2>
-          <div className="summary-grid">
-            <section>
-              <h3>Clients</h3>
-              {dashboard?.clients.length ? (
-                <ul className="summary-list">
-                  {dashboard.clients.map((client) => (
-                    <li key={client.id}>
-                      <span>{client.name}</span>
-                      <small>{client.status}</small>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="metric">No clients registered yet.</p>
-              )}
-            </section>
+        if (!cancelled) {
+          setDashboard(data.dashboard);
+          setHealth(data.health);
+          setApiStatus("ok");
+        }
+      } catch (error) {
+        if (cancelled) {
+          return;
+        }
 
-            <section>
-              <h3>Groups</h3>
-              {dashboard?.groups.length ? (
-                <ul className="summary-list">
-                  {dashboard.groups.map((group) => (
-                    <li key={group.id}>
-                      <span>{group.name}</span>
-                      <small>{group.clientCount} clients</small>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="metric">No groups created yet.</p>
-              )}
-            </section>
-          </div>
-        </article>
-      </section>
-    </main>
-  );
+        if (error instanceof ApiError && error.status === 401) {
+          handleSessionExpired();
+          return;
+        }
+
+        setApiStatus("error");
+      }
+    }
+
+    void refreshDashboard();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authMode]);
+
+  function handleAuthenticated(response: AdminAuthResponse): void {
+    setAuthError(null);
+    setCurrentUser(response.user);
+    setAuthMode("authenticated");
+  }
+
+  function handleSessionExpired(): void {
+    setCurrentUser(null);
+    setDashboard(null);
+    setHealth(null);
+    setApiStatus("checking");
+    setActiveScreen("dashboard");
+    setAuthMode("login");
+  }
+
+  async function handleLogout(): Promise<void> {
+    try {
+      await logoutAdmin();
+    } finally {
+      setCurrentUser(null);
+      setDashboard(null);
+      setHealth(null);
+      setApiStatus("checking");
+      setActiveScreen("dashboard");
+      setAuthMode(await resolveLoggedOutMode());
+    }
+  }
+
+  if (authMode === "bootstrap" || authMode === "login") {
+    return (
+      <AuthScreen
+        error={authError}
+        mode={authMode}
+        onAuthenticated={handleAuthenticated}
+        onError={setAuthError}
+      />
+    );
+  }
+
+  if (authMode === "authenticated" && currentUser) {
+    return (
+      <AdminShell
+        activeScreen={activeScreen}
+        apiStatus={apiStatus}
+        currentUser={currentUser}
+        onLogout={() => void handleLogout()}
+        onScreenChange={setActiveScreen}
+      >
+        {activeScreen === "dashboard" ? (
+          <AdminDashboard dashboard={dashboard} health={health} />
+        ) : (
+          <AdminUsersScreen currentUser={currentUser} onUnauthorized={handleSessionExpired} />
+        )}
+      </AdminShell>
+    );
+  }
+
+  return <LoadingScreen />;
+}
+
+async function resolveLoggedOutMode(): Promise<"bootstrap" | "login"> {
+  const bootstrapStatus = await getBootstrapStatus();
+
+  return bootstrapStatus.needsBootstrap ? "bootstrap" : "login";
 }

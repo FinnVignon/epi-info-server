@@ -1,6 +1,11 @@
 import "dotenv/config";
 
 export interface ServerConfig {
+  adminAuth: {
+    passwordBcryptRounds: number;
+    sessionCookieName: string;
+    sessionTtlHours: number;
+  };
   adminDistPath?: string;
   assetStoragePath: string;
   mysql: {
@@ -30,8 +35,23 @@ function readNumber(name: string, fallback: number): number {
   return value;
 }
 
+function readPositiveNumber(name: string, fallback: number): number {
+  const value = readNumber(name, fallback);
+
+  if (value <= 0) {
+    throw new Error(`${name} must be greater than 0`);
+  }
+
+  return value;
+}
+
 export function readConfig(): ServerConfig {
   return {
+    adminAuth: {
+      passwordBcryptRounds: readPositiveNumber("ADMIN_PASSWORD_BCRYPT_ROUNDS", 12),
+      sessionCookieName: process.env.ADMIN_SESSION_COOKIE_NAME ?? "epi_info_admin_session",
+      sessionTtlHours: readPositiveNumber("ADMIN_SESSION_TTL_HOURS", 12),
+    },
     adminDistPath: process.env.ADMIN_DIST_PATH,
     assetStoragePath: process.env.ASSET_STORAGE_PATH ?? "./data/assets",
     mysql: {

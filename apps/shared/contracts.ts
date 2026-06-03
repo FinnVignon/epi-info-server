@@ -37,4 +37,3 @@ export interface Manifest {
   name: string;
   version: number;
 }
-
