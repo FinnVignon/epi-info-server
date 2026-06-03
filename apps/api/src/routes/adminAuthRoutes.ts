@@ -1,9 +1,14 @@
 import { randomUUID } from "node:crypto";
-import { Router } from "express";
+import { Router, type Request, type Response } from "express";
 import { Pool } from "mysql2/promise";
 
 import { AuthenticatedAdminRequest, createAdminAuthMiddleware } from "../auth/adminAuth.js";
 import { hashAdminPassword, isValidAdminPassword, verifyAdminPassword } from "../auth/passwords.js";
+import {
+  createFixedWindowRateLimiter,
+  getRequestRateLimitKey,
+  sendRateLimitResponse,
+} from "../auth/rateLimit.js";
 import {
   createExpiredSessionCookieHeader,
   createSessionCookieHeader,
@@ -19,8 +24,28 @@ import {
   createAdminUser,
   deleteAdminSession,
   findAdminUserByEmail,
+  MysqlNamedLockTimeoutError,
   updateAdminLastLogin,
+  withMysqlNamedLock,
 } from "../database.js";
+
+const ADMIN_BOOTSTRAP_LOCK_NAME = "epi-info:admin-bootstrap";
+const ADMIN_BOOTSTRAP_LOCK_TIMEOUT_SECONDS = 10;
+
+const bootstrapRateLimiter = createFixedWindowRateLimiter({
+  maxAttempts: 5,
+  windowMs: 5 * 60 * 1000,
+});
+
+const loginEmailRateLimiter = createFixedWindowRateLimiter({
+  maxAttempts: 10,
+  windowMs: 5 * 60 * 1000,
+});
+
+const loginIpRateLimiter = createFixedWindowRateLimiter({
+  maxAttempts: 20,
+  windowMs: 5 * 60 * 1000,
+});
 
 interface LoginBody {
   email?: unknown;
@@ -77,6 +102,37 @@ function readBootstrapBody(
     ...loginBody,
     displayName: body.displayName.trim(),
   };
+}
+
+function checkBootstrapRateLimit(request: Request, response: Response): boolean {
+  const result = bootstrapRateLimiter.consume(getRequestRateLimitKey(request, "admin-bootstrap"));
+
+  if (!result.allowed) {
+    sendRateLimitResponse(response, result);
+    return false;
+  }
+
+  return true;
+}
+
+function checkLoginRateLimit(request: Request, response: Response, email: unknown): boolean {
+  const ipResult = loginIpRateLimiter.consume(getRequestRateLimitKey(request, "admin-login"));
+
+  if (!ipResult.allowed) {
+    sendRateLimitResponse(response, ipResult);
+    return false;
+  }
+
+  if (typeof email === "string" && email.trim().length > 0) {
+    const emailResult = loginEmailRateLimiter.consume(`admin-login-email:${normalizeEmail(email)}`);
+
+    if (!emailResult.allowed) {
+      sendRateLimitResponse(response, emailResult);
+      return false;
+    }
+  }
+
+  return true;
 }
 
 function safeUser(user: AdminUserWithPasswordHash) {
@@ -146,45 +202,77 @@ export function createAdminAuthRouter(pool: Pool, config: ServerConfig): Router 
 
   router.post("/bootstrap", async (request, response, next) => {
     try {
-      if ((await countAdminUsers(pool)) > 0) {
-        response.status(409).json({ error: "Admin bootstrap has already been completed" });
+      if (!checkBootstrapRateLimit(request, response)) {
         return;
       }
 
-      const body = readBootstrapBody(request.body as BootstrapBody);
+      const body = readBootstrapBody((request.body ?? {}) as BootstrapBody);
 
       if (typeof body === "string") {
         response.status(400).json({ error: body });
         return;
       }
 
-      const user = await createAdminUser(pool, {
-        displayName: body.displayName,
-        email: body.email,
-        id: randomUUID(),
-        isSuperAdmin: true,
-        passwordHash: await hashAdminPassword(body.password, {
-          bcryptRounds: config.adminAuth.passwordBcryptRounds,
-        }),
-      });
-      const session = await createAdminSessionResponse(pool, config, user.id);
+      const bootstrap = await withMysqlNamedLock(
+        pool,
+        ADMIN_BOOTSTRAP_LOCK_NAME,
+        ADMIN_BOOTSTRAP_LOCK_TIMEOUT_SECONDS,
+        async () => {
+          if ((await countAdminUsers(pool)) > 0) {
+            return null;
+          }
 
-      await updateAdminLastLogin(pool, user.id);
-      setSessionCookie(response, config, session.token, session.expiresAt);
+          const user = await createAdminUser(pool, {
+            displayName: body.displayName,
+            email: body.email,
+            id: randomUUID(),
+            isSuperAdmin: true,
+            passwordHash: await hashAdminPassword(body.password, {
+              bcryptRounds: config.adminAuth.passwordBcryptRounds,
+            }),
+          });
+          const session = await createAdminSessionResponse(pool, config, user.id);
+
+          await updateAdminLastLogin(pool, user.id);
+
+          return {
+            session,
+            user,
+          };
+        },
+      );
+
+      if (!bootstrap) {
+        response.status(409).json({ error: "Admin bootstrap has already been completed" });
+        return;
+      }
+
+      setSessionCookie(response, config, bootstrap.session.token, bootstrap.session.expiresAt);
       response.status(201).json({
         session: {
-          expiresAt: session.expiresAt.toISOString(),
+          expiresAt: bootstrap.session.expiresAt.toISOString(),
         },
-        user,
+        user: bootstrap.user,
       });
     } catch (error) {
+      if (error instanceof MysqlNamedLockTimeoutError) {
+        response.status(503).json({ error: "Admin bootstrap is already in progress" });
+        return;
+      }
+
       next(error);
     }
   });
 
   router.post("/login", async (request, response, next) => {
     try {
-      const body = readLoginBody(request.body as LoginBody);
+      const requestBody = (request.body ?? {}) as LoginBody;
+
+      if (!checkLoginRateLimit(request, response, requestBody.email)) {
+        return;
+      }
+
+      const body = readLoginBody(requestBody);
 
       if (typeof body === "string") {
         response.status(400).json({ error: body });

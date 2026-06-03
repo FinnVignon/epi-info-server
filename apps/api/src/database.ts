@@ -32,10 +32,13 @@ export type {
 export {
   createAdminSession,
   deleteAdminSession,
+  deleteAdminSessionsForUser,
   findAdminSessionByTokenHash,
   touchAdminSession,
 } from "./database/adminSessions.js";
 export type { AdminSessionWithUser } from "./database/adminSessions.js";
+
+export { MysqlNamedLockTimeoutError, withMysqlNamedLock } from "./database/mysqlLocks.js";
 
 export { getDashboardSummary } from "./database/dashboard.js";
 
