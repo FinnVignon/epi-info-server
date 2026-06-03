@@ -107,6 +107,10 @@ export interface ResetAdminUserPasswordRequest {
   password: string;
 }
 
+export interface UpdateAdminUserProfileRequest {
+  displayName: string;
+}
+
 export interface UpdateAdminUserStatusRequest {
   status: AdminUser["status"];
 }

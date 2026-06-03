@@ -13,6 +13,7 @@ import {
   listAdminUsers,
   replaceAdminPermissionsForUser,
   updateAdminUserPasswordHash,
+  updateAdminUserProfile,
   updateAdminUserStatus,
 } from "../database.js";
 import type { CreateAdminPermissionInput } from "../database.js";
@@ -26,6 +27,7 @@ import type {
   CreateAdminUserRequest,
   ReplaceAdminUserPermissionsRequest,
   ResetAdminUserPasswordRequest,
+  UpdateAdminUserProfileRequest,
   UpdateAdminUserStatusRequest,
 } from "../../../shared/adminContracts.js";
 import {
@@ -108,6 +110,24 @@ function readPasswordBody(
 
   return {
     password: body.password,
+  };
+}
+
+function readProfileBody(
+  body: Partial<UpdateAdminUserProfileRequest>,
+): { displayName: string } | string {
+  if (typeof body.displayName !== "string") {
+    return "Display name is required";
+  }
+
+  const displayName = body.displayName.trim();
+
+  if (displayName.length < 2) {
+    return "Display name must be at least 2 characters";
+  }
+
+  return {
+    displayName,
   };
 }
 
@@ -351,6 +371,43 @@ export function createAdminUserRouter(pool: Pool, config: ServerConfig): Router 
         return;
       }
 
+      const user = await findUserWithPermissions(pool, userId);
+
+      if (!user) {
+        response.status(404).json({ error: "Admin user was not found" });
+        return;
+      }
+
+      response.json({ user });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.patch("/:userId/profile", async (request, response, next) => {
+    try {
+      const userId = readUserId(request.params);
+      const profile = readProfileBody(request.body as Partial<UpdateAdminUserProfileRequest>);
+
+      if (!userId) {
+        response.status(400).json({ error: "User id is required" });
+        return;
+      }
+
+      if (typeof profile === "string") {
+        response.status(400).json({ error: profile });
+        return;
+      }
+
+      if (!(await findAdminUserById(pool, userId))) {
+        response.status(404).json({ error: "Admin user was not found" });
+        return;
+      }
+
+      await updateAdminUserProfile(pool, {
+        displayName: profile.displayName,
+        userId,
+      });
       const user = await findUserWithPermissions(pool, userId);
 
       if (!user) {

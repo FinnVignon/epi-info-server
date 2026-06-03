@@ -15,7 +15,7 @@ export class ApiError extends Error {
   }
 }
 
-async function readJsonResponse<T>(response: Response): Promise<T> {
+export async function readJsonResponse<T>(response: Response): Promise<T> {
   const body = response.status === 204 ? null : ((await response.json()) as unknown);
 
   if (!response.ok) {

@@ -6,11 +6,13 @@ export {
   listAdminUsers,
   updateAdminLastLogin,
   updateAdminUserPasswordHash,
+  updateAdminUserProfile,
   updateAdminUserStatus,
 } from "./database/adminUsers.js";
 export type {
   AdminUserWithPasswordHash,
   CreateAdminUserInput,
+  UpdateAdminUserProfileInput,
   UpdateAdminUserStatusInput,
 } from "./database/adminUsers.js";
 

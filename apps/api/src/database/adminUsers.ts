@@ -36,6 +36,11 @@ export interface UpdateAdminUserStatusInput {
   userId: string;
 }
 
+export interface UpdateAdminUserProfileInput {
+  displayName: string;
+  userId: string;
+}
+
 function mapAdminUser(row: AdminUserRow): AdminUser {
   return {
     createdAt: row.createdAt.toISOString(),
@@ -174,6 +179,18 @@ export async function updateAdminUserPasswordHash(
   const [result] = await pool.execute<ResultSetHeader>(
     "UPDATE admin_users SET password_hash = ? WHERE id = ?",
     [passwordHash, userId],
+  );
+
+  return result.affectedRows > 0;
+}
+
+export async function updateAdminUserProfile(
+  pool: Pool,
+  input: UpdateAdminUserProfileInput,
+): Promise<boolean> {
+  const [result] = await pool.execute<ResultSetHeader>(
+    "UPDATE admin_users SET display_name = ? WHERE id = ?",
+    [input.displayName, input.userId],
   );
 
   return result.affectedRows > 0;

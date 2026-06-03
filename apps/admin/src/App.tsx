@@ -8,6 +8,9 @@ import {
   logoutAdmin,
 } from "./api/adminApi";
 import { AdminDashboard } from "./components/AdminDashboard";
+import { AdminShell } from "./components/AdminShell";
+import type { AdminScreen } from "./components/AdminShell";
+import { AdminUsersScreen } from "./components/AdminUsersScreen";
 import { AuthScreen } from "./components/AuthScreen";
 import { LoadingScreen } from "./components/LoadingScreen";
 import type { AdminAuthResponse, AdminUser } from "../../shared/adminContracts";
@@ -18,6 +21,7 @@ type ApiStatus = "checking" | "ok" | "error";
 type AuthMode = "checking" | "bootstrap" | "login" | "authenticated";
 
 export function App() {
+  const [activeScreen, setActiveScreen] = useState<AdminScreen>("dashboard");
   const [apiStatus, setApiStatus] = useState<ApiStatus>("checking");
   const [authError, setAuthError] = useState<string | null>(null);
   const [authMode, setAuthMode] = useState<AuthMode>("checking");
@@ -84,8 +88,7 @@ export function App() {
         }
 
         if (error instanceof ApiError && error.status === 401) {
-          setCurrentUser(null);
-          setAuthMode("login");
+          handleSessionExpired();
           return;
         }
 
@@ -106,6 +109,15 @@ export function App() {
     setAuthMode("authenticated");
   }
 
+  function handleSessionExpired(): void {
+    setCurrentUser(null);
+    setDashboard(null);
+    setHealth(null);
+    setApiStatus("checking");
+    setActiveScreen("dashboard");
+    setAuthMode("login");
+  }
+
   async function handleLogout(): Promise<void> {
     try {
       await logoutAdmin();
@@ -114,6 +126,7 @@ export function App() {
       setDashboard(null);
       setHealth(null);
       setApiStatus("checking");
+      setActiveScreen("dashboard");
       setAuthMode(await resolveLoggedOutMode());
     }
   }
@@ -131,13 +144,19 @@ export function App() {
 
   if (authMode === "authenticated" && currentUser) {
     return (
-      <AdminDashboard
+      <AdminShell
+        activeScreen={activeScreen}
         apiStatus={apiStatus}
         currentUser={currentUser}
-        dashboard={dashboard}
-        health={health}
         onLogout={() => void handleLogout()}
-      />
+        onScreenChange={setActiveScreen}
+      >
+        {activeScreen === "dashboard" ? (
+          <AdminDashboard dashboard={dashboard} health={health} />
+        ) : (
+          <AdminUsersScreen currentUser={currentUser} onUnauthorized={handleSessionExpired} />
+        )}
+      </AdminShell>
     );
   }
 
