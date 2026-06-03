@@ -6,9 +6,16 @@ import { WebSocketServer } from "ws";
 
 import { createAdminAuthMiddleware } from "./auth/adminAuth.js";
 import { readConfig } from "./config.js";
-import { checkDatabaseHealth, createDatabasePool, getDashboardSummary } from "./database.js";
+import {
+  checkDatabaseHealth,
+  createDatabasePool,
+  ensureAssetSchema,
+  getDashboardSummary,
+} from "./database.js";
 import { createAdminAuthRouter } from "./routes/adminAuthRoutes.js";
+import { createAdminAssetRouter } from "./routes/adminAssetRoutes.js";
 import { createAdminUserRouter } from "./routes/adminUserRoutes.js";
+import { createAssetDownloadRouter } from "./routes/assetDownloadRoutes.js";
 import { SUPPORTED_MANIFEST_ITEM_TYPES } from "../../shared/contracts.js";
 
 const config = readConfig();
@@ -48,6 +55,8 @@ app.get("/api/dashboard", requireAdminAuth, async (_request, response) => {
   }
 });
 
+app.use("/media/assets", createAssetDownloadRouter(mysqlPool));
+app.use("/api/admin/assets", createAdminAssetRouter(mysqlPool, config));
 app.use("/api/admin/users", createAdminUserRouter(mysqlPool, config));
 app.use("/api/admin", createAdminAuthRouter(mysqlPool, config));
 
@@ -77,17 +86,26 @@ app.use(
   },
 );
 
-const httpServer = app.listen(config.port, () => {
-  console.log(`Epi Info server listening on port ${config.port}`);
-});
+async function startServer(): Promise<void> {
+  await ensureAssetSchema(mysqlPool, config.mysql.database);
 
-const webSocketServer = new WebSocketServer({ server: httpServer, path: "/ws" });
+  const httpServer = app.listen(config.port, () => {
+    console.log(`Epi Info server listening on port ${config.port}`);
+  });
 
-webSocketServer.on("connection", (socket) => {
-  socket.send(
-    JSON.stringify({
-      service: "epi-info-server",
-      type: "server.hello",
-    }),
-  );
+  const webSocketServer = new WebSocketServer({ server: httpServer, path: "/ws" });
+
+  webSocketServer.on("connection", (socket) => {
+    socket.send(
+      JSON.stringify({
+        service: "epi-info-server",
+        type: "server.hello",
+      }),
+    );
+  });
+}
+
+void startServer().catch((error: unknown) => {
+  console.error(error);
+  process.exit(1);
 });

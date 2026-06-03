@@ -46,6 +46,11 @@ export interface AdminPermissionCheckInput {
   userId: string;
 }
 
+export interface AdminAnyPermissionCheckInput {
+  action: AdminPermissionAction;
+  userId: string;
+}
+
 function mapAdminPermission(row: AdminPermissionRow): AdminPermission {
   return {
     canManageAssignments: Boolean(row.canManageAssignments),
@@ -198,6 +203,24 @@ export async function adminUserHasPermission(
         AND ${clause}
     `,
     [input.userId, ...parameters],
+  );
+
+  return Number(rows[0]?.count ?? 0) > 0;
+}
+
+export async function adminUserHasAnyPermission(
+  pool: Pool,
+  input: AdminAnyPermissionCheckInput,
+): Promise<boolean> {
+  const actionColumn = ADMIN_PERMISSION_ACTION_COLUMNS[input.action];
+  const [rows] = await pool.execute<CountRow[]>(
+    `
+      SELECT COUNT(*) AS count
+      FROM admin_permissions
+      WHERE user_id = ?
+        AND ${actionColumn} = TRUE
+    `,
+    [input.userId],
   );
 
   return Number(rows[0]?.count ?? 0) > 0;

@@ -82,6 +82,7 @@ CREATE TABLE IF NOT EXISTS client_groups (
 
 CREATE TABLE IF NOT EXISTS assets (
   id VARCHAR(64) PRIMARY KEY,
+  display_name VARCHAR(255) NOT NULL,
   type ENUM('image', 'video') NOT NULL,
   original_filename VARCHAR(255) NOT NULL,
   mime_type VARCHAR(255) NOT NULL,
@@ -89,9 +90,17 @@ CREATE TABLE IF NOT EXISTS assets (
   sha256 CHAR(64) NOT NULL,
   storage_path VARCHAR(1024) NOT NULL,
   public_url VARCHAR(1024) NOT NULL,
+  status ENUM('active', 'archived') NOT NULL DEFAULT 'active',
+  uploaded_by_user_id VARCHAR(64) NULL,
+  archived_at TIMESTAMP NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  UNIQUE KEY assets_sha256_unique (sha256)
+  UNIQUE KEY assets_sha256_unique (sha256),
+  INDEX assets_uploaded_by_user_id_index (uploaded_by_user_id),
+  INDEX assets_status_index (status),
+  CONSTRAINT assets_uploaded_by_user_id_fk
+    FOREIGN KEY (uploaded_by_user_id) REFERENCES admin_users (id)
+    ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS manifests (

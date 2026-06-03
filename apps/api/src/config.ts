@@ -7,6 +7,7 @@ export interface ServerConfig {
     sessionTtlHours: number;
   };
   adminDistPath?: string;
+  assetUploadMaxBytes: number;
   assetStoragePath: string;
   mysql: {
     database: string;
@@ -53,6 +54,7 @@ export function readConfig(): ServerConfig {
       sessionTtlHours: readPositiveNumber("ADMIN_SESSION_TTL_HOURS", 12),
     },
     adminDistPath: process.env.ADMIN_DIST_PATH,
+    assetUploadMaxBytes: readPositiveNumber("ASSET_UPLOAD_MAX_BYTES", 500 * 1024 * 1024),
     assetStoragePath: process.env.ASSET_STORAGE_PATH ?? "./data/assets",
     mysql: {
       database: process.env.MYSQL_DATABASE ?? "epi_info",

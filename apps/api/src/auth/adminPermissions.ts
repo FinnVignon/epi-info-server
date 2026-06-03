@@ -1,7 +1,7 @@
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import { Pool } from "mysql2/promise";
 
-import { adminUserHasPermission } from "../database.js";
+import { adminUserHasAnyPermission, adminUserHasPermission } from "../database.js";
 import type {
   AdminPermissionAction,
   AdminPermissionTarget,
@@ -62,6 +62,41 @@ export function createRequireAdminPermissionMiddleware(
       const hasPermission = await adminUserHasPermission(pool, {
         action,
         target,
+        userId: adminRequest.adminSession.user.id,
+      });
+
+      if (!hasPermission) {
+        response.status(403).json({ error: "Admin permission is required" });
+        return;
+      }
+
+      next();
+    } catch (error) {
+      next(error);
+    }
+  };
+}
+
+export function createRequireAnyAdminPermissionMiddleware(
+  pool: Pool,
+  action: AdminPermissionAction,
+): RequestHandler {
+  return async (request: Request, response: Response, next: NextFunction) => {
+    const adminRequest = getAuthenticatedAdminRequest(request);
+
+    if (!adminRequest) {
+      response.status(401).json({ error: "Admin authentication is required" });
+      return;
+    }
+
+    if (adminRequest.adminSession.user.isSuperAdmin) {
+      next();
+      return;
+    }
+
+    try {
+      const hasPermission = await adminUserHasAnyPermission(pool, {
+        action,
         userId: adminRequest.adminSession.user.id,
       });
 

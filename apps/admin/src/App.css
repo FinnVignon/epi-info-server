@@ -232,6 +232,12 @@ button:disabled {
   color: #5d6b78;
 }
 
+.status-pill.archived {
+  background: #f4f6f8;
+  border-color: #ccd6dd;
+  color: #5d6b78;
+}
+
 .content {
   display: grid;
   gap: 16px;
@@ -245,6 +251,10 @@ button:disabled {
 
 .content.users-layout {
   grid-template-columns: minmax(420px, 1.3fr) minmax(320px, 0.8fr);
+}
+
+.content.assets-layout {
+  grid-template-columns: minmax(320px, 0.7fr) minmax(480px, 1.3fr);
 }
 
 .panel {
@@ -467,7 +477,9 @@ button:disabled {
 }
 
 .users-list-panel,
-.users-detail-panel {
+.users-detail-panel,
+.assets-upload-panel,
+.assets-list-panel {
   align-self: start;
 }
 
@@ -509,6 +521,41 @@ button:disabled {
 }
 
 .table-search input:focus {
+  border-color: #2d6cdf;
+  box-shadow: 0 0 0 3px rgb(45 108 223 / 14%);
+}
+
+.table-controls {
+  align-items: end;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(240px, 1fr) minmax(140px, auto) minmax(140px, auto);
+  margin-bottom: 12px;
+}
+
+.table-controls label {
+  display: grid;
+  gap: 6px;
+}
+
+.table-controls label span {
+  color: #33424f;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.table-controls select {
+  background: #ffffff;
+  border: 1px solid #b9c7d2;
+  border-radius: 6px;
+  color: #172026;
+  min-height: 38px;
+  outline: none;
+  padding: 8px 10px;
+  width: 100%;
+}
+
+.table-controls select:focus {
   border-color: #2d6cdf;
   box-shadow: 0 0 0 3px rgb(45 108 223 / 14%);
 }
@@ -590,6 +637,50 @@ button:disabled {
   font-size: 12px;
 }
 
+.table-action-link {
+  color: #2d6cdf;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.table-action-link:hover {
+  text-decoration: underline;
+}
+
+.table-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.asset-file-cell {
+  display: grid;
+  gap: 2px;
+}
+
+.asset-file-cell span {
+  color: #172026;
+  font-size: 13px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.asset-file-cell small {
+  color: #5d6b78;
+  font-size: 12px;
+}
+
+.hash-code {
+  background: #eef3f7;
+  border: 1px solid #d8e0e7;
+  border-radius: 4px;
+  color: #33424f;
+  font-size: 12px;
+  padding: 3px 5px;
+}
+
 .detail-grid {
   display: grid;
   gap: 8px;
@@ -635,6 +726,10 @@ button:disabled {
     grid-template-columns: 1fr;
   }
 
+  .content.assets-layout {
+    grid-template-columns: 1fr;
+  }
+
   .users-list-panel {
     grid-row: auto;
   }
@@ -644,6 +739,10 @@ button:disabled {
   }
 
   .summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .table-controls {
     grid-template-columns: 1fr;
   }
 
