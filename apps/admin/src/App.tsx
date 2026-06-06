@@ -8,6 +8,7 @@ import {
   logoutAdmin,
 } from "./api/adminApi";
 import { AdminAssetsScreen } from "./components/AdminAssetsScreen";
+import { AdminClientsScreen } from "./components/AdminClientsScreen";
 import { AdminDashboard } from "./components/AdminDashboard";
 import { AdminShell } from "./components/AdminShell";
 import type { AdminScreen } from "./components/AdminShell";
@@ -178,6 +179,8 @@ function renderAdminScreen(activeScreen: AdminScreen, state: AdminScreenRenderSt
       return (
         <AdminAssetsScreen currentUser={state.currentUser} onUnauthorized={state.onUnauthorized} />
       );
+    case "clients":
+      return <AdminClientsScreen onUnauthorized={state.onUnauthorized} />;
     case "dashboard":
       return <AdminDashboard dashboard={state.dashboard} health={state.health} />;
     case "users":

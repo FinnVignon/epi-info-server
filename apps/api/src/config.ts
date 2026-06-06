@@ -9,6 +9,11 @@ export interface ServerConfig {
   adminDistPath?: string;
   assetUploadMaxBytes: number;
   assetStoragePath: string;
+  clientAuth: {
+    enrollmentTokenTtlMinutes: number;
+    heartbeatIntervalSeconds: number;
+    offlineAfterSeconds: number;
+  };
   mysql: {
     database: string;
     host: string;
@@ -56,6 +61,11 @@ export function readConfig(): ServerConfig {
     adminDistPath: process.env.ADMIN_DIST_PATH,
     assetUploadMaxBytes: readPositiveNumber("ASSET_UPLOAD_MAX_BYTES", 500 * 1024 * 1024),
     assetStoragePath: process.env.ASSET_STORAGE_PATH ?? "./data/assets",
+    clientAuth: {
+      enrollmentTokenTtlMinutes: readPositiveNumber("CLIENT_ENROLLMENT_TOKEN_TTL_MINUTES", 15),
+      heartbeatIntervalSeconds: readPositiveNumber("CLIENT_HEARTBEAT_INTERVAL_SECONDS", 30),
+      offlineAfterSeconds: readPositiveNumber("CLIENT_OFFLINE_AFTER_SECONDS", 90),
+    },
     mysql: {
       database: process.env.MYSQL_DATABASE ?? "epi_info",
       host: process.env.MYSQL_HOST ?? "localhost",

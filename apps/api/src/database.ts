@@ -58,6 +58,20 @@ export type {
   UpdateAssetStatusInput,
 } from "./database/assets.js";
 
+export {
+  createClientEnrollmentToken,
+  ensureClientConnectionSchema,
+  findClientCredentialById,
+  recordClientHeartbeat,
+  registerClientWithEnrollmentToken,
+} from "./database/clientConnections.js";
+export type {
+  ClientCredentialRecord,
+  CreateClientEnrollmentTokenInput,
+  RegisterClientInput,
+  RegisterClientResult,
+} from "./database/clientConnections.js";
+
 export { checkDatabaseHealth, DATABASE_TABLES } from "./database/health.js";
 export type { DatabaseHealth, DatabaseHealthStatus } from "./database/health.js";
 

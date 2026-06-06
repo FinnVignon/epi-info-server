@@ -717,6 +717,52 @@ button:disabled {
   padding-top: 16px;
 }
 
+.client-enrollment-panel {
+  align-self: start;
+  max-width: 880px;
+}
+
+.client-enrollment-panel .panel-header > div {
+  display: grid;
+  gap: 4px;
+}
+
+.enrollment-token-result {
+  background: #f7f9fb;
+  border: 1px solid #d8e0e7;
+  border-radius: 6px;
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 14px;
+}
+
+.enrollment-token-result > div {
+  display: grid;
+  gap: 6px;
+}
+
+.enrollment-token-result span {
+  color: #33424f;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.enrollment-token-result code {
+  background: #ffffff;
+  border: 1px solid #ccd6dd;
+  border-radius: 4px;
+  color: #172026;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+  padding: 10px;
+  user-select: all;
+}
+
+.enrollment-token-result .secondary-button {
+  justify-self: start;
+}
+
 @media (max-width: 860px) {
   .content {
     grid-template-columns: 1fr;
