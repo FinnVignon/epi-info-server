@@ -19,6 +19,7 @@ export interface ServerConfig {
     host: string;
     password: string;
     port: number;
+    socketPath?: string;
     user: string;
   };
   port: number;
@@ -52,6 +53,8 @@ function readPositiveNumber(name: string, fallback: number): number {
 }
 
 export function readConfig(): ServerConfig {
+  const mysqlSocketPath = process.env.MYSQL_SOCKET_PATH?.trim();
+
   return {
     adminAuth: {
       passwordBcryptRounds: readPositiveNumber("ADMIN_PASSWORD_BCRYPT_ROUNDS", 12),
@@ -71,6 +74,7 @@ export function readConfig(): ServerConfig {
       host: process.env.MYSQL_HOST ?? "localhost",
       password: process.env.MYSQL_PASSWORD ?? "epi_info_dev_password",
       port: readNumber("MYSQL_PORT", 3306),
+      ...(mysqlSocketPath ? { socketPath: mysqlSocketPath } : {}),
       user: process.env.MYSQL_USER ?? "epi_info",
     },
     port: readNumber("SERVER_PORT", 4000),

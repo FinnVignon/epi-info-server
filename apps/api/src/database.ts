@@ -72,6 +72,18 @@ export type {
   RegisterClientResult,
 } from "./database/clientConnections.js";
 
+export {
+  findClientById,
+  listClientsForAdmin,
+  updateClientProfile,
+  updateClientStatus,
+} from "./database/clients.js";
+export type {
+  ListClientsForAdminInput,
+  UpdateClientProfileInput,
+  UpdateClientStatusInput,
+} from "./database/clients.js";
+
 export { checkDatabaseHealth, DATABASE_TABLES } from "./database/health.js";
 export type { DatabaseHealth, DatabaseHealthStatus } from "./database/health.js";
 

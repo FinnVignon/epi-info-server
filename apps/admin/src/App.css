@@ -238,6 +238,24 @@ button:disabled {
   color: #5d6b78;
 }
 
+.status-pill.online {
+  background: #e8f6ee;
+  border-color: #9bd3b0;
+  color: #1c6b3a;
+}
+
+.status-pill.offline {
+  background: #fdeeee;
+  border-color: #efb4b4;
+  color: #9a2d2d;
+}
+
+.status-pill.unknown {
+  background: #f4f6f8;
+  border-color: #ccd6dd;
+  color: #5d6b78;
+}
+
 .content {
   display: grid;
   gap: 16px;
@@ -255,6 +273,10 @@ button:disabled {
 
 .content.assets-layout {
   grid-template-columns: minmax(320px, 0.7fr) minmax(480px, 1.3fr);
+}
+
+.content.clients-layout {
+  grid-template-columns: minmax(520px, 1.35fr) minmax(340px, 0.85fr);
 }
 
 .panel {
@@ -479,7 +501,10 @@ button:disabled {
 .users-list-panel,
 .users-detail-panel,
 .assets-upload-panel,
-.assets-list-panel {
+.assets-list-panel,
+.clients-list-panel,
+.clients-detail-panel,
+.client-enrollment-panel {
   align-self: start;
 }
 
@@ -490,6 +515,10 @@ button:disabled {
 }
 
 .users-list-panel {
+  grid-row: span 2;
+}
+
+.clients-list-panel {
   grid-row: span 2;
 }
 
@@ -544,6 +573,7 @@ button:disabled {
   font-weight: 600;
 }
 
+.table-controls input,
 .table-controls select {
   background: #ffffff;
   border: 1px solid #b9c7d2;
@@ -555,6 +585,7 @@ button:disabled {
   width: 100%;
 }
 
+.table-controls input:focus,
 .table-controls select:focus {
   border-color: #2d6cdf;
   box-shadow: 0 0 0 3px rgb(45 108 223 / 14%);
@@ -719,12 +750,6 @@ button:disabled {
 
 .client-enrollment-panel {
   align-self: start;
-  max-width: 880px;
-}
-
-.client-enrollment-panel .panel-header > div {
-  display: grid;
-  gap: 4px;
 }
 
 .enrollment-token-result {
@@ -763,6 +788,30 @@ button:disabled {
   justify-self: start;
 }
 
+.clients-detail-panel .panel-header > div {
+  min-width: 0;
+}
+
+.clients-detail-panel .panel-header .metric {
+  overflow-wrap: anywhere;
+}
+
+.client-error-detail {
+  background: #fdeeee;
+  border: 1px solid #efb4b4;
+  border-radius: 6px;
+  color: #9a2d2d;
+  font-size: 13px;
+  margin: 0;
+  overflow-wrap: anywhere;
+  padding: 10px;
+  white-space: pre-wrap;
+}
+
+.clients-table {
+  min-width: 840px;
+}
+
 @media (max-width: 860px) {
   .content {
     grid-template-columns: 1fr;
@@ -776,7 +825,15 @@ button:disabled {
     grid-template-columns: 1fr;
   }
 
+  .content.clients-layout {
+    grid-template-columns: 1fr;
+  }
+
   .users-list-panel {
+    grid-row: auto;
+  }
+
+  .clients-list-panel {
     grid-row: auto;
   }
 

@@ -1,6 +1,7 @@
 services:
   mysql:
     image: mysql:8.4
+    command: ["--bind-address=0.0.0.0"]
     environment:
       MYSQL_DATABASE: ${MYSQL_DATABASE:-epi_info}
       MYSQL_USER: ${MYSQL_USER:-epi_info}
@@ -13,6 +14,7 @@ services:
       retries: 20
     volumes:
       - mysql-data:/var/lib/mysql
+      - mysql-socket:/var/run/mysqld
       - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
 
   server:
@@ -24,6 +26,7 @@ services:
       SERVER_PORT: ${SERVER_PORT:-4000}
       MYSQL_HOST: mysql
       MYSQL_PORT: 3306
+      MYSQL_SOCKET_PATH: /var/run/mysqld/mysqld.sock
       MYSQL_DATABASE: ${MYSQL_DATABASE:-epi_info}
       MYSQL_USER: ${MYSQL_USER:-epi_info}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-epi_info_dev_password}
@@ -38,7 +41,19 @@ services:
       - "4000:4000"
     volumes:
       - server-assets:/data/assets
+      - mysql-socket:/var/run/mysqld
+    networks:
+      default:
+      epi-info:
+        aliases:
+          - epi-info-server
 
 volumes:
   mysql-data:
+  mysql-socket:
   server-assets:
+
+networks:
+  epi-info:
+    external: true
+    name: epi-info-network

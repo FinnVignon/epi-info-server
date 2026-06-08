@@ -1,58 +1,111 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-import { createClientEnrollmentToken } from "../api/adminClientsApi";
+import { listClients, updateClientProfile, updateClientStatus } from "../api/adminClientsApi";
 import { ApiError } from "../api/adminApi";
-import type { ClientEnrollmentToken } from "../../../shared/clientContracts";
+import { ClientDetail } from "./ClientDetail";
+import { ClientEnrollmentPanel } from "./ClientEnrollmentPanel";
+import { ClientTable } from "./ClientTable";
+import type { ManagedClient } from "../../../shared/clientContracts";
 
 interface AdminClientsScreenProps {
   onUnauthorized: () => void;
 }
 
 export function AdminClientsScreen({ onUnauthorized }: AdminClientsScreenProps) {
-  const [enrollmentToken, setEnrollmentToken] = useState<ClientEnrollmentToken | null>(null);
+  const [clients, setClients] = useState<ManagedClient[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [isCreating, setIsCreating] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
+  const selectedClient = useMemo(
+    () => clients.find((client) => client.id === selectedClientId) ?? clients[0] ?? null,
+    [clients, selectedClientId],
+  );
 
-  async function handleCreateToken(): Promise<void> {
+  useEffect(() => {
+    void loadClients();
+  }, []);
+
+  async function loadClients(): Promise<void> {
     setError(null);
-    setNotice(null);
-    setIsCreating(true);
+    setIsLoading(true);
 
     try {
-      const response = await createClientEnrollmentToken();
+      const response = await listClients();
 
-      setEnrollmentToken(response.enrollmentToken);
-      setNotice("Enrollment token created.");
-    } catch (createError) {
-      if (createError instanceof ApiError && createError.status === 401) {
-        onUnauthorized();
-        return;
-      }
-
-      setError(
-        createError instanceof Error ? createError.message : "Unable to create an enrollment token",
+      setClients(response.clients);
+      setSelectedClientId(
+        (currentSelection) => currentSelection ?? response.clients[0]?.id ?? null,
       );
+    } catch (loadError) {
+      handleApiError(loadError, "Unable to load clients");
     } finally {
-      setIsCreating(false);
+      setIsLoading(false);
     }
   }
 
-  async function handleCopyToken(): Promise<void> {
-    if (!enrollmentToken) {
+  async function handleUpdateProfile(name: string): Promise<boolean> {
+    if (!selectedClient) {
+      return false;
+    }
+
+    setError(null);
+    setNotice(null);
+    setIsSaving(true);
+
+    try {
+      const response = await updateClientProfile(selectedClient.id, { name });
+
+      replaceClient(response.client);
+      setNotice("Client updated.");
+      return true;
+    } catch (profileError) {
+      handleApiError(profileError, "Unable to update client");
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  async function handleStatusChange(client: ManagedClient): Promise<void> {
+    setError(null);
+    setNotice(null);
+    setIsSaving(true);
+
+    try {
+      const response = await updateClientStatus(client.id, {
+        accessStatus: client.accessStatus === "active" ? "disabled" : "active",
+      });
+
+      replaceClient(response.client);
+      setNotice(response.client.accessStatus === "active" ? "Client enabled." : "Client disabled.");
+    } catch (statusError) {
+      handleApiError(statusError, "Unable to update client status");
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  function replaceClient(client: ManagedClient): void {
+    setClients((currentClients) =>
+      currentClients.map((currentClient) =>
+        currentClient.id === client.id ? client : currentClient,
+      ),
+    );
+  }
+
+  function handleApiError(apiError: unknown, fallback: string): void {
+    if (apiError instanceof ApiError && apiError.status === 401) {
+      onUnauthorized();
       return;
     }
 
-    try {
-      await navigator.clipboard.writeText(enrollmentToken.token);
-      setNotice("Enrollment token copied.");
-    } catch {
-      setError("Unable to copy the token. Select it manually.");
-    }
+    setError(apiError instanceof Error ? apiError.message : fallback);
   }
 
   return (
-    <section className="content single-column">
+    <section className="content clients-layout">
       {error || notice ? (
         <div className="screen-alerts">
           {error ? <p className="form-error">{error}</p> : null}
@@ -60,46 +113,22 @@ export function AdminClientsScreen({ onUnauthorized }: AdminClientsScreenProps) 
         </div>
       ) : null}
 
-      <article className="panel client-enrollment-panel">
-        <div className="panel-header">
-          <div>
-            <h2>Connect A Client</h2>
-            <p className="metric">Generate a single-use token for one new display client.</p>
-          </div>
-          <button
-            className="primary-button"
-            disabled={isCreating}
-            onClick={() => void handleCreateToken()}
-            type="button"
-          >
-            {isCreating ? "Generating" : "Generate token"}
-          </button>
-        </div>
+      <ClientTable
+        clients={clients}
+        isLoading={isLoading}
+        onRefresh={() => void loadClients()}
+        onSelectClient={setSelectedClientId}
+        selectedClientId={selectedClient?.id ?? null}
+      />
 
-        {enrollmentToken ? (
-          <div className="enrollment-token-result">
-            <div>
-              <span>Enrollment token</span>
-              <code>{enrollmentToken.token}</code>
-            </div>
-            <p className="metric">
-              Expires {new Date(enrollmentToken.expiresAt).toLocaleString()}. It is shown only here
-              and can enroll one client.
-            </p>
-            <button
-              className="secondary-button"
-              onClick={() => void handleCopyToken()}
-              type="button"
-            >
-              Copy token
-            </button>
-          </div>
-        ) : (
-          <p className="metric">
-            Token generation requires super-admin access or global client-management permission.
-          </p>
-        )}
-      </article>
+      <ClientDetail
+        client={selectedClient}
+        isSaving={isSaving}
+        onStatusChange={(client) => void handleStatusChange(client)}
+        onUpdateProfile={handleUpdateProfile}
+      />
+
+      <ClientEnrollmentPanel onUnauthorized={onUnauthorized} />
     </section>
   );
 }

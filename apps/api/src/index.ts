@@ -15,6 +15,7 @@ import {
 } from "./database.js";
 import { createAdminAuthRouter } from "./routes/adminAuthRoutes.js";
 import { createAdminAssetRouter } from "./routes/adminAssetRoutes.js";
+import { createAdminClientRouter } from "./routes/adminClientRoutes.js";
 import { createAdminClientEnrollmentRouter } from "./routes/adminClientEnrollmentRoutes.js";
 import { createAdminUserRouter } from "./routes/adminUserRoutes.js";
 import { createAssetDownloadRouter } from "./routes/assetDownloadRoutes.js";
@@ -60,6 +61,7 @@ app.get("/api/dashboard", requireAdminAuth, async (_request, response) => {
 
 app.use("/media/assets", createAssetDownloadRouter(mysqlPool));
 app.use("/api/admin/assets", createAdminAssetRouter(mysqlPool, config));
+app.use("/api/admin/clients", createAdminClientRouter(mysqlPool, config));
 app.use(
   "/api/admin/client-enrollment-tokens",
   createAdminClientEnrollmentRouter(mysqlPool, config),
