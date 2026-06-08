@@ -232,6 +232,30 @@ button:disabled {
   color: #5d6b78;
 }
 
+.status-pill.archived {
+  background: #f4f6f8;
+  border-color: #ccd6dd;
+  color: #5d6b78;
+}
+
+.status-pill.online {
+  background: #e8f6ee;
+  border-color: #9bd3b0;
+  color: #1c6b3a;
+}
+
+.status-pill.offline {
+  background: #fdeeee;
+  border-color: #efb4b4;
+  color: #9a2d2d;
+}
+
+.status-pill.unknown {
+  background: #f4f6f8;
+  border-color: #ccd6dd;
+  color: #5d6b78;
+}
+
 .content {
   display: grid;
   gap: 16px;
@@ -245,6 +269,14 @@ button:disabled {
 
 .content.users-layout {
   grid-template-columns: minmax(420px, 1.3fr) minmax(320px, 0.8fr);
+}
+
+.content.assets-layout {
+  grid-template-columns: minmax(320px, 0.7fr) minmax(480px, 1.3fr);
+}
+
+.content.clients-layout {
+  grid-template-columns: minmax(520px, 1.35fr) minmax(340px, 0.85fr);
 }
 
 .panel {
@@ -467,7 +499,12 @@ button:disabled {
 }
 
 .users-list-panel,
-.users-detail-panel {
+.users-detail-panel,
+.assets-upload-panel,
+.assets-list-panel,
+.clients-list-panel,
+.clients-detail-panel,
+.client-enrollment-panel {
   align-self: start;
 }
 
@@ -478,6 +515,10 @@ button:disabled {
 }
 
 .users-list-panel {
+  grid-row: span 2;
+}
+
+.clients-list-panel {
   grid-row: span 2;
 }
 
@@ -509,6 +550,43 @@ button:disabled {
 }
 
 .table-search input:focus {
+  border-color: #2d6cdf;
+  box-shadow: 0 0 0 3px rgb(45 108 223 / 14%);
+}
+
+.table-controls {
+  align-items: end;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(240px, 1fr) minmax(140px, auto) minmax(140px, auto);
+  margin-bottom: 12px;
+}
+
+.table-controls label {
+  display: grid;
+  gap: 6px;
+}
+
+.table-controls label span {
+  color: #33424f;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.table-controls input,
+.table-controls select {
+  background: #ffffff;
+  border: 1px solid #b9c7d2;
+  border-radius: 6px;
+  color: #172026;
+  min-height: 38px;
+  outline: none;
+  padding: 8px 10px;
+  width: 100%;
+}
+
+.table-controls input:focus,
+.table-controls select:focus {
   border-color: #2d6cdf;
   box-shadow: 0 0 0 3px rgb(45 108 223 / 14%);
 }
@@ -590,6 +668,50 @@ button:disabled {
   font-size: 12px;
 }
 
+.table-action-link {
+  color: #2d6cdf;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.table-action-link:hover {
+  text-decoration: underline;
+}
+
+.table-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.asset-file-cell {
+  display: grid;
+  gap: 2px;
+}
+
+.asset-file-cell span {
+  color: #172026;
+  font-size: 13px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.asset-file-cell small {
+  color: #5d6b78;
+  font-size: 12px;
+}
+
+.hash-code {
+  background: #eef3f7;
+  border: 1px solid #d8e0e7;
+  border-radius: 4px;
+  color: #33424f;
+  font-size: 12px;
+  padding: 3px 5px;
+}
+
 .detail-grid {
   display: grid;
   gap: 8px;
@@ -626,6 +748,70 @@ button:disabled {
   padding-top: 16px;
 }
 
+.client-enrollment-panel {
+  align-self: start;
+}
+
+.enrollment-token-result {
+  background: #f7f9fb;
+  border: 1px solid #d8e0e7;
+  border-radius: 6px;
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 14px;
+}
+
+.enrollment-token-result > div {
+  display: grid;
+  gap: 6px;
+}
+
+.enrollment-token-result span {
+  color: #33424f;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.enrollment-token-result code {
+  background: #ffffff;
+  border: 1px solid #ccd6dd;
+  border-radius: 4px;
+  color: #172026;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+  padding: 10px;
+  user-select: all;
+}
+
+.enrollment-token-result .secondary-button {
+  justify-self: start;
+}
+
+.clients-detail-panel .panel-header > div {
+  min-width: 0;
+}
+
+.clients-detail-panel .panel-header .metric {
+  overflow-wrap: anywhere;
+}
+
+.client-error-detail {
+  background: #fdeeee;
+  border: 1px solid #efb4b4;
+  border-radius: 6px;
+  color: #9a2d2d;
+  font-size: 13px;
+  margin: 0;
+  overflow-wrap: anywhere;
+  padding: 10px;
+  white-space: pre-wrap;
+}
+
+.clients-table {
+  min-width: 840px;
+}
+
 @media (max-width: 860px) {
   .content {
     grid-template-columns: 1fr;
@@ -635,7 +821,19 @@ button:disabled {
     grid-template-columns: 1fr;
   }
 
+  .content.assets-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .content.clients-layout {
+    grid-template-columns: 1fr;
+  }
+
   .users-list-panel {
+    grid-row: auto;
+  }
+
+  .clients-list-panel {
     grid-row: auto;
   }
 
@@ -644,6 +842,10 @@ button:disabled {
   }
 
   .summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .table-controls {
     grid-template-columns: 1fr;
   }
 

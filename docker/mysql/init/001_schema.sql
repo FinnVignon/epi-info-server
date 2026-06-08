@@ -52,11 +52,35 @@ CREATE TABLE IF NOT EXISTS clients (
   id VARCHAR(64) PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   status ENUM('online', 'offline', 'unknown') NOT NULL DEFAULT 'unknown',
+  access_status ENUM('active', 'disabled') NOT NULL DEFAULT 'active',
+  credential_hash CHAR(64) NULL,
+  software_version VARCHAR(64) NULL,
   current_manifest_id VARCHAR(64) NULL,
+  current_manifest_version INT UNSIGNED NULL,
   last_seen_at TIMESTAMP NULL,
+  last_sync_result VARCHAR(255) NULL,
   last_error TEXT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY clients_credential_hash_unique (credential_hash)
+);
+
+CREATE TABLE IF NOT EXISTS client_enrollment_tokens (
+  id VARCHAR(64) PRIMARY KEY,
+  token_hash CHAR(64) NOT NULL,
+  created_by_user_id VARCHAR(64) NULL,
+  expires_at TIMESTAMP NOT NULL,
+  used_at TIMESTAMP NULL,
+  used_by_client_id VARCHAR(64) NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY client_enrollment_tokens_hash_unique (token_hash),
+  INDEX client_enrollment_tokens_expires_at_index (expires_at),
+  CONSTRAINT client_enrollment_tokens_created_by_user_id_fk
+    FOREIGN KEY (created_by_user_id) REFERENCES admin_users (id)
+    ON DELETE SET NULL,
+  CONSTRAINT client_enrollment_tokens_used_by_client_id_fk
+    FOREIGN KEY (used_by_client_id) REFERENCES clients (id)
+    ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS display_groups (
@@ -82,6 +106,7 @@ CREATE TABLE IF NOT EXISTS client_groups (
 
 CREATE TABLE IF NOT EXISTS assets (
   id VARCHAR(64) PRIMARY KEY,
+  display_name VARCHAR(255) NOT NULL,
   type ENUM('image', 'video') NOT NULL,
   original_filename VARCHAR(255) NOT NULL,
   mime_type VARCHAR(255) NOT NULL,
@@ -89,9 +114,17 @@ CREATE TABLE IF NOT EXISTS assets (
   sha256 CHAR(64) NOT NULL,
   storage_path VARCHAR(1024) NOT NULL,
   public_url VARCHAR(1024) NOT NULL,
+  status ENUM('active', 'archived') NOT NULL DEFAULT 'active',
+  uploaded_by_user_id VARCHAR(64) NULL,
+  archived_at TIMESTAMP NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  UNIQUE KEY assets_sha256_unique (sha256)
+  UNIQUE KEY assets_sha256_unique (sha256),
+  INDEX assets_uploaded_by_user_id_index (uploaded_by_user_id),
+  INDEX assets_status_index (status),
+  CONSTRAINT assets_uploaded_by_user_id_fk
+    FOREIGN KEY (uploaded_by_user_id) REFERENCES admin_users (id)
+    ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS manifests (

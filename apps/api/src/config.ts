@@ -7,12 +7,19 @@ export interface ServerConfig {
     sessionTtlHours: number;
   };
   adminDistPath?: string;
+  assetUploadMaxBytes: number;
   assetStoragePath: string;
+  clientAuth: {
+    enrollmentTokenTtlMinutes: number;
+    heartbeatIntervalSeconds: number;
+    offlineAfterSeconds: number;
+  };
   mysql: {
     database: string;
     host: string;
     password: string;
     port: number;
+    socketPath?: string;
     user: string;
   };
   port: number;
@@ -46,6 +53,8 @@ function readPositiveNumber(name: string, fallback: number): number {
 }
 
 export function readConfig(): ServerConfig {
+  const mysqlSocketPath = process.env.MYSQL_SOCKET_PATH?.trim();
+
   return {
     adminAuth: {
       passwordBcryptRounds: readPositiveNumber("ADMIN_PASSWORD_BCRYPT_ROUNDS", 12),
@@ -53,12 +62,19 @@ export function readConfig(): ServerConfig {
       sessionTtlHours: readPositiveNumber("ADMIN_SESSION_TTL_HOURS", 12),
     },
     adminDistPath: process.env.ADMIN_DIST_PATH,
+    assetUploadMaxBytes: readPositiveNumber("ASSET_UPLOAD_MAX_BYTES", 500 * 1024 * 1024),
     assetStoragePath: process.env.ASSET_STORAGE_PATH ?? "./data/assets",
+    clientAuth: {
+      enrollmentTokenTtlMinutes: readPositiveNumber("CLIENT_ENROLLMENT_TOKEN_TTL_MINUTES", 15),
+      heartbeatIntervalSeconds: readPositiveNumber("CLIENT_HEARTBEAT_INTERVAL_SECONDS", 30),
+      offlineAfterSeconds: readPositiveNumber("CLIENT_OFFLINE_AFTER_SECONDS", 90),
+    },
     mysql: {
       database: process.env.MYSQL_DATABASE ?? "epi_info",
       host: process.env.MYSQL_HOST ?? "localhost",
       password: process.env.MYSQL_PASSWORD ?? "epi_info_dev_password",
       port: readNumber("MYSQL_PORT", 3306),
+      ...(mysqlSocketPath ? { socketPath: mysqlSocketPath } : {}),
       user: process.env.MYSQL_USER ?? "epi_info",
     },
     port: readNumber("SERVER_PORT", 4000),

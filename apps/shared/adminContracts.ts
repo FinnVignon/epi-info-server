@@ -9,6 +9,31 @@ export interface AdminUser {
   updatedAt: string;
 }
 
+export type AssetType = "image" | "video";
+export type AssetStatus = "active" | "archived";
+
+export interface AssetUploader {
+  displayName: string;
+  email: string;
+  id: string;
+}
+
+export interface Asset {
+  archivedAt: string | null;
+  createdAt: string;
+  displayName: string;
+  id: string;
+  mimeType: string;
+  originalFilename: string;
+  publicUrl: string;
+  sha256: string;
+  sizeBytes: number;
+  status: AssetStatus;
+  type: AssetType;
+  updatedAt: string;
+  uploadedBy: AssetUploader | null;
+}
+
 export const ADMIN_PERMISSION_ACTIONS = [
   "manage_users",
   "manage_clients",
@@ -89,6 +114,18 @@ export interface AdminUserListResponse {
 
 export interface AdminUserResponse {
   user: AdminUserWithPermissions;
+}
+
+export interface AssetListResponse {
+  assets: Asset[];
+}
+
+export interface AssetUploadResponse {
+  asset: Asset;
+}
+
+export interface UpdateAssetStatusRequest {
+  status: AssetStatus;
 }
 
 export interface CreateAdminUserRequest {

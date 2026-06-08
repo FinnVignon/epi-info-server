@@ -16,19 +16,27 @@ interface GroupSummaryRow extends RowDataPacket {
   name: string;
 }
 
-export async function getDashboardSummary(pool: Pool): Promise<DashboardResponse> {
-  const [clients] = await pool.query<ClientSummaryRow[]>(
+export async function getDashboardSummary(
+  pool: Pool,
+  offlineAfterSeconds: number,
+): Promise<DashboardResponse> {
+  const [clients] = await pool.execute<ClientSummaryRow[]>(
     `
       SELECT
         id,
         name,
-        status,
+        CASE
+          WHEN last_seen_at IS NULL THEN 'unknown'
+          WHEN TIMESTAMPDIFF(SECOND, last_seen_at, NOW()) <= ? THEN 'online'
+          ELSE 'offline'
+        END AS status,
         current_manifest_id AS currentManifestId,
         last_seen_at AS lastSeenAt
       FROM clients
       ORDER BY updated_at DESC
       LIMIT 8
     `,
+    [offlineAfterSeconds],
   );
   const [groups] = await pool.query<GroupSummaryRow[]>(
     `

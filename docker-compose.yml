@@ -1,6 +1,7 @@
 services:
   mysql:
     image: mysql:8.4
+    command: ["--bind-address=0.0.0.0"]
     environment:
       MYSQL_DATABASE: ${MYSQL_DATABASE:-epi_info}
       MYSQL_USER: ${MYSQL_USER:-epi_info}
@@ -13,6 +14,7 @@ services:
       retries: 20
     volumes:
       - mysql-data:/var/lib/mysql
+      - mysql-socket:/var/run/mysqld
       - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
 
   server:
@@ -24,17 +26,34 @@ services:
       SERVER_PORT: ${SERVER_PORT:-4000}
       MYSQL_HOST: mysql
       MYSQL_PORT: 3306
+      MYSQL_SOCKET_PATH: /var/run/mysqld/mysqld.sock
       MYSQL_DATABASE: ${MYSQL_DATABASE:-epi_info}
       MYSQL_USER: ${MYSQL_USER:-epi_info}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-epi_info_dev_password}
       ASSET_STORAGE_PATH: /data/assets
+      ASSET_UPLOAD_MAX_BYTES: ${ASSET_UPLOAD_MAX_BYTES:-524288000}
       PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:4000}
       ADMIN_DIST_PATH: /app/dist/admin
+      CLIENT_ENROLLMENT_TOKEN_TTL_MINUTES: ${CLIENT_ENROLLMENT_TOKEN_TTL_MINUTES:-15}
+      CLIENT_HEARTBEAT_INTERVAL_SECONDS: ${CLIENT_HEARTBEAT_INTERVAL_SECONDS:-30}
+      CLIENT_OFFLINE_AFTER_SECONDS: ${CLIENT_OFFLINE_AFTER_SECONDS:-90}
     ports:
       - "4000:4000"
     volumes:
       - server-assets:/data/assets
+      - mysql-socket:/var/run/mysqld
+    networks:
+      default:
+      epi-info:
+        aliases:
+          - epi-info-server
 
 volumes:
   mysql-data:
+  mysql-socket:
   server-assets:
+
+networks:
+  epi-info:
+    external: true
+    name: epi-info-network

@@ -5,7 +5,8 @@ import {
   formatPermissionTarget,
   PermissionEditor,
 } from "./PermissionEditor";
-import { formatDate, permissionToGrant } from "../utils/adminPermissions";
+import { formatDate } from "../utils/formatDate";
+import { permissionToGrant } from "../utils/adminPermissions";
 import type {
   AdminPermissionGrant,
   AdminUserWithPermissions,

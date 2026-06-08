@@ -4,10 +4,16 @@ import { ServerConfig } from "../config.js";
 
 export function createDatabasePool(config: ServerConfig["mysql"]): Pool {
   return createPool({
+    ...(config.socketPath
+      ? {
+          socketPath: config.socketPath,
+        }
+      : {
+          host: config.host,
+          port: config.port,
+        }),
     database: config.database,
-    host: config.host,
     password: config.password,
-    port: config.port,
     user: config.user,
     waitForConnections: true,
     connectionLimit: 5,
