@@ -1,9 +1,8 @@
-import { access } from "node:fs/promises";
-import path from "node:path";
 import { Router } from "express";
 import { Pool } from "mysql2/promise";
 
 import { findAssetById } from "../database.js";
+import { sendStoredAsset } from "../http/sendStoredAsset.js";
 
 function readAssetId(params: { assetId?: string }): string | null {
   return typeof params.assetId === "string" && params.assetId.length > 0 ? params.assetId : null;
@@ -28,20 +27,7 @@ export function createAssetDownloadRouter(pool: Pool): Router {
         return;
       }
 
-      try {
-        await access(asset.storagePath);
-      } catch {
-        response.status(404).json({ error: "Asset file was not found" });
-        return;
-      }
-
-      response.setHeader("Cache-Control", "public, max-age=31536000, immutable");
-      response.setHeader("Content-Type", asset.mimeType);
-      response.sendFile(path.resolve(asset.storagePath), (error) => {
-        if (error) {
-          next(error);
-        }
-      });
+      await sendStoredAsset(response, next, asset, "public");
     } catch (error) {
       next(error);
     }

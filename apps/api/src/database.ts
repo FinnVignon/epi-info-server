@@ -79,10 +79,14 @@ export {
   updateClientStatus,
 } from "./database/clients.js";
 export type {
+  ClientAdminAction,
   ListClientsForAdminInput,
   UpdateClientProfileInput,
   UpdateClientStatusInput,
 } from "./database/clients.js";
+
+export { assignAssetToClient, findEffectiveManifestForClient } from "./database/manifests.js";
+export type { AssignAssetToClientInput } from "./database/manifests.js";
 
 export { checkDatabaseHealth, DATABASE_TABLES } from "./database/health.js";
 export type { DatabaseHealth, DatabaseHealthStatus } from "./database/health.js";

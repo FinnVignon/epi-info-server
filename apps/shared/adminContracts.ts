@@ -1,3 +1,6 @@
+import type { FitMode, Manifest } from "./contracts.js";
+import type { ManagedClient } from "./clientContracts.js";
+
 export interface AdminUser {
   createdAt: string;
   displayName: string;
@@ -126,6 +129,19 @@ export interface AssetUploadResponse {
 
 export interface UpdateAssetStatusRequest {
   status: AssetStatus;
+}
+
+export interface AssignAssetToClientRequest {
+  assetId: string;
+  fit: FitMode;
+}
+
+export interface ClientAssignmentResponse {
+  manifest: Manifest;
+}
+
+export interface AssignmentClientListResponse {
+  clients: ManagedClient[];
 }
 
 export interface CreateAdminUserRequest {

@@ -51,7 +51,11 @@ avoids dependence on host Docker bridge firewall rules. Outside Compose, leave
 
 The API also joins the external `epi-info-network` network under the
 `epi-info-server` hostname. Client Compose stacks use this network for
-registration, heartbeats, and future content synchronization.
+registration, heartbeats, and content synchronization.
+
+The Clients admin screen can assign an active image or video directly to one
+registered client. The server stores a versioned manifest, and the authenticated
+client downloads the assigned asset through the client API.
 
 If the schema changes after the MySQL volume already exists, use a migration or
 recreate the local volume intentionally.

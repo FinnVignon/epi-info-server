@@ -15,11 +15,13 @@ import {
 } from "./database.js";
 import { createAdminAuthRouter } from "./routes/adminAuthRoutes.js";
 import { createAdminAssetRouter } from "./routes/adminAssetRoutes.js";
+import { createAdminAssignmentRouter } from "./routes/adminAssignmentRoutes.js";
 import { createAdminClientRouter } from "./routes/adminClientRoutes.js";
 import { createAdminClientEnrollmentRouter } from "./routes/adminClientEnrollmentRoutes.js";
 import { createAdminUserRouter } from "./routes/adminUserRoutes.js";
 import { createAssetDownloadRouter } from "./routes/assetDownloadRoutes.js";
 import { createClientConnectionRouter } from "./routes/clientConnectionRoutes.js";
+import { createClientManifestRouter } from "./routes/clientManifestRoutes.js";
 import { SUPPORTED_MANIFEST_ITEM_TYPES } from "../../shared/contracts.js";
 
 const config = readConfig();
@@ -61,6 +63,7 @@ app.get("/api/dashboard", requireAdminAuth, async (_request, response) => {
 
 app.use("/media/assets", createAssetDownloadRouter(mysqlPool));
 app.use("/api/admin/assets", createAdminAssetRouter(mysqlPool, config));
+app.use("/api/admin/assignments", createAdminAssignmentRouter(mysqlPool, config));
 app.use("/api/admin/clients", createAdminClientRouter(mysqlPool, config));
 app.use(
   "/api/admin/client-enrollment-tokens",
@@ -69,6 +72,7 @@ app.use(
 app.use("/api/admin/users", createAdminUserRouter(mysqlPool, config));
 app.use("/api/admin", createAdminAuthRouter(mysqlPool, config));
 app.use("/api/clients", createClientConnectionRouter(mysqlPool, config));
+app.use("/api/clients", createClientManifestRouter(mysqlPool));
 
 if (config.adminDistPath) {
   const adminDistPath = path.resolve(config.adminDistPath);

@@ -6,6 +6,8 @@ import type {
   ManagedClient,
 } from "../../../shared/clientContracts.js";
 
+export type ClientAdminAction = "manage_assignments" | "manage_clients";
+
 interface ClientRow extends RowDataPacket {
   accessStatus: ClientAccessStatus;
   connectionStatus: ClientConnectionStatus;
@@ -24,6 +26,7 @@ interface ClientRow extends RowDataPacket {
 export interface ListClientsForAdminInput {
   isSuperAdmin: boolean;
   offlineAfterSeconds: number;
+  permissionAction: ClientAdminAction;
   userId: string;
 }
 
@@ -60,6 +63,10 @@ export async function listClientsForAdmin(
   pool: Pool,
   input: ListClientsForAdminInput,
 ): Promise<ManagedClient[]> {
+  const permissionColumn =
+    input.permissionAction === "manage_assignments"
+      ? "can_manage_assignments"
+      : "can_manage_clients";
   const permissionClause = input.isSuperAdmin
     ? ""
     : `
@@ -67,7 +74,7 @@ export async function listClientsForAdmin(
         SELECT 1
         FROM admin_permissions
         WHERE admin_permissions.user_id = ?
-          AND admin_permissions.can_manage_clients = TRUE
+          AND admin_permissions.${permissionColumn} = TRUE
           AND (
             admin_permissions.target_type = 'global'
             OR (

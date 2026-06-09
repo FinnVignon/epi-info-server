@@ -279,6 +279,10 @@ button:disabled {
   grid-template-columns: minmax(520px, 1.35fr) minmax(340px, 0.85fr);
 }
 
+.content.clients-layout.assignment-only {
+  grid-template-columns: minmax(320px, 720px);
+}
+
 .panel {
   background: #ffffff;
   border: 1px solid #d8e0e7;
@@ -451,6 +455,7 @@ button:disabled {
 }
 
 .form-grid input,
+.form-grid select,
 .permission-builder input,
 .permission-builder select {
   background: #ffffff;
@@ -464,6 +469,7 @@ button:disabled {
 }
 
 .form-grid input:focus,
+.form-grid select:focus,
 .permission-builder input:focus,
 .permission-builder select:focus {
   border-color: #2d6cdf;
@@ -504,6 +510,7 @@ button:disabled {
 .assets-list-panel,
 .clients-list-panel,
 .clients-detail-panel,
+.client-assignment-panel,
 .client-enrollment-panel {
   align-self: start;
 }
@@ -794,6 +801,22 @@ button:disabled {
 
 .clients-detail-panel .panel-header .metric {
   overflow-wrap: anywhere;
+}
+
+.assignment-form label,
+.assignment-form .form-error,
+.assignment-form .form-notice,
+.assignment-form .metric,
+.assignment-form button {
+  grid-column: 1 / -1;
+}
+
+.assignment-form .assignment-fit-field {
+  max-width: 220px;
+}
+
+.assignment-form button {
+  justify-self: start;
 }
 
 .client-error-detail {
