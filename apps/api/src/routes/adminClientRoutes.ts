@@ -9,6 +9,7 @@ import {
 } from "../auth/adminPermissions.js";
 import type { ServerConfig } from "../config.js";
 import {
+  adminUserHasPermission,
   findClientById,
   listClientsForAdmin,
   updateClientProfile,
@@ -50,10 +51,26 @@ export function createAdminClientRouter(pool: Pool, config: ServerConfig): Route
       const clients = await listClientsForAdmin(pool, {
         isSuperAdmin: adminRequest.adminSession.user.isSuperAdmin,
         offlineAfterSeconds: config.clientAuth.offlineAfterSeconds,
+        permissionAction: "manage_clients",
         userId: adminRequest.adminSession.user.id,
       });
+      const canEnrollClients =
+        adminRequest.adminSession.user.isSuperAdmin ||
+        (await adminUserHasPermission(pool, {
+          action: "manage_clients",
+          target: {
+            targetId: null,
+            targetType: "global",
+          },
+          userId: adminRequest.adminSession.user.id,
+        }));
 
-      response.json({ clients } satisfies ClientListResponse);
+      response.json({
+        capabilities: {
+          canEnrollClients,
+        },
+        clients,
+      } satisfies ClientListResponse);
     } catch (error) {
       next(error);
     }

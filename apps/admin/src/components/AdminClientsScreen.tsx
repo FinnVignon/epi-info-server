@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { listClients, updateClientProfile, updateClientStatus } from "../api/adminClientsApi";
 import { ApiError } from "../api/adminApi";
+import { ClientAssignmentPanel } from "./ClientAssignmentPanel";
 import { ClientDetail } from "./ClientDetail";
 import { ClientEnrollmentPanel } from "./ClientEnrollmentPanel";
 import { ClientTable } from "./ClientTable";
@@ -12,6 +13,8 @@ interface AdminClientsScreenProps {
 }
 
 export function AdminClientsScreen({ onUnauthorized }: AdminClientsScreenProps) {
+  const [canEnrollClients, setCanEnrollClients] = useState(false);
+  const [canManageClients, setCanManageClients] = useState<boolean | null>(null);
   const [clients, setClients] = useState<ManagedClient[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -34,12 +37,21 @@ export function AdminClientsScreen({ onUnauthorized }: AdminClientsScreenProps) 
     try {
       const response = await listClients();
 
+      setCanEnrollClients(response.capabilities.canEnrollClients);
+      setCanManageClients(true);
       setClients(response.clients);
       setSelectedClientId(
         (currentSelection) => currentSelection ?? response.clients[0]?.id ?? null,
       );
     } catch (loadError) {
-      handleApiError(loadError, "Unable to load clients");
+      if (loadError instanceof ApiError && loadError.status === 403) {
+        setCanManageClients(false);
+        setCanEnrollClients(false);
+        setClients([]);
+        setSelectedClientId(null);
+      } else {
+        handleApiError(loadError, "Unable to load clients");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -105,7 +117,9 @@ export function AdminClientsScreen({ onUnauthorized }: AdminClientsScreenProps) 
   }
 
   return (
-    <section className="content clients-layout">
+    <section
+      className={`content clients-layout ${canManageClients === false ? "assignment-only" : ""}`}
+    >
       {error || notice ? (
         <div className="screen-alerts">
           {error ? <p className="form-error">{error}</p> : null}
@@ -113,22 +127,31 @@ export function AdminClientsScreen({ onUnauthorized }: AdminClientsScreenProps) 
         </div>
       ) : null}
 
-      <ClientTable
-        clients={clients}
-        isLoading={isLoading}
-        onRefresh={() => void loadClients()}
-        onSelectClient={setSelectedClientId}
-        selectedClientId={selectedClient?.id ?? null}
-      />
+      {canManageClients !== false ? (
+        <>
+          <ClientTable
+            clients={clients}
+            isLoading={isLoading}
+            onRefresh={() => void loadClients()}
+            onSelectClient={setSelectedClientId}
+            selectedClientId={selectedClient?.id ?? null}
+          />
 
-      <ClientDetail
-        client={selectedClient}
-        isSaving={isSaving}
-        onStatusChange={(client) => void handleStatusChange(client)}
-        onUpdateProfile={handleUpdateProfile}
-      />
+          <ClientDetail
+            client={selectedClient}
+            isSaving={isSaving}
+            onStatusChange={(client) => void handleStatusChange(client)}
+            onUpdateProfile={handleUpdateProfile}
+          />
 
-      <ClientEnrollmentPanel onUnauthorized={onUnauthorized} />
+          {canEnrollClients ? <ClientEnrollmentPanel onUnauthorized={onUnauthorized} /> : null}
+        </>
+      ) : null}
+
+      <ClientAssignmentPanel
+        onUnauthorized={onUnauthorized}
+        preferredClientId={selectedClient?.id ?? null}
+      />
     </section>
   );
 }

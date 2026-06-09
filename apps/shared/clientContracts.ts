@@ -1,3 +1,5 @@
+import type { Manifest } from "./contracts.js";
+
 export type ClientAccessStatus = "active" | "disabled";
 export type ClientConnectionStatus = "online" | "offline" | "unknown";
 
@@ -17,6 +19,9 @@ export interface ManagedClient {
 }
 
 export interface ClientListResponse {
+  capabilities: {
+    canEnrollClients: boolean;
+  };
   clients: ManagedClient[];
 }
 
@@ -64,4 +69,8 @@ export interface ClientHeartbeatRequest {
 export interface ClientHeartbeatResponse {
   heartbeatIntervalSeconds: number;
   serverTime: string;
+}
+
+export interface EffectiveManifestResponse {
+  manifest: Manifest | null;
 }
