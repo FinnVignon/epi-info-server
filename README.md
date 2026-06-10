@@ -57,5 +57,8 @@ The Clients admin screen can assign an active image or video directly to one
 registered client. The server stores a versioned manifest, and the authenticated
 client downloads the assigned asset through the client API.
 
+The Groups admin screen manages display groups and client memberships.
+Membership changes require permission for both the target group and client.
+
 If the schema changes after the MySQL volume already exists, use a migration or
 recreate the local volume intentionally.

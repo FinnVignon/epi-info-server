@@ -16,29 +16,78 @@ interface GroupSummaryRow extends RowDataPacket {
   name: string;
 }
 
+export interface DashboardSummaryInput {
+  isSuperAdmin: boolean;
+  offlineAfterSeconds: number;
+  userId: string;
+}
+
 export async function getDashboardSummary(
   pool: Pool,
-  offlineAfterSeconds: number,
+  input: DashboardSummaryInput,
 ): Promise<DashboardResponse> {
+  const clientPermissionClause = input.isSuperAdmin
+    ? ""
+    : `
+      WHERE EXISTS (
+        SELECT 1
+        FROM admin_permissions
+        WHERE admin_permissions.user_id = ?
+          AND admin_permissions.can_manage_clients = TRUE
+          AND (
+            admin_permissions.target_type = 'global'
+            OR (
+              admin_permissions.target_type = 'client'
+              AND admin_permissions.target_id = clients.id
+            )
+            OR (
+              admin_permissions.target_type = 'group'
+              AND admin_permissions.target_id IN (
+                SELECT client_groups.group_id
+                FROM client_groups
+                WHERE client_groups.client_id = clients.id
+              )
+            )
+          )
+      )
+    `;
   const [clients] = await pool.execute<ClientSummaryRow[]>(
     `
       SELECT
-        id,
-        name,
+        clients.id,
+        clients.name,
         CASE
-          WHEN last_seen_at IS NULL THEN 'unknown'
-          WHEN TIMESTAMPDIFF(SECOND, last_seen_at, NOW()) <= ? THEN 'online'
+          WHEN clients.last_seen_at IS NULL THEN 'unknown'
+          WHEN TIMESTAMPDIFF(SECOND, clients.last_seen_at, NOW()) <= ? THEN 'online'
           ELSE 'offline'
         END AS status,
-        current_manifest_id AS currentManifestId,
-        last_seen_at AS lastSeenAt
+        clients.current_manifest_id AS currentManifestId,
+        clients.last_seen_at AS lastSeenAt
       FROM clients
-      ORDER BY updated_at DESC
+      ${clientPermissionClause}
+      ORDER BY clients.updated_at DESC
       LIMIT 8
     `,
-    [offlineAfterSeconds],
+    input.isSuperAdmin ? [input.offlineAfterSeconds] : [input.offlineAfterSeconds, input.userId],
   );
-  const [groups] = await pool.query<GroupSummaryRow[]>(
+  const groupPermissionClause = input.isSuperAdmin
+    ? ""
+    : `
+      WHERE EXISTS (
+        SELECT 1
+        FROM admin_permissions
+        WHERE admin_permissions.user_id = ?
+          AND admin_permissions.can_manage_groups = TRUE
+          AND (
+            admin_permissions.target_type = 'global'
+            OR (
+              admin_permissions.target_type = 'group'
+              AND admin_permissions.target_id = display_groups.id
+            )
+          )
+      )
+    `;
+  const [groups] = await pool.execute<GroupSummaryRow[]>(
     `
       SELECT
         display_groups.id,
@@ -46,10 +95,12 @@ export async function getDashboardSummary(
         COUNT(client_groups.client_id) AS clientCount
       FROM display_groups
       LEFT JOIN client_groups ON client_groups.group_id = display_groups.id
+      ${groupPermissionClause}
       GROUP BY display_groups.id, display_groups.name
       ORDER BY display_groups.updated_at DESC
       LIMIT 8
     `,
+    input.isSuperAdmin ? [] : [input.userId],
   );
 
   return {

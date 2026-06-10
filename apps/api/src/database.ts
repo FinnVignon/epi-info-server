@@ -43,6 +43,7 @@ export type { AdminSessionWithUser } from "./database/adminSessions.js";
 export { MysqlNamedLockTimeoutError, withMysqlNamedLock } from "./database/mysqlLocks.js";
 
 export { getDashboardSummary } from "./database/dashboard.js";
+export type { DashboardSummaryInput } from "./database/dashboard.js";
 
 export {
   createAsset,
@@ -74,6 +75,7 @@ export type {
 
 export {
   findClientById,
+  listClientsInGroup,
   listClientsForAdmin,
   updateClientProfile,
   updateClientStatus,
@@ -87,6 +89,21 @@ export type {
 
 export { assignAssetToClient, findEffectiveManifestForClient } from "./database/manifests.js";
 export type { AssignAssetToClientInput } from "./database/manifests.js";
+
+export {
+  addClientToGroup,
+  createGroup,
+  deleteGroup,
+  findGroupById,
+  listGroupsForAdmin,
+  removeClientFromGroup,
+  updateGroup,
+} from "./database/groups.js";
+export type {
+  CreateGroupInput,
+  ListGroupsForAdminInput,
+  UpdateGroupInput,
+} from "./database/groups.js";
 
 export { checkDatabaseHealth, DATABASE_TABLES } from "./database/health.js";
 export type { DatabaseHealth, DatabaseHealthStatus } from "./database/health.js";

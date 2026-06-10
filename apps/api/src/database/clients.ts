@@ -128,6 +128,26 @@ export async function findClientById(
   return rows[0] ? mapClient(rows[0]) : null;
 }
 
+export async function listClientsInGroup(
+  pool: Pool,
+  groupId: string,
+  offlineAfterSeconds: number,
+): Promise<ManagedClient[]> {
+  const [rows] = await pool.execute<ClientRow[]>(
+    `
+      SELECT
+        ${CLIENT_SELECT_FIELDS}
+      FROM clients
+      INNER JOIN client_groups ON client_groups.client_id = clients.id
+      WHERE client_groups.group_id = ?
+      ORDER BY clients.name
+    `,
+    [offlineAfterSeconds, groupId],
+  );
+
+  return rows.map(mapClient);
+}
+
 export async function updateClientProfile(
   pool: Pool,
   input: UpdateClientProfileInput,

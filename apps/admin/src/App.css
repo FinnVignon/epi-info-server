@@ -113,6 +113,7 @@ button:disabled {
 
 .primary-button,
 .secondary-button,
+.danger-button,
 .ghost-button {
   align-items: center;
   border-radius: 6px;
@@ -134,6 +135,12 @@ button:disabled {
   background: #ffffff;
   border: 1px solid #ccd6dd;
   color: #33424f;
+}
+
+.danger-button {
+  background: #ffffff;
+  border: 1px solid #df9f9f;
+  color: #9a2d2d;
 }
 
 .ghost-button {
@@ -281,6 +288,10 @@ button:disabled {
 
 .content.clients-layout.assignment-only {
   grid-template-columns: minmax(320px, 720px);
+}
+
+.content.groups-layout {
+  grid-template-columns: minmax(460px, 1fr) minmax(380px, 1fr);
 }
 
 .panel {
@@ -511,7 +522,10 @@ button:disabled {
 .clients-list-panel,
 .clients-detail-panel,
 .client-assignment-panel,
-.client-enrollment-panel {
+.client-enrollment-panel,
+.groups-list-panel,
+.groups-detail-panel,
+.group-create-panel {
   align-self: start;
 }
 
@@ -526,6 +540,10 @@ button:disabled {
 }
 
 .clients-list-panel {
+  grid-row: span 2;
+}
+
+.groups-list-panel {
   grid-row: span 2;
 }
 
@@ -835,6 +853,45 @@ button:disabled {
   min-width: 840px;
 }
 
+.groups-table {
+  min-width: 560px;
+}
+
+.group-member-list {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.group-member-list li {
+  align-items: center;
+  border: 1px solid #d8e0e7;
+  border-radius: 6px;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 10px;
+}
+
+.group-member-list li > div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.group-member-list strong {
+  color: #172026;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.group-member-list span {
+  color: #5d6b78;
+  font-size: 12px;
+}
+
 @media (max-width: 860px) {
   .content {
     grid-template-columns: 1fr;
@@ -852,11 +909,19 @@ button:disabled {
     grid-template-columns: 1fr;
   }
 
+  .content.groups-layout {
+    grid-template-columns: 1fr;
+  }
+
   .users-list-panel {
     grid-row: auto;
   }
 
   .clients-list-panel {
+    grid-row: auto;
+  }
+
+  .groups-list-panel {
     grid-row: auto;
   }
 
