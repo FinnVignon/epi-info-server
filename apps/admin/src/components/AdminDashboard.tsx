@@ -1,5 +1,6 @@
 import { SUPPORTED_MANIFEST_ITEM_TYPES } from "../../../shared/contracts";
 import type { DashboardResponse, HealthResponse } from "../../../shared/dashboardContracts";
+import { useTranslation } from "../i18n";
 
 interface AdminDashboardProps {
   dashboard: DashboardResponse | null;
@@ -7,19 +8,21 @@ interface AdminDashboardProps {
 }
 
 export function AdminDashboard({ dashboard, health }: AdminDashboardProps) {
+  const { t } = useTranslation();
+
   return (
     <section className="content">
       <article className="panel">
-        <h2>Server</h2>
-        <p className="metric">Service: {health?.service ?? "not connected"}</p>
-        <p className="metric">Database: {health?.database.status ?? "unknown"}</p>
+        <h2>{t.dashboard.serverTitle}</h2>
+        <p className="metric">{t.dashboard.service} : {health?.service ?? t.dashboard.notConnected}</p>
+        <p className="metric">{t.dashboard.database} : {health?.database.status ?? t.dashboard.unknown}</p>
         {health?.database.missingTables.length ? (
-          <p className="metric">Missing tables: {health.database.missingTables.join(", ")}</p>
+          <p className="metric">{t.dashboard.missingTables} : {health.database.missingTables.join(", ")}</p>
         ) : null}
       </article>
 
       <article className="panel">
-        <h2>Display Types</h2>
+        <h2>{t.dashboard.displayTypesTitle}</h2>
         <div className="content-types">
           {(health?.supportedManifestItemTypes ?? SUPPORTED_MANIFEST_ITEM_TYPES).map((type) => (
             <span className="content-type" key={type}>
@@ -30,10 +33,10 @@ export function AdminDashboard({ dashboard, health }: AdminDashboardProps) {
       </article>
 
       <article className="panel">
-        <h2>Clients And Groups</h2>
+        <h2>{t.dashboard.clientsGroupsTitle}</h2>
         <div className="summary-grid">
           <section>
-            <h3>Clients</h3>
+            <h3>{t.dashboard.clientsTitle}</h3>
             {dashboard?.clients.length ? (
               <ul className="summary-list">
                 {dashboard.clients.map((client) => (
@@ -44,23 +47,23 @@ export function AdminDashboard({ dashboard, health }: AdminDashboardProps) {
                 ))}
               </ul>
             ) : (
-              <p className="metric">No clients registered yet.</p>
+              <p className="metric">{t.dashboard.noClients}</p>
             )}
           </section>
 
           <section>
-            <h3>Groups</h3>
+            <h3>{t.dashboard.groupsTitle}</h3>
             {dashboard?.groups.length ? (
               <ul className="summary-list">
                 {dashboard.groups.map((group) => (
                   <li key={group.id}>
                     <span>{group.name}</span>
-                    <small>{group.clientCount} clients</small>
+                    <small>{group.clientCount} {t.dashboard.clientCount}</small>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="metric">No groups created yet.</p>
+              <p className="metric">{t.dashboard.noGroups}</p>
             )}
           </section>
         </div>

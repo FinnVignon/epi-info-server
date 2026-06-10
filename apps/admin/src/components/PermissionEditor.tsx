@@ -5,20 +5,7 @@ import type {
   AdminPermissionGrant,
   AdminPermissionTargetType,
 } from "../../../shared/adminContracts";
-
-const ACTION_OPTIONS: Array<{ label: string; value: AdminPermissionAction }> = [
-  { label: "Users", value: "manage_users" },
-  { label: "Clients", value: "manage_clients" },
-  { label: "Groups", value: "manage_groups" },
-  { label: "Content", value: "manage_content" },
-  { label: "Assignments", value: "manage_assignments" },
-];
-
-const TARGET_OPTIONS: Array<{ label: string; value: AdminPermissionTargetType }> = [
-  { label: "Global", value: "global" },
-  { label: "Group", value: "group" },
-  { label: "Client", value: "client" },
-];
+import { useTranslation } from "../i18n";
 
 interface PermissionEditorProps {
   disabled?: boolean;
@@ -27,40 +14,48 @@ interface PermissionEditorProps {
 }
 
 export function PermissionEditor({ disabled, onChange, permissions }: PermissionEditorProps) {
+  const { t } = useTranslation();
   const [draftActions, setDraftActions] = useState<AdminPermissionAction[]>(["manage_content"]);
   const [draftError, setDraftError] = useState<string | null>(null);
   const [draftTargetId, setDraftTargetId] = useState("");
   const [draftTargetType, setDraftTargetType] = useState<AdminPermissionTargetType>("global");
 
+  const ACTION_OPTIONS: Array<{ label: string; value: AdminPermissionAction }> = [
+    { label: t.permissions.actionUsers, value: "manage_users" },
+    { label: t.permissions.actionClients, value: "manage_clients" },
+    { label: t.permissions.actionGroups, value: "manage_groups" },
+    { label: t.permissions.actionContent, value: "manage_content" },
+    { label: t.permissions.actionAssignments, value: "manage_assignments" },
+  ];
+
+  const TARGET_OPTIONS: Array<{ label: string; value: AdminPermissionTargetType }> = [
+    { label: t.permissions.scopeGlobal, value: "global" },
+    { label: t.permissions.scopeGroup, value: "group" },
+    { label: t.permissions.scopeClient, value: "client" },
+  ];
+
   function addPermission(): void {
     setDraftError(null);
 
     if (draftActions.length === 0) {
-      setDraftError("Select at least one action.");
+      setDraftError(t.permissions.errorNoAction);
       return;
     }
 
     if (draftTargetType !== "global" && draftTargetId.trim().length === 0) {
-      setDraftError("Target id is required.");
+      setDraftError(t.permissions.errorNoTarget);
       return;
     }
 
     const permission: AdminPermissionGrant =
       draftTargetType === "global"
-        ? {
-            actions: draftActions,
-            targetId: null,
-            targetType: "global",
-          }
-        : {
-            actions: draftActions,
-            targetId: draftTargetId.trim(),
-            targetType: draftTargetType,
-          };
+        ? { actions: draftActions, targetId: null, targetType: "global" }
+        : { actions: draftActions, targetId: draftTargetId.trim(), targetType: draftTargetType };
+
     const targetKey = getPermissionTargetKey(permission);
 
     if (permissions.some((existing) => getPermissionTargetKey(existing) === targetKey)) {
-      setDraftError("That target already has a permission grant.");
+      setDraftError(t.permissions.errorDuplicate);
       return;
     }
 
@@ -75,9 +70,13 @@ export function PermissionEditor({ disabled, onChange, permissions }: Permission
   function toggleAction(action: AdminPermissionAction): void {
     setDraftActions((actions) =>
       actions.includes(action)
-        ? actions.filter((existingAction) => existingAction !== action)
+        ? actions.filter((a) => a !== action)
         : [...actions, action],
     );
+  }
+
+  function formatAction(action: AdminPermissionAction): string {
+    return ACTION_OPTIONS.find((o) => o.value === action)?.label ?? action;
   }
 
   return (
@@ -86,12 +85,11 @@ export function PermissionEditor({ disabled, onChange, permissions }: Permission
         <ul className="permission-list">
           {permissions.map((permission) => {
             const targetKey = getPermissionTargetKey(permission);
-
             return (
               <li key={targetKey}>
                 <div>
-                  <span>{formatPermissionTarget(permission)}</span>
-                  <small>{formatPermissionActions(permission.actions)}</small>
+                  <span>{formatPermissionTarget(permission, t)}</span>
+                  <small>{permission.actions.map(formatAction).join(", ")}</small>
                 </div>
                 <button
                   className="ghost-button"
@@ -99,19 +97,19 @@ export function PermissionEditor({ disabled, onChange, permissions }: Permission
                   onClick={() => removePermission(targetKey)}
                   type="button"
                 >
-                  Remove
+                  {t.permissions.remove}
                 </button>
               </li>
             );
           })}
         </ul>
       ) : (
-        <p className="metric">No scoped permissions.</p>
+        <p className="metric">{t.permissions.noPermissions}</p>
       )}
 
       <div className="permission-builder">
         <label>
-          <span>Scope</span>
+          <span>{t.permissions.scope}</span>
           <select
             disabled={disabled}
             onChange={(event) => {
@@ -130,7 +128,7 @@ export function PermissionEditor({ disabled, onChange, permissions }: Permission
 
         {draftTargetType !== "global" ? (
           <label>
-            <span>{draftTargetType === "group" ? "Group id" : "Client id"}</span>
+            <span>{draftTargetType === "group" ? t.permissions.groupId : t.permissions.clientId}</span>
             <input
               disabled={disabled}
               onChange={(event) => setDraftTargetId(event.target.value)}
@@ -161,29 +159,30 @@ export function PermissionEditor({ disabled, onChange, permissions }: Permission
           onClick={addPermission}
           type="button"
         >
-          Add permission
+          {t.permissions.addButton}
         </button>
       </div>
     </div>
   );
 }
 
-export function formatPermissionActions(actions: AdminPermissionAction[]): string {
-  return actions.map(formatPermissionAction).join(", ");
+// Ces fonctions sont exportées car utilisées dans AdminUserDetail
+export function formatPermissionActions(
+  actions: AdminPermissionAction[],
+  actionLabels: Record<string, string>,
+): string {
+  return actions.map((a) => actionLabels[a] ?? a).join(", ");
 }
 
-export function formatPermissionTarget(permission: AdminPermissionGrant): string {
-  if (permission.targetType === "global") {
-    return "Global";
-  }
-
-  return `${permission.targetType}: ${permission.targetId}`;
+export function formatPermissionTarget(
+  permission: AdminPermissionGrant,
+  t: { permissions: { targetGlobal: string; targetGroup: string; targetClient: string } },
+): string {
+  if (permission.targetType === "global") return t.permissions.targetGlobal;
+  const label = permission.targetType === "group" ? t.permissions.targetGroup : t.permissions.targetClient;
+  return `${label} : ${permission.targetId}`;
 }
 
 export function getPermissionTargetKey(permission: AdminPermissionGrant): string {
   return `${permission.targetType}:${permission.targetId ?? "global"}`;
-}
-
-function formatPermissionAction(action: AdminPermissionAction): string {
-  return ACTION_OPTIONS.find((option) => option.value === action)?.label ?? action;
 }
