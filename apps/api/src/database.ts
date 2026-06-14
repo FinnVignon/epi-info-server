@@ -87,8 +87,12 @@ export type {
   UpdateClientStatusInput,
 } from "./database/clients.js";
 
-export { assignAssetToClient, findEffectiveManifestForClient } from "./database/manifests.js";
-export type { AssignAssetToClientInput } from "./database/manifests.js";
+export {
+  assignAssetToTarget,
+  findEffectiveManifestForClient,
+  removeAssignmentFromTarget,
+} from "./database/manifests.js";
+export type { AssignmentTargetType, AssignAssetToTargetInput } from "./database/manifests.js";
 
 export {
   addClientToGroup,
@@ -101,6 +105,7 @@ export {
 } from "./database/groups.js";
 export type {
   CreateGroupInput,
+  GroupAdminAction,
   ListGroupsForAdminInput,
   UpdateGroupInput,
 } from "./database/groups.js";

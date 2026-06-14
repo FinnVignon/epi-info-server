@@ -294,6 +294,16 @@ button:disabled {
   grid-template-columns: minmax(460px, 1fr) minmax(380px, 1fr);
 }
 
+.content.groups-layout.assignment-only {
+  grid-template-columns: minmax(320px, 720px);
+}
+
+.groups-side-column {
+  align-self: start;
+  display: grid;
+  gap: 16px;
+}
+
 .panel {
   background: #ffffff;
   border: 1px solid #d8e0e7;
@@ -525,7 +535,8 @@ button:disabled {
 .client-enrollment-panel,
 .groups-list-panel,
 .groups-detail-panel,
-.group-create-panel {
+.group-create-panel,
+.group-assignment-panel {
   align-self: start;
 }
 
@@ -540,10 +551,6 @@ button:disabled {
 }
 
 .clients-list-panel {
-  grid-row: span 2;
-}
-
-.groups-list-panel {
   grid-row: span 2;
 }
 
@@ -825,7 +832,8 @@ button:disabled {
 .assignment-form .form-error,
 .assignment-form .form-notice,
 .assignment-form .metric,
-.assignment-form button {
+.assignment-form > button,
+.assignment-form .assignment-actions {
   grid-column: 1 / -1;
 }
 
@@ -833,7 +841,14 @@ button:disabled {
   max-width: 220px;
 }
 
-.assignment-form button {
+.assignment-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.assignment-form > button,
+.assignment-actions {
   justify-self: start;
 }
 

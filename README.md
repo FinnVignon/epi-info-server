@@ -55,10 +55,14 @@ registration, heartbeats, and content synchronization.
 
 The Clients admin screen can assign an active image or video directly to one
 registered client. The server stores a versioned manifest, and the authenticated
-client downloads the assigned asset through the client API.
+client downloads the assigned asset through the client API. Use `Inherit from
+group` to remove an individual override and return the client to group or global
+content.
 
 The Groups admin screen manages display groups and client memberships.
 Membership changes require permission for both the target group and client.
+It can also assign an active image or video to a permitted group. Individual
+client assignments override group assignments.
 
 If the schema changes after the MySQL volume already exists, use a migration or
 recreate the local volume intentionally.

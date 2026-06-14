@@ -1,8 +1,9 @@
 import type {
   AssetListResponse,
-  AssignAssetToClientRequest,
+  AssignAssetRequest,
+  AssignmentGroupListResponse,
+  AssignmentResponse,
   AssignmentClientListResponse,
-  ClientAssignmentResponse,
 } from "../../../shared/adminContracts";
 import { readJsonResponse } from "./adminApi";
 
@@ -16,12 +17,41 @@ export async function listAssignmentClients(): Promise<AssignmentClientListRespo
   );
 }
 
+export async function listAssignmentGroups(): Promise<AssignmentGroupListResponse> {
+  return readJsonResponse<AssignmentGroupListResponse>(
+    await fetch("/api/admin/assignments/groups"),
+  );
+}
+
 export async function assignAssetToClient(
   clientId: string,
-  request: AssignAssetToClientRequest,
-): Promise<ClientAssignmentResponse> {
-  return readJsonResponse<ClientAssignmentResponse>(
+  request: AssignAssetRequest,
+): Promise<AssignmentResponse> {
+  return readJsonResponse<AssignmentResponse>(
     await fetch(`/api/admin/assignments/clients/${encodeURIComponent(clientId)}`, {
+      body: JSON.stringify(request),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "PUT",
+    }),
+  );
+}
+
+export async function removeClientAssignment(clientId: string): Promise<void> {
+  await readJsonResponse<void>(
+    await fetch(`/api/admin/assignments/clients/${encodeURIComponent(clientId)}`, {
+      method: "DELETE",
+    }),
+  );
+}
+
+export async function assignAssetToGroup(
+  groupId: string,
+  request: AssignAssetRequest,
+): Promise<AssignmentResponse> {
+  return readJsonResponse<AssignmentResponse>(
+    await fetch(`/api/admin/assignments/groups/${encodeURIComponent(groupId)}`, {
       body: JSON.stringify(request),
       headers: {
         "Content-Type": "application/json",

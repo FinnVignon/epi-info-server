@@ -91,6 +91,7 @@ export function createAdminGroupRouter(pool: Pool, config: ServerConfig): Router
         },
         groups: await listGroupsForAdmin(pool, {
           isSuperAdmin: adminRequest.adminSession.user.isSuperAdmin,
+          permissionAction: "manage_groups",
           userId: adminRequest.adminSession.user.id,
         }),
       } satisfies GroupListResponse);

@@ -11,6 +11,7 @@ import {
   updateGroup,
 } from "../api/adminGroupsApi";
 import { ApiError } from "../api/adminApi";
+import { GroupAssignmentPanel } from "./GroupAssignmentPanel";
 import { GroupCreatePanel } from "./GroupCreatePanel";
 import { GroupDetail } from "./GroupDetail";
 import { GroupTable } from "./GroupTable";
@@ -27,6 +28,7 @@ interface AdminGroupsScreenProps {
 
 export function AdminGroupsScreen({ onUnauthorized }: AdminGroupsScreenProps) {
   const [canCreateGroups, setCanCreateGroups] = useState(false);
+  const [canManageGroups, setCanManageGroups] = useState<boolean | null>(null);
   const [clientOptions, setClientOptions] = useState<ManagedClient[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [groups, setGroups] = useState<DisplayGroup[]>([]);
@@ -91,6 +93,7 @@ export function AdminGroupsScreen({ onUnauthorized }: AdminGroupsScreenProps) {
       const response = await listGroups();
 
       setCanCreateGroups(response.capabilities.canCreateGroups);
+      setCanManageGroups(true);
       setGroups(response.groups);
       setSelectedGroupId((currentId) =>
         currentId && response.groups.some((group) => group.id === currentId)
@@ -98,7 +101,15 @@ export function AdminGroupsScreen({ onUnauthorized }: AdminGroupsScreenProps) {
           : (response.groups[0]?.id ?? null),
       );
     } catch (loadError) {
-      handleApiError(loadError, "Unable to load groups");
+      if (loadError instanceof ApiError && loadError.status === 403) {
+        setCanCreateGroups(false);
+        setCanManageGroups(false);
+        setGroups([]);
+        setSelectedGroup(null);
+        setSelectedGroupId(null);
+      } else {
+        handleApiError(loadError, "Unable to load groups");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -244,7 +255,9 @@ export function AdminGroupsScreen({ onUnauthorized }: AdminGroupsScreenProps) {
   }
 
   return (
-    <section className="content groups-layout">
+    <section
+      className={`content groups-layout ${canManageGroups === false ? "assignment-only" : ""}`}
+    >
       {error || notice ? (
         <div className="screen-alerts">
           {error ? <p className="form-error">{error}</p> : null}
@@ -252,26 +265,38 @@ export function AdminGroupsScreen({ onUnauthorized }: AdminGroupsScreenProps) {
         </div>
       ) : null}
 
-      <GroupTable
-        groups={groups}
-        isLoading={isLoading}
-        onRefresh={() => void loadGroups()}
-        onSelectGroup={setSelectedGroupId}
-        selectedGroupId={selectedGroupId}
-      />
+      {canManageGroups !== false ? (
+        <GroupTable
+          groups={groups}
+          isLoading={isLoading}
+          onRefresh={() => void loadGroups()}
+          onSelectGroup={setSelectedGroupId}
+          selectedGroupId={selectedGroupId}
+        />
+      ) : null}
 
-      <GroupDetail
-        clientOptions={clientOptions}
-        group={selectedGroup}
-        isLoading={isLoadingDetail}
-        isSaving={isSaving}
-        onAddMember={handleAddMember}
-        onDelete={handleDelete}
-        onRemoveMember={handleRemoveMember}
-        onUpdate={handleUpdate}
-      />
+      <div className="groups-side-column">
+        {canManageGroups !== false ? (
+          <>
+            <GroupDetail
+              clientOptions={clientOptions}
+              group={selectedGroup}
+              isLoading={isLoadingDetail}
+              isSaving={isSaving}
+              onAddMember={handleAddMember}
+              onDelete={handleDelete}
+              onRemoveMember={handleRemoveMember}
+              onUpdate={handleUpdate}
+            />
 
-      {canCreateGroups ? <GroupCreatePanel isSaving={isSaving} onCreate={handleCreate} /> : null}
+            {canCreateGroups ? (
+              <GroupCreatePanel isSaving={isSaving} onCreate={handleCreate} />
+            ) : null}
+          </>
+        ) : null}
+
+        <GroupAssignmentPanel onUnauthorized={onUnauthorized} preferredGroupId={selectedGroupId} />
+      </div>
     </section>
   );
 }

@@ -2,6 +2,8 @@ import type { Pool, ResultSetHeader, RowDataPacket } from "mysql2/promise";
 
 import type { DisplayGroup } from "../../../shared/groupContracts.js";
 
+export type GroupAdminAction = "manage_assignments" | "manage_groups";
+
 interface GroupRow extends RowDataPacket {
   createdAt: Date;
   id: string;
@@ -12,6 +14,7 @@ interface GroupRow extends RowDataPacket {
 
 export interface ListGroupsForAdminInput {
   isSuperAdmin: boolean;
+  permissionAction: GroupAdminAction;
   userId: string;
 }
 
@@ -37,6 +40,10 @@ export async function listGroupsForAdmin(
   pool: Pool,
   input: ListGroupsForAdminInput,
 ): Promise<DisplayGroup[]> {
+  const permissionColumn =
+    input.permissionAction === "manage_assignments"
+      ? "can_manage_assignments"
+      : "can_manage_groups";
   const permissionClause = input.isSuperAdmin
     ? ""
     : `
@@ -44,7 +51,7 @@ export async function listGroupsForAdmin(
         SELECT 1
         FROM admin_permissions
         WHERE admin_permissions.user_id = ?
-          AND admin_permissions.can_manage_groups = TRUE
+          AND admin_permissions.${permissionColumn} = TRUE
           AND (
             admin_permissions.target_type = 'global'
             OR (

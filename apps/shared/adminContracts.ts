@@ -1,5 +1,6 @@
 import type { FitMode, Manifest } from "./contracts.js";
 import type { ManagedClient } from "./clientContracts.js";
+import type { DisplayGroup } from "./groupContracts.js";
 
 export interface AdminUser {
   createdAt: string;
@@ -131,17 +132,21 @@ export interface UpdateAssetStatusRequest {
   status: AssetStatus;
 }
 
-export interface AssignAssetToClientRequest {
+export interface AssignAssetRequest {
   assetId: string;
   fit: FitMode;
 }
 
-export interface ClientAssignmentResponse {
+export interface AssignmentResponse {
   manifest: Manifest;
 }
 
 export interface AssignmentClientListResponse {
   clients: ManagedClient[];
+}
+
+export interface AssignmentGroupListResponse {
+  groups: DisplayGroup[];
 }
 
 export interface CreateAdminUserRequest {

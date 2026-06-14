@@ -34,10 +34,11 @@ interface ManifestItemRow extends RowDataPacket {
   url: string | null;
 }
 
-export interface AssignAssetToClientInput {
+export type AssignmentTargetType = "client" | "group";
+
+export interface AssignAssetToTargetInput {
   assetId: string;
   assignmentId: string;
-  clientId: string;
   durationSeconds: number;
   fit: FitMode;
   itemId: string;
@@ -46,18 +47,20 @@ export interface AssignAssetToClientInput {
   manifestName: string;
   remoteUrl: string;
   sha256: string;
+  targetId: string;
+  targetType: AssignmentTargetType;
   type: "image" | "video";
 }
 
-export async function assignAssetToClient(
+export async function assignAssetToTarget(
   pool: Pool,
-  input: AssignAssetToClientInput,
+  input: AssignAssetToTargetInput,
 ): Promise<Manifest> {
   const connection = await pool.getConnection();
 
   try {
     await connection.beginTransaction();
-    const existing = await findClientAssignmentForUpdate(connection, input.clientId);
+    const existing = await findAssignmentForUpdate(connection, input.targetType, input.targetId);
     const manifestId = existing?.manifestId ?? input.manifestId;
     const version = existing ? existing.version + 1 : 1;
 
@@ -87,9 +90,9 @@ export async function assignAssetToClient(
       await connection.execute<ResultSetHeader>(
         `
           INSERT INTO assignments (id, target_type, target_id, manifest_id)
-          VALUES (?, 'client', ?, ?)
+          VALUES (?, ?, ?, ?)
         `,
-        [input.assignmentId, input.clientId, manifestId],
+        [input.assignmentId, input.targetType, input.targetId, manifestId],
       );
     }
 
@@ -140,6 +143,39 @@ export async function assignAssetToClient(
       name: input.manifestName,
       version,
     };
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
+}
+
+export async function removeAssignmentFromTarget(
+  pool: Pool,
+  targetType: AssignmentTargetType,
+  targetId: string,
+): Promise<boolean> {
+  const connection = await pool.getConnection();
+
+  try {
+    await connection.beginTransaction();
+    const existing = await findAssignmentForUpdate(connection, targetType, targetId);
+
+    if (!existing) {
+      await connection.commit();
+      return false;
+    }
+
+    await connection.execute<ResultSetHeader>("DELETE FROM assignments WHERE id = ?", [
+      existing.assignmentId,
+    ]);
+    await connection.execute<ResultSetHeader>("DELETE FROM manifests WHERE id = ?", [
+      existing.manifestId,
+    ]);
+    await connection.commit();
+
+    return true;
   } catch (error) {
     await connection.rollback();
     throw error;
@@ -217,9 +253,10 @@ export async function findEffectiveManifestForClient(
   };
 }
 
-async function findClientAssignmentForUpdate(
+async function findAssignmentForUpdate(
   connection: PoolConnection,
-  clientId: string,
+  targetType: AssignmentTargetType,
+  targetId: string,
 ): Promise<AssignmentManifestRow | null> {
   const [rows] = await connection.execute<AssignmentManifestRow[]>(
     `
@@ -230,12 +267,12 @@ async function findClientAssignmentForUpdate(
         manifests.version
       FROM assignments
       INNER JOIN manifests ON manifests.id = assignments.manifest_id
-      WHERE assignments.target_type = 'client'
+      WHERE assignments.target_type = ?
         AND assignments.target_id = ?
       LIMIT 1
       FOR UPDATE
     `,
-    [clientId],
+    [targetType, targetId],
   );
 
   return rows[0] ?? null;
