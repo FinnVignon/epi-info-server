@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 import type { AdminUser } from "../../../shared/adminContracts";
 
-export type AdminScreen = "assets" | "clients" | "dashboard" | "groups" | "users";
+export type AdminScreen = "assets" | "clients" | "dashboard" | "global" | "groups" | "users";
 
 interface AdminShellProps {
   activeScreen: AdminScreen;
@@ -43,6 +43,13 @@ export function AdminShell({
           type="button"
         >
           Dashboard
+        </button>
+        <button
+          className={activeScreen === "global" ? "active" : ""}
+          onClick={() => onScreenChange("global")}
+          type="button"
+        >
+          All Displays
         </button>
         <button
           className={activeScreen === "users" ? "active" : ""}

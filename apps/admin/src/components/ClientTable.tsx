@@ -8,7 +8,7 @@ import type {
 } from "../../../shared/clientContracts";
 
 type SortDirection = "asc" | "desc";
-type SortKey = "access" | "connection" | "lastSeen" | "name" | "version";
+type SortKey = "access" | "connection" | "lastSeen" | "name" | "software";
 type AccessFilter = "all" | ClientAccessStatus;
 type ConnectionFilter = "all" | ClientConnectionStatus;
 
@@ -78,7 +78,7 @@ export function ClientTable({
           <span>Search</span>
           <input
             onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder="Name, ID, or version"
+            placeholder="Name, ID, or software"
             value={searchQuery}
           />
         </label>
@@ -138,9 +138,9 @@ export function ClientTable({
                 <SortableHeader
                   activeSortKey={sortKey}
                   direction={sortDirection}
-                  label="Version"
+                  label="Software"
                   onSort={handleSort}
-                  sortKey="version"
+                  sortKey="software"
                 />
                 <SortableHeader
                   activeSortKey={sortKey}
@@ -230,7 +230,7 @@ function compareClients(
       return compareNullableDates(firstClient.lastSeenAt, secondClient.lastSeenAt);
     case "name":
       return compareText(firstClient.name, secondClient.name);
-    case "version":
+    case "software":
       return compareText(firstClient.softwareVersion ?? "", secondClient.softwareVersion ?? "");
   }
 }

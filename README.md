@@ -54,15 +54,18 @@ The API also joins the external `epi-info-network` network under the
 registration, heartbeats, and content synchronization.
 
 The Clients admin screen can assign an active image or video directly to one
-registered client. The server stores a versioned manifest, and the authenticated
-client downloads the assigned asset through the client API. Use `Inherit from
-group` to remove an individual override and return the client to group or global
-content.
+registered client. The server updates an internal manifest revision so the
+authenticated client can detect and download changed content. This revision is
+not shown as an admin control.
 
 The Groups admin screen manages display groups and client memberships.
 Membership changes require permission for both the target group and client.
-It can also assign an active image or video to a permitted group. Individual
-client assignments override group assignments.
+It can also send an active image or video to a permitted group.
+
+The All Displays admin screen assigns an active image or video as the global
+display command. It requires super-admin access or global `manage_assignments`
+permission. For each client, the newest applicable individual, group, or global
+send is displayed; the target scope does not have a priority.
 
 If the schema changes after the MySQL volume already exists, use a migration or
 recreate the local volume intentionally.

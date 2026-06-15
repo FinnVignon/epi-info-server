@@ -62,7 +62,7 @@ export function ClientDetail({
           <strong>{client.accessStatus}</strong>
         </p>
         <p>
-          <span>Version</span>
+          <span>Client software</span>
           <strong>{client.softwareVersion ?? "Unknown"}</strong>
         </p>
         <p>
@@ -71,11 +71,7 @@ export function ClientDetail({
         </p>
         <p>
           <span>Manifest</span>
-          <strong>
-            {client.currentManifestId
-              ? `${client.currentManifestId} v${client.currentManifestVersion ?? "?"}`
-              : "None"}
-          </strong>
+          <strong>{client.currentManifestId ?? "None"}</strong>
         </p>
         <p>
           <span>Last sync</span>

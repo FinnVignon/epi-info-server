@@ -149,6 +149,13 @@ export interface AssignmentGroupListResponse {
   groups: DisplayGroup[];
 }
 
+export interface AssignmentGlobalTargetResponse {
+  target: {
+    id: "global";
+    name: string;
+  };
+}
+
 export interface CreateAdminUserRequest {
   displayName: string;
   email: string;

@@ -298,6 +298,10 @@ button:disabled {
   grid-template-columns: minmax(320px, 720px);
 }
 
+.content.global-assignment-layout {
+  grid-template-columns: minmax(320px, 720px);
+}
+
 .groups-side-column {
   align-self: start;
   display: grid;
@@ -536,7 +540,8 @@ button:disabled {
 .groups-list-panel,
 .groups-detail-panel,
 .group-create-panel,
-.group-assignment-panel {
+.group-assignment-panel,
+.global-assignment-panel {
   align-self: start;
 }
 

@@ -10,6 +10,7 @@ import {
 import { AdminAssetsScreen } from "./components/AdminAssetsScreen";
 import { AdminClientsScreen } from "./components/AdminClientsScreen";
 import { AdminDashboard } from "./components/AdminDashboard";
+import { AdminGlobalAssignmentScreen } from "./components/AdminGlobalAssignmentScreen";
 import { AdminGroupsScreen } from "./components/AdminGroupsScreen";
 import { AdminShell } from "./components/AdminShell";
 import type { AdminScreen } from "./components/AdminShell";
@@ -186,6 +187,8 @@ function renderAdminScreen(activeScreen: AdminScreen, state: AdminScreenRenderSt
       return <AdminDashboard dashboard={state.dashboard} health={state.health} />;
     case "groups":
       return <AdminGroupsScreen onUnauthorized={state.onUnauthorized} />;
+    case "global":
+      return <AdminGlobalAssignmentScreen onUnauthorized={state.onUnauthorized} />;
     case "users":
       return (
         <AdminUsersScreen currentUser={state.currentUser} onUnauthorized={state.onUnauthorized} />

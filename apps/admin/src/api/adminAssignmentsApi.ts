@@ -2,6 +2,7 @@ import type {
   AssetListResponse,
   AssignAssetRequest,
   AssignmentGroupListResponse,
+  AssignmentGlobalTargetResponse,
   AssignmentResponse,
   AssignmentClientListResponse,
 } from "../../../shared/adminContracts";
@@ -38,20 +39,33 @@ export async function assignAssetToClient(
   );
 }
 
-export async function removeClientAssignment(clientId: string): Promise<void> {
-  await readJsonResponse<void>(
-    await fetch(`/api/admin/assignments/clients/${encodeURIComponent(clientId)}`, {
-      method: "DELETE",
-    }),
-  );
-}
-
 export async function assignAssetToGroup(
   groupId: string,
   request: AssignAssetRequest,
 ): Promise<AssignmentResponse> {
   return readJsonResponse<AssignmentResponse>(
     await fetch(`/api/admin/assignments/groups/${encodeURIComponent(groupId)}`, {
+      body: JSON.stringify(request),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "PUT",
+    }),
+  );
+}
+
+export async function getGlobalAssignmentTarget(): Promise<AssignmentGlobalTargetResponse> {
+  return readJsonResponse<AssignmentGlobalTargetResponse>(
+    await fetch("/api/admin/assignments/global"),
+  );
+}
+
+export async function assignAssetGlobally(
+  _targetId: string,
+  request: AssignAssetRequest,
+): Promise<AssignmentResponse> {
+  return readJsonResponse<AssignmentResponse>(
+    await fetch("/api/admin/assignments/global", {
       body: JSON.stringify(request),
       headers: {
         "Content-Type": "application/json",

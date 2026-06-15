@@ -1,8 +1,4 @@
-import {
-  assignAssetToClient,
-  listAssignmentClients,
-  removeClientAssignment,
-} from "../api/adminAssignmentsApi";
+import { assignAssetToClient, listAssignmentClients } from "../api/adminAssignmentsApi";
 import { AssetAssignmentPanel, type AssignmentTargetOption } from "./AssetAssignmentPanel";
 
 interface ClientAssignmentPanelProps {
@@ -17,11 +13,6 @@ export function ClientAssignmentPanel({
   return (
     <AssetAssignmentPanel
       assignAsset={assignAssetToClient}
-      clearActionLabel="Inherit from group"
-      clearAssignment={removeClientAssignment}
-      clearSuccessMessage={(client) =>
-        `${client.name} will now use its group assignment, or global content if no group assignment applies.`
-      }
       loadTargets={loadClientTargets}
       onUnauthorized={onUnauthorized}
       panelClassName="client-assignment-panel"

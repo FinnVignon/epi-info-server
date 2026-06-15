@@ -12,28 +12,26 @@ export interface AssignmentTargetOption {
 
 interface AssetAssignmentPanelProps {
   assignAsset: (targetId: string, request: AssignAssetRequest) => Promise<AssignmentResponse>;
-  clearActionLabel?: string;
-  clearAssignment?: (targetId: string) => Promise<void>;
-  clearSuccessMessage?: (target: AssignmentTargetOption) => string;
+  hideTargetSelector?: boolean;
   loadTargets: () => Promise<AssignmentTargetOption[]>;
   onUnauthorized: () => void;
   panelClassName: string;
   preferredTargetId: string | null;
   targetLabel: string;
   title: string;
+  unavailableMessage?: string;
 }
 
 export function AssetAssignmentPanel({
   assignAsset,
-  clearActionLabel,
-  clearAssignment,
-  clearSuccessMessage,
+  hideTargetSelector = false,
   loadTargets,
   onUnauthorized,
   panelClassName,
   preferredTargetId,
   targetLabel,
   title,
+  unavailableMessage,
 }: AssetAssignmentPanelProps) {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [assetId, setAssetId] = useState("");
@@ -130,32 +128,10 @@ export function AssetAssignmentPanel({
       });
 
       setNotice(
-        `${response.manifest.name} assigned to ${selectedTarget.name}. Affected displays will activate version ${response.manifest.version} after download verification.`,
+        `${response.manifest.name} sent to ${selectedTarget.name}. Affected displays will download, verify, and activate it on their next sync.`,
       );
     } catch (assignmentError) {
       handleApiError(assignmentError, "Unable to assign asset");
-    } finally {
-      setIsSaving(false);
-    }
-  }
-
-  async function handleClearAssignment(): Promise<void> {
-    if (!clearAssignment || !selectedTarget) {
-      return;
-    }
-
-    setError(null);
-    setNotice(null);
-    setIsSaving(true);
-
-    try {
-      await clearAssignment(selectedTarget.id);
-      setNotice(
-        clearSuccessMessage?.(selectedTarget) ??
-          `${selectedTarget.name} will now use its next available assignment.`,
-      );
-    } catch (clearError) {
-      handleApiError(clearError, "Unable to remove assignment");
     } finally {
       setIsSaving(false);
     }
@@ -168,6 +144,15 @@ export function AssetAssignmentPanel({
     }
 
     setError(apiError instanceof Error ? apiError.message : fallback);
+  }
+
+  if (isAvailable === false && unavailableMessage) {
+    return (
+      <article className={`panel ${panelClassName}`}>
+        <h2>{title}</h2>
+        <p className="metric">{unavailableMessage}</p>
+      </article>
+    );
   }
 
   if (isAvailable !== true) {
@@ -191,20 +176,22 @@ export function AssetAssignmentPanel({
       {notice ? <p className="form-notice">{notice}</p> : null}
 
       <form className="form-grid assignment-form" onSubmit={(event) => void handleSubmit(event)}>
-        <label>
-          <span>{targetLabel}</span>
-          <select
-            disabled={isLoading || isSaving || targets.length === 0}
-            onChange={(event) => setTargetId(event.target.value)}
-            value={targetId}
-          >
-            {targets.map((target) => (
-              <option key={target.id} value={target.id}>
-                {target.name}
-              </option>
-            ))}
-          </select>
-        </label>
+        {!hideTargetSelector ? (
+          <label>
+            <span>{targetLabel}</span>
+            <select
+              disabled={isLoading || isSaving || targets.length === 0}
+              onChange={(event) => setTargetId(event.target.value)}
+              value={targetId}
+            >
+              {targets.map((target) => (
+                <option key={target.id} value={target.id}>
+                  {target.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : null}
 
         <label>
           <span>Asset</span>
@@ -245,16 +232,6 @@ export function AssetAssignmentPanel({
           >
             {isSaving ? "Working" : "Display asset"}
           </button>
-          {clearAssignment && clearActionLabel ? (
-            <button
-              className="secondary-button"
-              disabled={!selectedTarget || isSaving}
-              onClick={() => void handleClearAssignment()}
-              type="button"
-            >
-              {clearActionLabel}
-            </button>
-          ) : null}
         </div>
       </form>
     </article>
