@@ -41,22 +41,47 @@ export function AdminUserCreateForm({ onCreate }: AdminUserCreateFormProps) {
       <form className="form-grid" onSubmit={(event) => void handleSubmit(event)}>
         <label>
           <span>{t.users.displayNameLabel}</span>
-          <input minLength={2} onChange={(event) => setDisplayName(event.target.value)} required value={displayName} />
+          <input
+            minLength={2}
+            onChange={(event) => setDisplayName(event.target.value)}
+            required
+            value={displayName}
+          />
         </label>
         <label>
           <span>{t.users.emailLabel}</span>
-          <input inputMode="email" onChange={(event) => setEmail(event.target.value)} required type="email" value={email} />
+          <input
+            inputMode="email"
+            onChange={(event) => setEmail(event.target.value)}
+            required
+            type="email"
+            value={email}
+          />
         </label>
         <label>
           <span>{t.users.passwordLabel}</span>
-          <input minLength={10} onChange={(event) => setPassword(event.target.value)} required type="password" value={password} />
+          <input
+            minLength={10}
+            onChange={(event) => setPassword(event.target.value)}
+            required
+            type="password"
+            value={password}
+          />
         </label>
         <label className="checkbox-row">
-          <input checked={isSuperAdmin} onChange={(event) => setIsSuperAdmin(event.target.checked)} type="checkbox" />
+          <input
+            checked={isSuperAdmin}
+            onChange={(event) => setIsSuperAdmin(event.target.checked)}
+            type="checkbox"
+          />
           <span>{t.users.superAdminCheckbox}</span>
         </label>
         {!isSuperAdmin ? (
-          <PermissionEditor disabled={isSubmitting} onChange={setPermissions} permissions={permissions} />
+          <PermissionEditor
+            disabled={isSubmitting}
+            onChange={setPermissions}
+            permissions={permissions}
+          />
         ) : null}
         <button className="primary-button" disabled={isSubmitting} type="submit">
           {isSubmitting ? t.users.creating : t.users.createButton}

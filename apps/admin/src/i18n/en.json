@@ -3,7 +3,11 @@
 
   "nav": {
     "dashboard": "Dashboard",
+    "global": "All displays",
     "users": "Users",
+    "assets": "Assets",
+    "clients": "Clients",
+    "groups": "Groups",
     "logout": "Log out",
     "sections": "Admin sections"
   },

@@ -3,7 +3,11 @@
 
   "nav": {
     "dashboard": "Tableau de bord",
+    "global": "Tous les écrans",
     "users": "Utilisateurs",
+    "assets": "Contenus",
+    "clients": "Clients",
+    "groups": "Groupes",
     "logout": "Déconnexion",
     "sections": "Sections admin"
   },

@@ -59,7 +59,7 @@ export function AdminShell({
           onClick={() => onScreenChange("global")}
           type="button"
         >
-          All Displays
+          {t.nav.global}
         </button>
         <button
           className={activeScreen === "users" ? "active" : ""}
@@ -69,11 +69,25 @@ export function AdminShell({
           {t.nav.users}
         </button>
         <button
+          className={activeScreen === "assets" ? "active" : ""}
+          onClick={() => onScreenChange("assets")}
+          type="button"
+        >
+          {t.nav.assets}
+        </button>
+        <button
+          className={activeScreen === "clients" ? "active" : ""}
+          onClick={() => onScreenChange("clients")}
+          type="button"
+        >
+          {t.nav.clients}
+        </button>
+        <button
           className={activeScreen === "groups" ? "active" : ""}
           onClick={() => onScreenChange("groups")}
           type="button"
         >
-          Groups
+          {t.nav.groups}
         </button>
       </nav>
 

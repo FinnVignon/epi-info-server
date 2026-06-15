@@ -44,7 +44,3 @@ export function permissionToGrant(permission: AdminPermission): AdminPermissionG
     actions,
   };
 }
-
-export function formatDate(value: string | null, neverLabel = "Never"): string {
-  return value ? new Date(value).toLocaleString() : neverLabel;
-}

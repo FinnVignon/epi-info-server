@@ -87,7 +87,11 @@ export function AuthScreen({ error, mode, onAuthenticated, onError }: AuthScreen
           {error ? <p className="form-error">{error}</p> : null}
 
           <button className="primary-button" disabled={isSubmitting} type="submit">
-            {isSubmitting ? t.auth.submitting : isBootstrap ? t.auth.bootstrapButton : t.auth.loginButton}
+            {isSubmitting
+              ? t.auth.submitting
+              : isBootstrap
+                ? t.auth.bootstrapButton
+                : t.auth.loginButton}
           </button>
         </form>
       </section>
