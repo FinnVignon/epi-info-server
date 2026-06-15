@@ -7,6 +7,8 @@ import {
   loadDashboardData,
   logoutAdmin,
 } from "./api/adminApi";
+import { AdminAssetsScreen } from "./components/AdminAssetsScreen";
+import { AdminClientsScreen } from "./components/AdminClientsScreen";
 import { AdminDashboard } from "./components/AdminDashboard";
 import { AdminGlobalAssignmentScreen } from "./components/AdminGlobalAssignmentScreen";
 import { AdminGroupsScreen } from "./components/AdminGroupsScreen";
@@ -55,7 +57,9 @@ export function App() {
         }
       } catch (error) {
         if (!cancelled) {
-          setAuthError(error instanceof Error ? error.message : "Impossible de vérifier la session admin");
+          setAuthError(
+            error instanceof Error ? error.message : "Impossible de vérifier la session admin",
+          );
           setAuthMode("login");
         }
       }
@@ -153,11 +157,12 @@ export function App() {
         onLogout={() => void handleLogout()}
         onScreenChange={setActiveScreen}
       >
-        {activeScreen === "dashboard" ? (
-          <AdminDashboard dashboard={dashboard} health={health} />
-        ) : (
-          <AdminUsersScreen currentUser={currentUser} onUnauthorized={handleSessionExpired} />
-        )}
+        {renderAdminScreen(activeScreen, {
+          currentUser,
+          dashboard,
+          health,
+          onUnauthorized: handleSessionExpired,
+        })}
       </AdminShell>
     );
   }

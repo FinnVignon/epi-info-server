@@ -1,8 +1,12 @@
 import { useEffect, useState } from "react";
 
 import { formatPermissionTarget, PermissionEditor } from "./PermissionEditor";
-import { formatDate, permissionToGrant } from "../utils/adminPermissions";
-import type { AdminPermissionGrant, AdminUserWithPermissions } from "../../../shared/adminContracts";
+import { permissionToGrant } from "../utils/adminPermissions";
+import { formatDate } from "../utils/formatDate";
+import type {
+  AdminPermissionGrant,
+  AdminUserWithPermissions,
+} from "../../../shared/adminContracts";
 import { useTranslation } from "../i18n";
 
 interface AdminUserDetailProps {
@@ -84,7 +88,9 @@ export function AdminUserDetail({
       <div className="detail-grid">
         <p>
           <span>{t.users.statusLabel}</span>
-          <strong>{user.status === "active" ? t.users.statusActive : t.users.statusInactive}</strong>
+          <strong>
+            {user.status === "active" ? t.users.statusActive : t.users.statusInactive}
+          </strong>
         </p>
         <p>
           <span>{t.users.superAdminLabel}</span>
@@ -96,7 +102,10 @@ export function AdminUserDetail({
         </p>
       </div>
 
-      <form className="form-grid compact-form" onSubmit={(event) => void handleUpdateProfile(event)}>
+      <form
+        className="form-grid compact-form"
+        onSubmit={(event) => void handleUpdateProfile(event)}
+      >
         <label>
           <span>{t.users.displayNameLabel}</span>
           <input
@@ -111,7 +120,10 @@ export function AdminUserDetail({
         </button>
       </form>
 
-      <form className="form-grid compact-form" onSubmit={(event) => void handleResetPassword(event)}>
+      <form
+        className="form-grid compact-form"
+        onSubmit={(event) => void handleResetPassword(event)}
+      >
         <label>
           <span>{t.users.newPassword}</span>
           <input

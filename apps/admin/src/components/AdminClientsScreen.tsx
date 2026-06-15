@@ -41,7 +41,9 @@ export function AdminClientsScreen({ onUnauthorized }: AdminClientsScreenProps) 
       setCanEnrollClients(response.capabilities.canEnrollClients);
       setCanManageClients(true);
       setClients(response.clients);
-      setSelectedClientId((currentSelection) => currentSelection ?? response.clients[0]?.id ?? null);
+      setSelectedClientId(
+        (currentSelection) => currentSelection ?? response.clients[0]?.id ?? null,
+      );
     } catch (loadError) {
       if (loadError instanceof ApiError && loadError.status === 403) {
         setCanManageClients(false);
@@ -85,7 +87,11 @@ export function AdminClientsScreen({ onUnauthorized }: AdminClientsScreenProps) 
         accessStatus: client.accessStatus === "active" ? "disabled" : "active",
       });
       replaceClient(response.client);
-      setNotice(response.client.accessStatus === "active" ? t.clients.noticeEnabled : t.clients.noticeDisabled);
+      setNotice(
+        response.client.accessStatus === "active"
+          ? t.clients.noticeEnabled
+          : t.clients.noticeDisabled,
+      );
     } catch (statusError) {
       handleApiError(statusError, t.clients.errorStatus);
     } finally {
@@ -94,9 +100,7 @@ export function AdminClientsScreen({ onUnauthorized }: AdminClientsScreenProps) 
   }
 
   function replaceClient(client: ManagedClient): void {
-    setClients((currentClients) =>
-      currentClients.map((c) => (c.id === client.id ? client : c)),
-    );
+    setClients((currentClients) => currentClients.map((c) => (c.id === client.id ? client : c)));
   }
 
   function handleApiError(apiError: unknown, fallback: string): void {
@@ -108,7 +112,9 @@ export function AdminClientsScreen({ onUnauthorized }: AdminClientsScreenProps) 
   }
 
   return (
-    <section className={`content clients-layout ${canManageClients === false ? "assignment-only" : ""}`}>
+    <section
+      className={`content clients-layout ${canManageClients === false ? "assignment-only" : ""}`}
+    >
       {error || notice ? (
         <div className="screen-alerts">
           {error ? <p className="form-error">{error}</p> : null}

@@ -69,9 +69,7 @@ export function PermissionEditor({ disabled, onChange, permissions }: Permission
 
   function toggleAction(action: AdminPermissionAction): void {
     setDraftActions((actions) =>
-      actions.includes(action)
-        ? actions.filter((a) => a !== action)
-        : [...actions, action],
+      actions.includes(action) ? actions.filter((a) => a !== action) : [...actions, action],
     );
   }
 
@@ -128,7 +126,9 @@ export function PermissionEditor({ disabled, onChange, permissions }: Permission
 
         {draftTargetType !== "global" ? (
           <label>
-            <span>{draftTargetType === "group" ? t.permissions.groupId : t.permissions.clientId}</span>
+            <span>
+              {draftTargetType === "group" ? t.permissions.groupId : t.permissions.clientId}
+            </span>
             <input
               disabled={disabled}
               onChange={(event) => setDraftTargetId(event.target.value)}
@@ -167,19 +167,13 @@ export function PermissionEditor({ disabled, onChange, permissions }: Permission
 }
 
 // Ces fonctions sont exportées car utilisées dans AdminUserDetail
-export function formatPermissionActions(
-  actions: AdminPermissionAction[],
-  actionLabels: Record<string, string>,
-): string {
-  return actions.map((a) => actionLabels[a] ?? a).join(", ");
-}
-
 export function formatPermissionTarget(
   permission: AdminPermissionGrant,
   t: { permissions: { targetGlobal: string; targetGroup: string; targetClient: string } },
 ): string {
   if (permission.targetType === "global") return t.permissions.targetGlobal;
-  const label = permission.targetType === "group" ? t.permissions.targetGroup : t.permissions.targetClient;
+  const label =
+    permission.targetType === "group" ? t.permissions.targetGroup : t.permissions.targetClient;
   return `${label} : ${permission.targetId}`;
 }
 

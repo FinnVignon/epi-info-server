@@ -14,7 +14,13 @@ interface AdminUserTableProps {
   users: AdminUserWithPermissions[];
 }
 
-export function AdminUserTable({ isLoading, onRefresh, onSelectUser, selectedUserId, users }: AdminUserTableProps) {
+export function AdminUserTable({
+  isLoading,
+  onRefresh,
+  onSelectUser,
+  selectedUserId,
+  users,
+}: AdminUserTableProps) {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
@@ -70,10 +76,34 @@ export function AdminUserTable({ isLoading, onRefresh, onSelectUser, selectedUse
           <table className="data-table">
             <thead>
               <tr>
-                <SortableHeader activeSortKey={sortKey} direction={sortDirection} label={t.users.colName} onSort={handleSort} sortKey="displayName" />
-                <SortableHeader activeSortKey={sortKey} direction={sortDirection} label={t.users.colStatus} onSort={handleSort} sortKey="status" />
-                <SortableHeader activeSortKey={sortKey} direction={sortDirection} label={t.users.colSuperAdmin} onSort={handleSort} sortKey="superAdmin" />
-                <SortableHeader activeSortKey={sortKey} direction={sortDirection} label={t.users.colPermissions} onSort={handleSort} sortKey="permissions" />
+                <SortableHeader
+                  activeSortKey={sortKey}
+                  direction={sortDirection}
+                  label={t.users.colName}
+                  onSort={handleSort}
+                  sortKey="displayName"
+                />
+                <SortableHeader
+                  activeSortKey={sortKey}
+                  direction={sortDirection}
+                  label={t.users.colStatus}
+                  onSort={handleSort}
+                  sortKey="status"
+                />
+                <SortableHeader
+                  activeSortKey={sortKey}
+                  direction={sortDirection}
+                  label={t.users.colSuperAdmin}
+                  onSort={handleSort}
+                  sortKey="superAdmin"
+                />
+                <SortableHeader
+                  activeSortKey={sortKey}
+                  direction={sortDirection}
+                  label={t.users.colPermissions}
+                  onSort={handleSort}
+                  sortKey="permissions"
+                />
               </tr>
             </thead>
             <tbody>
@@ -93,7 +123,11 @@ export function AdminUserTable({ isLoading, onRefresh, onSelectUser, selectedUse
                     <span className={`status-pill ${user.status}`}>{user.status}</span>
                   </td>
                   <td>{user.isSuperAdmin ? t.users.yes : t.users.no}</td>
-                  <td>{user.isSuperAdmin ? t.users.allPermissions : `${user.permissions.length} ${t.users.grantsCount}`}</td>
+                  <td>
+                    {user.isSuperAdmin
+                      ? t.users.allPermissions
+                      : `${user.permissions.length} ${t.users.grantsCount}`}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -119,7 +153,11 @@ function SortableHeader({ activeSortKey, direction, label, onSort, sortKey }: So
   const isActive = activeSortKey === sortKey;
   return (
     <th>
-      <button className={`sort-button ${isActive ? "active" : ""}`} onClick={() => onSort(sortKey)} type="button">
+      <button
+        className={`sort-button ${isActive ? "active" : ""}`}
+        onClick={() => onSort(sortKey)}
+        type="button"
+      >
         <span>{label}</span>
         <small>{isActive ? (direction === "asc" ? "↑" : "↓") : ""}</small>
       </button>
@@ -127,11 +165,19 @@ function SortableHeader({ activeSortKey, direction, label, onSort, sortKey }: So
   );
 }
 
-function compareUsers(a: AdminUserWithPermissions, b: AdminUserWithPermissions, sortKey: SortKey): number {
+function compareUsers(
+  a: AdminUserWithPermissions,
+  b: AdminUserWithPermissions,
+  sortKey: SortKey,
+): number {
   switch (sortKey) {
-    case "displayName": return a.displayName.localeCompare(b.displayName, undefined, { sensitivity: "base" });
-    case "permissions": return a.permissions.length - b.permissions.length;
-    case "status": return a.status.localeCompare(b.status, undefined, { sensitivity: "base" });
-    case "superAdmin": return Number(a.isSuperAdmin) - Number(b.isSuperAdmin);
+    case "displayName":
+      return a.displayName.localeCompare(b.displayName, undefined, { sensitivity: "base" });
+    case "permissions":
+      return a.permissions.length - b.permissions.length;
+    case "status":
+      return a.status.localeCompare(b.status, undefined, { sensitivity: "base" });
+    case "superAdmin":
+      return Number(a.isSuperAdmin) - Number(b.isSuperAdmin);
   }
 }

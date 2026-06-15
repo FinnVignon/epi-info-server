@@ -14,10 +14,16 @@ export function AdminDashboard({ dashboard, health }: AdminDashboardProps) {
     <section className="content">
       <article className="panel">
         <h2>{t.dashboard.serverTitle}</h2>
-        <p className="metric">{t.dashboard.service} : {health?.service ?? t.dashboard.notConnected}</p>
-        <p className="metric">{t.dashboard.database} : {health?.database.status ?? t.dashboard.unknown}</p>
+        <p className="metric">
+          {t.dashboard.service} : {health?.service ?? t.dashboard.notConnected}
+        </p>
+        <p className="metric">
+          {t.dashboard.database} : {health?.database.status ?? t.dashboard.unknown}
+        </p>
         {health?.database.missingTables.length ? (
-          <p className="metric">{t.dashboard.missingTables} : {health.database.missingTables.join(", ")}</p>
+          <p className="metric">
+            {t.dashboard.missingTables} : {health.database.missingTables.join(", ")}
+          </p>
         ) : null}
       </article>
 
@@ -58,7 +64,9 @@ export function AdminDashboard({ dashboard, health }: AdminDashboardProps) {
                 {dashboard.groups.map((group) => (
                   <li key={group.id}>
                     <span>{group.name}</span>
-                    <small>{group.clientCount} {t.dashboard.clientCount}</small>
+                    <small>
+                      {group.clientCount} {t.dashboard.clientCount}
+                    </small>
                   </li>
                 ))}
               </ul>
