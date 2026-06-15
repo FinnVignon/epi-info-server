@@ -22,7 +22,7 @@ export async function readJsonResponse<T>(response: Response): Promise<T> {
     const error =
       typeof body === "object" && body !== null && "error" in body && typeof body.error === "string"
         ? body.error
-        : "Request failed";
+        : "Requête échouée";
 
     throw new ApiError(error, response.status);
   }

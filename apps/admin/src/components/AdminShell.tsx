@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import type { AdminUser } from "../../../shared/adminContracts";
+import { useTranslation } from "../i18n";
 
 export type AdminScreen = "assets" | "clients" | "dashboard" | "global" | "groups" | "users";
 
@@ -21,28 +22,37 @@ export function AdminShell({
   onLogout,
   onScreenChange,
 }: AdminShellProps) {
+  const { t, lang, setLang } = useTranslation();
+
   return (
     <main className="app-shell">
       <header className="topbar">
         <div className="brand">
-          <h1>Epi Info Admin</h1>
+          <h1>{t.brand}</h1>
           <span>{currentUser.email}</span>
         </div>
         <div className="topbar-actions">
-          <span className={`status-pill ${apiStatus}`}>API {apiStatus}</span>
+          <span className={`status-pill ${apiStatus}`}>API {t.apiStatus[apiStatus]}</span>
+          <button
+            className="secondary-button"
+            onClick={() => setLang(lang === "fr" ? "en" : "fr")}
+            type="button"
+          >
+            {lang === "fr" ? "🇬🇧 EN" : "🇫🇷 FR"}
+          </button>
           <button className="secondary-button" onClick={onLogout} type="button">
-            Log out
+            {t.nav.logout}
           </button>
         </div>
       </header>
 
-      <nav className="admin-nav" aria-label="Admin sections">
+      <nav className="admin-nav" aria-label={t.nav.sections}>
         <button
           className={activeScreen === "dashboard" ? "active" : ""}
           onClick={() => onScreenChange("dashboard")}
           type="button"
         >
-          Dashboard
+          {t.nav.dashboard}
         </button>
         <button
           className={activeScreen === "global" ? "active" : ""}
@@ -56,21 +66,7 @@ export function AdminShell({
           onClick={() => onScreenChange("users")}
           type="button"
         >
-          Users
-        </button>
-        <button
-          className={activeScreen === "assets" ? "active" : ""}
-          onClick={() => onScreenChange("assets")}
-          type="button"
-        >
-          Assets
-        </button>
-        <button
-          className={activeScreen === "clients" ? "active" : ""}
-          onClick={() => onScreenChange("clients")}
-          type="button"
-        >
-          Clients
+          {t.nav.users}
         </button>
         <button
           className={activeScreen === "groups" ? "active" : ""}

@@ -1,0 +1,153 @@
+{
+  "brand": "Epi Info Admin",
+
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "users": "Utilisateurs",
+    "logout": "Déconnexion",
+    "sections": "Sections admin"
+  },
+
+  "apiStatus": {
+    "checking": "vérification",
+    "ok": "connectée",
+    "error": "erreur"
+  },
+
+  "auth": {
+    "loginTitle": "Connexion administrateur",
+    "bootstrapTitle": "Créer le premier administrateur",
+    "checkingSession": "Vérification de la session…",
+    "displayName": "Nom affiché",
+    "email": "Adresse e-mail",
+    "password": "Mot de passe",
+    "loginButton": "Se connecter",
+    "bootstrapButton": "Créer l'administrateur",
+    "submitting": "Veuillez patienter…",
+    "errorFallback": "Impossible de se connecter",
+    "sessionError": "Impossible de vérifier la session admin"
+  },
+
+  "dashboard": {
+    "serverTitle": "Serveur",
+    "service": "Service",
+    "database": "Base de données",
+    "missingTables": "Tables manquantes",
+    "notConnected": "non connecté",
+    "unknown": "inconnu",
+    "displayTypesTitle": "Types d'affichage",
+    "clientsGroupsTitle": "Clients et groupes",
+    "clientsTitle": "Clients",
+    "groupsTitle": "Groupes",
+    "noClients": "Aucun client enregistré.",
+    "noGroups": "Aucun groupe créé.",
+    "clientCount": "client(s)"
+  },
+
+  "users": {
+    "title": "Utilisateurs",
+    "refresh": "Actualiser",
+    "search": "Recherche",
+    "searchPlaceholder": "Nom ou e-mail",
+    "loading": "Chargement des utilisateurs…",
+    "noUsers": "Aucun utilisateur admin.",
+    "noMatch": "Aucun utilisateur trouvé.",
+    "colName": "Nom",
+    "colStatus": "Statut",
+    "colSuperAdmin": "Super admin",
+    "colPermissions": "Permissions",
+    "yes": "Oui",
+    "no": "Non",
+    "allPermissions": "Toutes",
+    "grantsCount": "droit(s)",
+    "selectUser": "Sélectionnez un utilisateur.",
+    "statusActive": "Actif",
+    "statusInactive": "Inactif",
+    "disable": "Désactiver",
+    "enable": "Activer",
+    "statusLabel": "Statut",
+    "superAdminLabel": "Super administrateur",
+    "lastLogin": "Dernière connexion",
+    "never": "Jamais",
+    "displayNameLabel": "Nom affiché",
+    "saveName": "Enregistrer le nom",
+    "newPassword": "Nouveau mot de passe",
+    "resetPassword": "Réinitialiser le mot de passe",
+    "permissionsTitle": "Permissions",
+    "savingPermissions": "Enregistrement…",
+    "savePermissions": "Enregistrer les permissions",
+    "superAdminAllPerms": "Les super administrateurs ont toutes les permissions.",
+    "currentGrants": "Droits actuels",
+    "createTitle": "Créer un utilisateur",
+    "emailLabel": "Adresse e-mail",
+    "passwordLabel": "Mot de passe",
+    "superAdminCheckbox": "Super administrateur",
+    "creating": "Création en cours…",
+    "createButton": "Créer l'utilisateur",
+    "noticeCreated": "Utilisateur créé.",
+    "noticeUpdated": "Utilisateur mis à jour.",
+    "noticePasswordReset": "Mot de passe réinitialisé.",
+    "noticePermissionsSaved": "Permissions enregistrées.",
+    "noticeEnabled": "Utilisateur activé.",
+    "noticeDisabled": "Utilisateur désactivé.",
+    "errorLoad": "Impossible de charger les utilisateurs",
+    "errorCreate": "Impossible de créer l'utilisateur",
+    "errorUpdate": "Impossible de mettre à jour l'utilisateur",
+    "errorPassword": "Impossible de réinitialiser le mot de passe",
+    "errorPermissions": "Impossible de mettre à jour les permissions",
+    "errorStatus": "Impossible de changer le statut"
+  },
+
+  "permissions": {
+    "noPermissions": "Aucune permission définie.",
+    "remove": "Supprimer",
+    "scope": "Portée",
+    "scopeGlobal": "Global",
+    "scopeGroup": "Groupe",
+    "scopeClient": "Client",
+    "groupId": "ID du groupe",
+    "clientId": "ID du client",
+    "actionUsers": "Utilisateurs",
+    "actionClients": "Clients",
+    "actionGroups": "Groupes",
+    "actionContent": "Contenu",
+    "actionAssignments": "Assignations",
+    "addButton": "Ajouter une permission",
+    "errorNoAction": "Sélectionnez au moins une action.",
+    "errorNoTarget": "L'identifiant de la cible est requis.",
+    "errorDuplicate": "Cette cible possède déjà un droit d'accès.",
+    "targetGlobal": "Global",
+    "targetGroup": "Groupe",
+    "targetClient": "Client"
+  },
+
+  "clients": {
+    "errorLoad": "Impossible de charger les clients",
+    "errorUpdate": "Impossible de mettre à jour le client",
+    "errorStatus": "Impossible de mettre à jour le statut du client",
+    "noticeUpdated": "Client mis à jour.",
+    "noticeEnabled": "Client activé.",
+    "noticeDisabled": "Client désactivé."
+  },
+
+  "assignment": {
+    "title": "Assignation d'affichage",
+    "target": "Cible",
+    "noClient": "Aucun client autorisé disponible.",
+    "clientLabel": "Client",
+    "assetLabel": "Contenu",
+    "fitLabel": "Ajustement",
+    "fitContain": "Contenu dans l'écran",
+    "fitCover": "Remplir l'écran",
+    "noAssets": "Importez une image ou une vidéo active avant de créer une assignation.",
+    "assigning": "Assignation en cours…",
+    "assignButton": "Assigner le contenu",
+    "errorLoad": "Impossible de charger les options d'assignation",
+    "errorAssign": "Impossible d'assigner le contenu",
+    "noticeAssigned": "assigné. Le client activera la version"
+  },
+
+  "api": {
+    "requestFailed": "Requête échouée"
+  }
+}
