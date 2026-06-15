@@ -8,6 +8,8 @@ import {
   logoutAdmin,
 } from "./api/adminApi";
 import { AdminDashboard } from "./components/AdminDashboard";
+import { AdminGlobalAssignmentScreen } from "./components/AdminGlobalAssignmentScreen";
+import { AdminGroupsScreen } from "./components/AdminGroupsScreen";
 import { AdminShell } from "./components/AdminShell";
 import type { AdminScreen } from "./components/AdminShell";
 import { AdminUsersScreen } from "./components/AdminUsersScreen";
@@ -161,6 +163,34 @@ export function App() {
   }
 
   return <LoadingScreen />;
+}
+
+interface AdminScreenRenderState {
+  currentUser: AdminUser;
+  dashboard: DashboardResponse | null;
+  health: HealthResponse | null;
+  onUnauthorized: () => void;
+}
+
+function renderAdminScreen(activeScreen: AdminScreen, state: AdminScreenRenderState) {
+  switch (activeScreen) {
+    case "assets":
+      return (
+        <AdminAssetsScreen currentUser={state.currentUser} onUnauthorized={state.onUnauthorized} />
+      );
+    case "clients":
+      return <AdminClientsScreen onUnauthorized={state.onUnauthorized} />;
+    case "dashboard":
+      return <AdminDashboard dashboard={state.dashboard} health={state.health} />;
+    case "groups":
+      return <AdminGroupsScreen onUnauthorized={state.onUnauthorized} />;
+    case "global":
+      return <AdminGlobalAssignmentScreen onUnauthorized={state.onUnauthorized} />;
+    case "users":
+      return (
+        <AdminUsersScreen currentUser={state.currentUser} onUnauthorized={state.onUnauthorized} />
+      );
+  }
 }
 
 async function resolveLoggedOutMode(): Promise<"bootstrap" | "login"> {

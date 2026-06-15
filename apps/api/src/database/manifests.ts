@@ -34,10 +34,23 @@ interface ManifestItemRow extends RowDataPacket {
   url: string | null;
 }
 
-export interface AssignAssetToClientInput {
+interface TimestampPrecisionRow extends RowDataPacket {
+  datetimePrecision: number | null;
+}
+
+export type AssignmentTarget =
+  | {
+      targetId: null;
+      targetType: "global";
+    }
+  | {
+      targetId: string;
+      targetType: "client" | "group";
+    };
+
+interface AssignAssetToTargetFields {
   assetId: string;
   assignmentId: string;
-  clientId: string;
   durationSeconds: number;
   fit: FitMode;
   itemId: string;
@@ -49,15 +62,44 @@ export interface AssignAssetToClientInput {
   type: "image" | "video";
 }
 
-export async function assignAssetToClient(
+export type AssignAssetToTargetInput = AssignAssetToTargetFields & AssignmentTarget;
+
+export async function ensureAssignmentSchema(pool: Pool, databaseName: string): Promise<void> {
+  const [rows] = await pool.execute<TimestampPrecisionRow[]>(
+    `
+      SELECT DATETIME_PRECISION AS datetimePrecision
+      FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE TABLE_SCHEMA = ?
+        AND TABLE_NAME = 'assignments'
+        AND COLUMN_NAME = 'updated_at'
+      LIMIT 1
+    `,
+    [databaseName],
+  );
+
+  if (!rows[0] || Number(rows[0].datetimePrecision ?? 0) === 6) {
+    return;
+  }
+
+  await pool.execute(`
+    ALTER TABLE assignments
+      MODIFY COLUMN created_at
+        TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+      MODIFY COLUMN updated_at
+        TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6)
+        ON UPDATE CURRENT_TIMESTAMP(6)
+  `);
+}
+
+export async function assignAssetToTarget(
   pool: Pool,
-  input: AssignAssetToClientInput,
+  input: AssignAssetToTargetInput,
 ): Promise<Manifest> {
   const connection = await pool.getConnection();
 
   try {
     await connection.beginTransaction();
-    const existing = await findClientAssignmentForUpdate(connection, input.clientId);
+    const existing = await findAssignmentForUpdate(connection, input);
     const manifestId = existing?.manifestId ?? input.manifestId;
     const version = existing ? existing.version + 1 : 1;
 
@@ -76,6 +118,14 @@ export async function assignAssetToClient(
         "DELETE FROM manifest_items WHERE manifest_id = ?",
         [manifestId],
       );
+      await connection.execute<ResultSetHeader>(
+        `
+          UPDATE assignments
+          SET updated_at = CURRENT_TIMESTAMP(6)
+          WHERE id = ?
+        `,
+        [existing.assignmentId],
+      );
     } else {
       await connection.execute<ResultSetHeader>(
         `
@@ -87,9 +137,9 @@ export async function assignAssetToClient(
       await connection.execute<ResultSetHeader>(
         `
           INSERT INTO assignments (id, target_type, target_id, manifest_id)
-          VALUES (?, 'client', ?, ?)
+          VALUES (?, ?, ?, ?)
         `,
-        [input.assignmentId, input.clientId, manifestId],
+        [input.assignmentId, input.targetType, input.targetId, manifestId],
       );
     }
 
@@ -121,6 +171,7 @@ export async function assignAssetToClient(
         input.sha256,
       ],
     );
+
     await connection.commit();
 
     return {
@@ -172,11 +223,6 @@ export async function findEffectiveManifestForClient(
         )
         OR assignments.target_type = 'global'
       ORDER BY
-        CASE assignments.target_type
-          WHEN 'client' THEN 1
-          WHEN 'group' THEN 2
-          ELSE 3
-        END,
         assignments.updated_at DESC
       LIMIT 1
     `,
@@ -217,9 +263,9 @@ export async function findEffectiveManifestForClient(
   };
 }
 
-async function findClientAssignmentForUpdate(
+async function findAssignmentForUpdate(
   connection: PoolConnection,
-  clientId: string,
+  target: AssignmentTarget,
 ): Promise<AssignmentManifestRow | null> {
   const [rows] = await connection.execute<AssignmentManifestRow[]>(
     `
@@ -230,12 +276,12 @@ async function findClientAssignmentForUpdate(
         manifests.version
       FROM assignments
       INNER JOIN manifests ON manifests.id = assignments.manifest_id
-      WHERE assignments.target_type = 'client'
-        AND assignments.target_id = ?
+      WHERE assignments.target_type = ?
+        AND assignments.target_id <=> ?
       LIMIT 1
       FOR UPDATE
     `,
-    [clientId],
+    [target.targetType, target.targetId],
   );
 
   return rows[0] ?? null;

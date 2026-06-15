@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import type { AdminUser } from "../../../shared/adminContracts";
 import { useTranslation } from "../i18n";
 
-export type AdminScreen = "dashboard" | "users";
+export type AdminScreen = "assets" | "clients" | "dashboard" | "global" | "groups" | "users";
 
 interface AdminShellProps {
   activeScreen: AdminScreen;
@@ -55,11 +55,25 @@ export function AdminShell({
           {t.nav.dashboard}
         </button>
         <button
+          className={activeScreen === "global" ? "active" : ""}
+          onClick={() => onScreenChange("global")}
+          type="button"
+        >
+          All Displays
+        </button>
+        <button
           className={activeScreen === "users" ? "active" : ""}
           onClick={() => onScreenChange("users")}
           type="button"
         >
           {t.nav.users}
+        </button>
+        <button
+          className={activeScreen === "groups" ? "active" : ""}
+          onClick={() => onScreenChange("groups")}
+          type="button"
+        >
+          Groups
         </button>
       </nav>
 

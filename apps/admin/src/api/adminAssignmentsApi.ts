@@ -1,8 +1,10 @@
 import type {
   AssetListResponse,
-  AssignAssetToClientRequest,
+  AssignAssetRequest,
+  AssignmentGroupListResponse,
+  AssignmentGlobalTargetResponse,
+  AssignmentResponse,
   AssignmentClientListResponse,
-  ClientAssignmentResponse,
 } from "../../../shared/adminContracts";
 import { readJsonResponse } from "./adminApi";
 
@@ -16,12 +18,54 @@ export async function listAssignmentClients(): Promise<AssignmentClientListRespo
   );
 }
 
+export async function listAssignmentGroups(): Promise<AssignmentGroupListResponse> {
+  return readJsonResponse<AssignmentGroupListResponse>(
+    await fetch("/api/admin/assignments/groups"),
+  );
+}
+
 export async function assignAssetToClient(
   clientId: string,
-  request: AssignAssetToClientRequest,
-): Promise<ClientAssignmentResponse> {
-  return readJsonResponse<ClientAssignmentResponse>(
+  request: AssignAssetRequest,
+): Promise<AssignmentResponse> {
+  return readJsonResponse<AssignmentResponse>(
     await fetch(`/api/admin/assignments/clients/${encodeURIComponent(clientId)}`, {
+      body: JSON.stringify(request),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "PUT",
+    }),
+  );
+}
+
+export async function assignAssetToGroup(
+  groupId: string,
+  request: AssignAssetRequest,
+): Promise<AssignmentResponse> {
+  return readJsonResponse<AssignmentResponse>(
+    await fetch(`/api/admin/assignments/groups/${encodeURIComponent(groupId)}`, {
+      body: JSON.stringify(request),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "PUT",
+    }),
+  );
+}
+
+export async function getGlobalAssignmentTarget(): Promise<AssignmentGlobalTargetResponse> {
+  return readJsonResponse<AssignmentGlobalTargetResponse>(
+    await fetch("/api/admin/assignments/global"),
+  );
+}
+
+export async function assignAssetGlobally(
+  _targetId: string,
+  request: AssignAssetRequest,
+): Promise<AssignmentResponse> {
+  return readJsonResponse<AssignmentResponse>(
+    await fetch("/api/admin/assignments/global", {
       body: JSON.stringify(request),
       headers: {
         "Content-Type": "application/json",

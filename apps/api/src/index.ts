@@ -5,10 +5,12 @@ import path from "node:path";
 import { WebSocketServer } from "ws";
 
 import { createAdminAuthMiddleware } from "./auth/adminAuth.js";
+import type { AuthenticatedAdminRequest } from "./auth/adminAuth.js";
 import { readConfig } from "./config.js";
 import {
   checkDatabaseHealth,
   createDatabasePool,
+  ensureAssignmentSchema,
   ensureAssetSchema,
   ensureClientConnectionSchema,
   getDashboardSummary,
@@ -18,6 +20,7 @@ import { createAdminAssetRouter } from "./routes/adminAssetRoutes.js";
 import { createAdminAssignmentRouter } from "./routes/adminAssignmentRoutes.js";
 import { createAdminClientRouter } from "./routes/adminClientRoutes.js";
 import { createAdminClientEnrollmentRouter } from "./routes/adminClientEnrollmentRoutes.js";
+import { createAdminGroupRouter } from "./routes/adminGroupRoutes.js";
 import { createAdminUserRouter } from "./routes/adminUserRoutes.js";
 import { createAssetDownloadRouter } from "./routes/assetDownloadRoutes.js";
 import { createClientConnectionRouter } from "./routes/clientConnectionRoutes.js";
@@ -51,9 +54,17 @@ app.get("/api/config", (_request, response) => {
   });
 });
 
-app.get("/api/dashboard", requireAdminAuth, async (_request, response) => {
+app.get("/api/dashboard", requireAdminAuth, async (request, response) => {
   try {
-    response.json(await getDashboardSummary(mysqlPool, config.clientAuth.offlineAfterSeconds));
+    const adminRequest = request as AuthenticatedAdminRequest;
+
+    response.json(
+      await getDashboardSummary(mysqlPool, {
+        isSuperAdmin: adminRequest.adminSession.user.isSuperAdmin,
+        offlineAfterSeconds: config.clientAuth.offlineAfterSeconds,
+        userId: adminRequest.adminSession.user.id,
+      }),
+    );
   } catch (error) {
     response.status(503).json({
       error: error instanceof Error ? error.message : "Unable to load dashboard summary",
@@ -69,6 +80,7 @@ app.use(
   "/api/admin/client-enrollment-tokens",
   createAdminClientEnrollmentRouter(mysqlPool, config),
 );
+app.use("/api/admin/groups", createAdminGroupRouter(mysqlPool, config));
 app.use("/api/admin/users", createAdminUserRouter(mysqlPool, config));
 app.use("/api/admin", createAdminAuthRouter(mysqlPool, config));
 app.use("/api/clients", createClientConnectionRouter(mysqlPool, config));
@@ -101,6 +113,7 @@ app.use(
 );
 
 async function startServer(): Promise<void> {
+  await ensureAssignmentSchema(mysqlPool, config.mysql.database);
   await ensureAssetSchema(mysqlPool, config.mysql.database);
   await ensureClientConnectionSchema(mysqlPool, config.mysql.database);
 
