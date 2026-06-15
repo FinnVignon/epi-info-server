@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 
 import type { AdminUserWithPermissions } from "../../../shared/adminContracts";
+import { useTranslation } from "../i18n";
 
 type SortDirection = "asc" | "desc";
 type SortKey = "displayName" | "permissions" | "status" | "superAdmin";
@@ -13,16 +14,12 @@ interface AdminUserTableProps {
   users: AdminUserWithPermissions[];
 }
 
-export function AdminUserTable({
-  isLoading,
-  onRefresh,
-  onSelectUser,
-  selectedUserId,
-  users,
-}: AdminUserTableProps) {
+export function AdminUserTable({ isLoading, onRefresh, onSelectUser, selectedUserId, users }: AdminUserTableProps) {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [sortKey, setSortKey] = useState<SortKey>("displayName");
+
   const visibleUsers = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase();
     const filteredUsers = normalizedQuery
@@ -33,19 +30,17 @@ export function AdminUserTable({
         )
       : users;
 
-    return [...filteredUsers].sort((firstUser, secondUser) => {
-      const comparison = compareUsers(firstUser, secondUser, sortKey);
-
+    return [...filteredUsers].sort((a, b) => {
+      const comparison = compareUsers(a, b, sortKey);
       return sortDirection === "asc" ? comparison : -comparison;
     });
   }, [searchQuery, sortDirection, sortKey, users]);
 
   function handleSort(nextSortKey: SortKey): void {
     if (nextSortKey === sortKey) {
-      setSortDirection((currentDirection) => (currentDirection === "asc" ? "desc" : "asc"));
+      setSortDirection((d) => (d === "asc" ? "desc" : "asc"));
       return;
     }
-
     setSortKey(nextSortKey);
     setSortDirection("asc");
   }
@@ -53,56 +48,32 @@ export function AdminUserTable({
   return (
     <article className="panel users-list-panel">
       <div className="panel-header">
-        <h2>Users</h2>
+        <h2>{t.users.title}</h2>
         <button className="secondary-button" onClick={onRefresh} type="button">
-          Refresh
+          {t.users.refresh}
         </button>
       </div>
 
       <label className="table-search">
-        <span>Search</span>
+        <span>{t.users.search}</span>
         <input
           onChange={(event) => setSearchQuery(event.target.value)}
-          placeholder="Name or email"
+          placeholder={t.users.searchPlaceholder}
           value={searchQuery}
         />
       </label>
 
       {isLoading ? (
-        <p className="metric">Loading users...</p>
+        <p className="metric">{t.users.loading}</p>
       ) : users.length ? (
         <div className="table-wrap">
           <table className="data-table">
             <thead>
               <tr>
-                <SortableHeader
-                  activeSortKey={sortKey}
-                  direction={sortDirection}
-                  label="Name"
-                  onSort={handleSort}
-                  sortKey="displayName"
-                />
-                <SortableHeader
-                  activeSortKey={sortKey}
-                  direction={sortDirection}
-                  label="Status"
-                  onSort={handleSort}
-                  sortKey="status"
-                />
-                <SortableHeader
-                  activeSortKey={sortKey}
-                  direction={sortDirection}
-                  label="Super admin"
-                  onSort={handleSort}
-                  sortKey="superAdmin"
-                />
-                <SortableHeader
-                  activeSortKey={sortKey}
-                  direction={sortDirection}
-                  label="Permissions"
-                  onSort={handleSort}
-                  sortKey="permissions"
-                />
+                <SortableHeader activeSortKey={sortKey} direction={sortDirection} label={t.users.colName} onSort={handleSort} sortKey="displayName" />
+                <SortableHeader activeSortKey={sortKey} direction={sortDirection} label={t.users.colStatus} onSort={handleSort} sortKey="status" />
+                <SortableHeader activeSortKey={sortKey} direction={sortDirection} label={t.users.colSuperAdmin} onSort={handleSort} sortKey="superAdmin" />
+                <SortableHeader activeSortKey={sortKey} direction={sortDirection} label={t.users.colPermissions} onSort={handleSort} sortKey="permissions" />
               </tr>
             </thead>
             <tbody>
@@ -121,16 +92,16 @@ export function AdminUserTable({
                   <td>
                     <span className={`status-pill ${user.status}`}>{user.status}</span>
                   </td>
-                  <td>{user.isSuperAdmin ? "Yes" : "No"}</td>
-                  <td>{user.isSuperAdmin ? "All" : `${user.permissions.length} grants`}</td>
+                  <td>{user.isSuperAdmin ? t.users.yes : t.users.no}</td>
+                  <td>{user.isSuperAdmin ? t.users.allPermissions : `${user.permissions.length} ${t.users.grantsCount}`}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-          {!visibleUsers.length ? <p className="metric table-empty">No matching users.</p> : null}
+          {!visibleUsers.length ? <p className="metric table-empty">{t.users.noMatch}</p> : null}
         </div>
       ) : (
-        <p className="metric">No admin users found.</p>
+        <p className="metric">{t.users.noUsers}</p>
       )}
     </article>
   );
@@ -146,40 +117,21 @@ interface SortableHeaderProps {
 
 function SortableHeader({ activeSortKey, direction, label, onSort, sortKey }: SortableHeaderProps) {
   const isActive = activeSortKey === sortKey;
-
   return (
     <th>
-      <button
-        className={`sort-button ${isActive ? "active" : ""}`}
-        onClick={() => onSort(sortKey)}
-        type="button"
-      >
+      <button className={`sort-button ${isActive ? "active" : ""}`} onClick={() => onSort(sortKey)} type="button">
         <span>{label}</span>
-        <small>{isActive ? (direction === "asc" ? "up" : "down") : ""}</small>
+        <small>{isActive ? (direction === "asc" ? "↑" : "↓") : ""}</small>
       </button>
     </th>
   );
 }
 
-function compareUsers(
-  firstUser: AdminUserWithPermissions,
-  secondUser: AdminUserWithPermissions,
-  sortKey: SortKey,
-): number {
+function compareUsers(a: AdminUserWithPermissions, b: AdminUserWithPermissions, sortKey: SortKey): number {
   switch (sortKey) {
-    case "displayName":
-      return compareText(firstUser.displayName, secondUser.displayName);
-    case "permissions":
-      return firstUser.permissions.length - secondUser.permissions.length;
-    case "status":
-      return compareText(firstUser.status, secondUser.status);
-    case "superAdmin":
-      return Number(firstUser.isSuperAdmin) - Number(secondUser.isSuperAdmin);
+    case "displayName": return a.displayName.localeCompare(b.displayName, undefined, { sensitivity: "base" });
+    case "permissions": return a.permissions.length - b.permissions.length;
+    case "status": return a.status.localeCompare(b.status, undefined, { sensitivity: "base" });
+    case "superAdmin": return Number(a.isSuperAdmin) - Number(b.isSuperAdmin);
   }
-}
-
-function compareText(firstValue: string, secondValue: string): number {
-  return firstValue.localeCompare(secondValue, undefined, {
-    sensitivity: "base",
-  });
 }

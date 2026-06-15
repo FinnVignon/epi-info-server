@@ -1,16 +1,9 @@
 import { useEffect, useState } from "react";
 
-import {
-  formatPermissionActions,
-  formatPermissionTarget,
-  PermissionEditor,
-} from "./PermissionEditor";
-import { formatDate } from "../utils/formatDate";
-import { permissionToGrant } from "../utils/adminPermissions";
-import type {
-  AdminPermissionGrant,
-  AdminUserWithPermissions,
-} from "../../../shared/adminContracts";
+import { formatPermissionTarget, PermissionEditor } from "./PermissionEditor";
+import { formatDate, permissionToGrant } from "../utils/adminPermissions";
+import type { AdminPermissionGrant, AdminUserWithPermissions } from "../../../shared/adminContracts";
+import { useTranslation } from "../i18n";
 
 interface AdminUserDetailProps {
   currentUserId: string;
@@ -35,8 +28,17 @@ export function AdminUserDetail({
   permissionDraft,
   user,
 }: AdminUserDetailProps) {
+  const { t } = useTranslation();
   const [displayName, setDisplayName] = useState("");
   const [resetPassword, setResetPassword] = useState("");
+
+  const ACTION_LABELS: Record<string, string> = {
+    manage_users: t.permissions.actionUsers,
+    manage_clients: t.permissions.actionClients,
+    manage_groups: t.permissions.actionGroups,
+    manage_content: t.permissions.actionContent,
+    manage_assignments: t.permissions.actionAssignments,
+  };
 
   useEffect(() => {
     setDisplayName(user?.displayName ?? "");
@@ -44,7 +46,6 @@ export function AdminUserDetail({
 
   async function handleResetPassword(event: React.FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
-
     if (await onResetPassword(resetPassword)) {
       setResetPassword("");
     }
@@ -58,7 +59,7 @@ export function AdminUserDetail({
   if (!user) {
     return (
       <article className="panel users-detail-panel">
-        <p className="metric">Select a user.</p>
+        <p className="metric">{t.users.selectUser}</p>
       </article>
     );
   }
@@ -76,31 +77,28 @@ export function AdminUserDetail({
           onClick={() => onStatusChange(user)}
           type="button"
         >
-          {user.status === "active" ? "Disable" : "Enable"}
+          {user.status === "active" ? t.users.disable : t.users.enable}
         </button>
       </div>
 
       <div className="detail-grid">
         <p>
-          <span>Status</span>
-          <strong>{user.status}</strong>
+          <span>{t.users.statusLabel}</span>
+          <strong>{user.status === "active" ? t.users.statusActive : t.users.statusInactive}</strong>
         </p>
         <p>
-          <span>Super admin</span>
-          <strong>{user.isSuperAdmin ? "Yes" : "No"}</strong>
+          <span>{t.users.superAdminLabel}</span>
+          <strong>{user.isSuperAdmin ? t.users.yes : t.users.no}</strong>
         </p>
         <p>
-          <span>Last login</span>
-          <strong>{formatDate(user.lastLoginAt)}</strong>
+          <span>{t.users.lastLogin}</span>
+          <strong>{formatDate(user.lastLoginAt, t.users.never)}</strong>
         </p>
       </div>
 
-      <form
-        className="form-grid compact-form"
-        onSubmit={(event) => void handleUpdateProfile(event)}
-      >
+      <form className="form-grid compact-form" onSubmit={(event) => void handleUpdateProfile(event)}>
         <label>
-          <span>Display name</span>
+          <span>{t.users.displayNameLabel}</span>
           <input
             minLength={2}
             onChange={(event) => setDisplayName(event.target.value)}
@@ -109,16 +107,13 @@ export function AdminUserDetail({
           />
         </label>
         <button className="secondary-button" type="submit">
-          Save name
+          {t.users.saveName}
         </button>
       </form>
 
-      <form
-        className="form-grid compact-form"
-        onSubmit={(event) => void handleResetPassword(event)}
-      >
+      <form className="form-grid compact-form" onSubmit={(event) => void handleResetPassword(event)}>
         <label>
-          <span>New password</span>
+          <span>{t.users.newPassword}</span>
           <input
             minLength={10}
             onChange={(event) => setResetPassword(event.target.value)}
@@ -128,24 +123,24 @@ export function AdminUserDetail({
           />
         </label>
         <button className="secondary-button" type="submit">
-          Reset password
+          {t.users.resetPassword}
         </button>
       </form>
 
       <section className="section-block">
         <div className="panel-header">
-          <h3>Permissions</h3>
+          <h3>{t.users.permissionsTitle}</h3>
           <button
             className="secondary-button"
             disabled={isSavingPermissions || user.isSuperAdmin}
             onClick={onSavePermissions}
             type="button"
           >
-            {isSavingPermissions ? "Saving" : "Save permissions"}
+            {isSavingPermissions ? t.users.savingPermissions : t.users.savePermissions}
           </button>
         </div>
         {user.isSuperAdmin ? (
-          <p className="metric">Super admins have all permissions.</p>
+          <p className="metric">{t.users.superAdminAllPerms}</p>
         ) : (
           <PermissionEditor
             disabled={isSavingPermissions}
@@ -157,16 +152,15 @@ export function AdminUserDetail({
 
       {user.permissions.length ? (
         <section className="section-block">
-          <h3>Current Grants</h3>
+          <h3>{t.users.currentGrants}</h3>
           <ul className="permission-list readonly">
             {user.permissions.map((permission) => {
               const grant = permissionToGrant(permission);
-
               return (
                 <li key={`${grant.targetType}:${grant.targetId ?? "global"}`}>
                   <div>
-                    <span>{formatPermissionTarget(grant)}</span>
-                    <small>{formatPermissionActions(grant.actions)}</small>
+                    <span>{formatPermissionTarget(grant, t)}</span>
+                    <small>{grant.actions.map((a) => ACTION_LABELS[a] ?? a).join(", ")}</small>
                   </div>
                 </li>
               );

@@ -10,6 +10,7 @@ import {
   updateAdminUserStatus,
 } from "../api/adminUsersApi";
 import { permissionToGrant } from "../utils/adminPermissions";
+import { useTranslation } from "../i18n";
 import { AdminUserCreateForm } from "./AdminUserCreateForm";
 import { AdminUserDetail } from "./AdminUserDetail";
 import { AdminUserTable } from "./AdminUserTable";
@@ -26,6 +27,7 @@ interface AdminUsersScreenProps {
 }
 
 export function AdminUsersScreen({ currentUser, onUnauthorized }: AdminUsersScreenProps) {
+  const { t } = useTranslation();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSavingPermissions, setIsSavingPermissions] = useState(false);
@@ -59,7 +61,7 @@ export function AdminUsersScreen({ currentUser, onUnauthorized }: AdminUsersScre
       setUsers(response.users);
       setSelectedUserId((currentSelection) => currentSelection ?? response.users[0]?.id ?? null);
     } catch (loadError) {
-      handleApiError(loadError, "Unable to load admin users");
+      handleApiError(loadError, t.users.errorLoad);
     } finally {
       setIsLoading(false);
     }
@@ -74,10 +76,10 @@ export function AdminUsersScreen({ currentUser, onUnauthorized }: AdminUsersScre
 
       setUsers((currentUsers) => [response.user, ...currentUsers]);
       setSelectedUserId(response.user.id);
-      setNotice("User created.");
+      setNotice(t.users.noticeCreated);
       return true;
     } catch (createError) {
-      handleApiError(createError, "Unable to create admin user");
+      handleApiError(createError, t.users.errorCreate);
       return false;
     }
   }
@@ -94,10 +96,10 @@ export function AdminUsersScreen({ currentUser, onUnauthorized }: AdminUsersScre
       await resetAdminUserPassword(selectedUser.id, {
         password,
       });
-      setNotice("Password reset.");
+      setNotice(t.users.noticePasswordReset);
       return true;
     } catch (resetError) {
-      handleApiError(resetError, "Unable to reset password");
+      handleApiError(resetError, t.users.errorPassword);
       return false;
     }
   }
@@ -116,10 +118,10 @@ export function AdminUsersScreen({ currentUser, onUnauthorized }: AdminUsersScre
       });
 
       replaceUser(response.user);
-      setNotice("User updated.");
+      setNotice(t.users.noticeUpdated);
       return true;
     } catch (profileError) {
-      handleApiError(profileError, "Unable to update user");
+      handleApiError(profileError, t.users.errorUpdate);
       return false;
     }
   }
@@ -140,9 +142,9 @@ export function AdminUsersScreen({ currentUser, onUnauthorized }: AdminUsersScre
 
       replaceUser(response.user);
       setPermissionDraft(response.user.permissions.map(permissionToGrant));
-      setNotice("Permissions updated.");
+      setNotice(t.users.noticePermissionsSaved);
     } catch (saveError) {
-      handleApiError(saveError, "Unable to update permissions");
+      handleApiError(saveError, t.users.errorPermissions);
     } finally {
       setIsSavingPermissions(false);
     }
@@ -158,9 +160,9 @@ export function AdminUsersScreen({ currentUser, onUnauthorized }: AdminUsersScre
       });
 
       replaceUser(response.user);
-      setNotice(response.user.status === "active" ? "User enabled." : "User disabled.");
+      setNotice(response.user.status === "active" ? t.users.noticeEnabled : t.users.noticeDisabled);
     } catch (statusError) {
-      handleApiError(statusError, "Unable to update user status");
+      handleApiError(statusError, t.users.errorStatus);
     }
   }
 
@@ -185,7 +187,7 @@ export function AdminUsersScreen({ currentUser, onUnauthorized }: AdminUsersScre
     return (
       <section className="content single-column">
         <article className="panel">
-          <h2>Users</h2>
+          <h2>{t.users.title}</h2>
           <p className="metric">Super admin access is required.</p>
         </article>
       </section>

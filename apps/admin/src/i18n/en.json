@@ -1,0 +1,153 @@
+{
+  "brand": "Epi Info Admin",
+
+  "nav": {
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "logout": "Log out",
+    "sections": "Admin sections"
+  },
+
+  "apiStatus": {
+    "checking": "checking",
+    "ok": "ok",
+    "error": "error"
+  },
+
+  "auth": {
+    "loginTitle": "Admin sign in",
+    "bootstrapTitle": "Create the first administrator",
+    "checkingSession": "Checking admin session",
+    "displayName": "Display name",
+    "email": "Email",
+    "password": "Password",
+    "loginButton": "Sign in",
+    "bootstrapButton": "Create admin",
+    "submitting": "Please wait",
+    "errorFallback": "Unable to sign in",
+    "sessionError": "Unable to check admin session"
+  },
+
+  "dashboard": {
+    "serverTitle": "Server",
+    "service": "Service",
+    "database": "Database",
+    "missingTables": "Missing tables",
+    "notConnected": "not connected",
+    "unknown": "unknown",
+    "displayTypesTitle": "Display Types",
+    "clientsGroupsTitle": "Clients And Groups",
+    "clientsTitle": "Clients",
+    "groupsTitle": "Groups",
+    "noClients": "No clients registered yet.",
+    "noGroups": "No groups created yet.",
+    "clientCount": "clients"
+  },
+
+  "users": {
+    "title": "Users",
+    "refresh": "Refresh",
+    "search": "Search",
+    "searchPlaceholder": "Name or email",
+    "loading": "Loading users...",
+    "noUsers": "No admin users found.",
+    "noMatch": "No matching users.",
+    "colName": "Name",
+    "colStatus": "Status",
+    "colSuperAdmin": "Super admin",
+    "colPermissions": "Permissions",
+    "yes": "Yes",
+    "no": "No",
+    "allPermissions": "All",
+    "grantsCount": "grants",
+    "selectUser": "Select a user.",
+    "statusActive": "Active",
+    "statusInactive": "Inactive",
+    "disable": "Disable",
+    "enable": "Enable",
+    "statusLabel": "Status",
+    "superAdminLabel": "Super admin",
+    "lastLogin": "Last login",
+    "never": "Never",
+    "displayNameLabel": "Display name",
+    "saveName": "Save name",
+    "newPassword": "New password",
+    "resetPassword": "Reset password",
+    "permissionsTitle": "Permissions",
+    "savingPermissions": "Saving",
+    "savePermissions": "Save permissions",
+    "superAdminAllPerms": "Super admins have all permissions.",
+    "currentGrants": "Current Grants",
+    "createTitle": "Create User",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "superAdminCheckbox": "Super admin",
+    "creating": "Creating",
+    "createButton": "Create user",
+    "noticeCreated": "User created.",
+    "noticeUpdated": "User updated.",
+    "noticePasswordReset": "Password reset.",
+    "noticePermissionsSaved": "Permissions updated.",
+    "noticeEnabled": "User enabled.",
+    "noticeDisabled": "User disabled.",
+    "errorLoad": "Unable to load admin users",
+    "errorCreate": "Unable to create admin user",
+    "errorUpdate": "Unable to update user",
+    "errorPassword": "Unable to reset password",
+    "errorPermissions": "Unable to update permissions",
+    "errorStatus": "Unable to update user status"
+  },
+
+  "permissions": {
+    "noPermissions": "No scoped permissions.",
+    "remove": "Remove",
+    "scope": "Scope",
+    "scopeGlobal": "Global",
+    "scopeGroup": "Group",
+    "scopeClient": "Client",
+    "groupId": "Group id",
+    "clientId": "Client id",
+    "actionUsers": "Users",
+    "actionClients": "Clients",
+    "actionGroups": "Groups",
+    "actionContent": "Content",
+    "actionAssignments": "Assignments",
+    "addButton": "Add permission",
+    "errorNoAction": "Select at least one action.",
+    "errorNoTarget": "Target id is required.",
+    "errorDuplicate": "That target already has a permission grant.",
+    "targetGlobal": "Global",
+    "targetGroup": "Group",
+    "targetClient": "Client"
+  },
+
+  "clients": {
+    "errorLoad": "Unable to load clients",
+    "errorUpdate": "Unable to update client",
+    "errorStatus": "Unable to update client status",
+    "noticeUpdated": "Client updated.",
+    "noticeEnabled": "Client enabled.",
+    "noticeDisabled": "Client disabled."
+  },
+
+  "assignment": {
+    "title": "Display Assignment",
+    "target": "Target",
+    "noClient": "No permitted client is available.",
+    "clientLabel": "Client",
+    "assetLabel": "Asset",
+    "fitLabel": "Fit",
+    "fitContain": "Contain",
+    "fitCover": "Cover",
+    "noAssets": "Upload an active image or video before creating an assignment.",
+    "assigning": "Assigning",
+    "assignButton": "Display asset",
+    "errorLoad": "Unable to load assignment options",
+    "errorAssign": "Unable to assign asset",
+    "noticeAssigned": "assigned. The client will activate version"
+  },
+
+  "api": {
+    "requestFailed": "Request failed"
+  }
+}

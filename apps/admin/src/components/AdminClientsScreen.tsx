@@ -7,12 +7,14 @@ import { ClientDetail } from "./ClientDetail";
 import { ClientEnrollmentPanel } from "./ClientEnrollmentPanel";
 import { ClientTable } from "./ClientTable";
 import type { ManagedClient } from "../../../shared/clientContracts";
+import { useTranslation } from "../i18n";
 
 interface AdminClientsScreenProps {
   onUnauthorized: () => void;
 }
 
 export function AdminClientsScreen({ onUnauthorized }: AdminClientsScreenProps) {
+  const { t } = useTranslation();
   const [canEnrollClients, setCanEnrollClients] = useState(false);
   const [canManageClients, setCanManageClients] = useState<boolean | null>(null);
   const [clients, setClients] = useState<ManagedClient[]>([]);
@@ -36,13 +38,10 @@ export function AdminClientsScreen({ onUnauthorized }: AdminClientsScreenProps) 
 
     try {
       const response = await listClients();
-
       setCanEnrollClients(response.capabilities.canEnrollClients);
       setCanManageClients(true);
       setClients(response.clients);
-      setSelectedClientId(
-        (currentSelection) => currentSelection ?? response.clients[0]?.id ?? null,
-      );
+      setSelectedClientId((currentSelection) => currentSelection ?? response.clients[0]?.id ?? null);
     } catch (loadError) {
       if (loadError instanceof ApiError && loadError.status === 403) {
         setCanManageClients(false);
@@ -50,7 +49,7 @@ export function AdminClientsScreen({ onUnauthorized }: AdminClientsScreenProps) 
         setClients([]);
         setSelectedClientId(null);
       } else {
-        handleApiError(loadError, "Unable to load clients");
+        handleApiError(loadError, t.clients.errorLoad);
       }
     } finally {
       setIsLoading(false);
@@ -58,22 +57,18 @@ export function AdminClientsScreen({ onUnauthorized }: AdminClientsScreenProps) 
   }
 
   async function handleUpdateProfile(name: string): Promise<boolean> {
-    if (!selectedClient) {
-      return false;
-    }
-
+    if (!selectedClient) return false;
     setError(null);
     setNotice(null);
     setIsSaving(true);
 
     try {
       const response = await updateClientProfile(selectedClient.id, { name });
-
       replaceClient(response.client);
-      setNotice("Client updated.");
+      setNotice(t.clients.noticeUpdated);
       return true;
     } catch (profileError) {
-      handleApiError(profileError, "Unable to update client");
+      handleApiError(profileError, t.clients.errorUpdate);
       return false;
     } finally {
       setIsSaving(false);
@@ -89,11 +84,10 @@ export function AdminClientsScreen({ onUnauthorized }: AdminClientsScreenProps) 
       const response = await updateClientStatus(client.id, {
         accessStatus: client.accessStatus === "active" ? "disabled" : "active",
       });
-
       replaceClient(response.client);
-      setNotice(response.client.accessStatus === "active" ? "Client enabled." : "Client disabled.");
+      setNotice(response.client.accessStatus === "active" ? t.clients.noticeEnabled : t.clients.noticeDisabled);
     } catch (statusError) {
-      handleApiError(statusError, "Unable to update client status");
+      handleApiError(statusError, t.clients.errorStatus);
     } finally {
       setIsSaving(false);
     }
@@ -101,9 +95,7 @@ export function AdminClientsScreen({ onUnauthorized }: AdminClientsScreenProps) 
 
   function replaceClient(client: ManagedClient): void {
     setClients((currentClients) =>
-      currentClients.map((currentClient) =>
-        currentClient.id === client.id ? client : currentClient,
-      ),
+      currentClients.map((c) => (c.id === client.id ? client : c)),
     );
   }
 
@@ -112,14 +104,11 @@ export function AdminClientsScreen({ onUnauthorized }: AdminClientsScreenProps) 
       onUnauthorized();
       return;
     }
-
     setError(apiError instanceof Error ? apiError.message : fallback);
   }
 
   return (
-    <section
-      className={`content clients-layout ${canManageClients === false ? "assignment-only" : ""}`}
-    >
+    <section className={`content clients-layout ${canManageClients === false ? "assignment-only" : ""}`}>
       {error || notice ? (
         <div className="screen-alerts">
           {error ? <p className="form-error">{error}</p> : null}
@@ -136,14 +125,12 @@ export function AdminClientsScreen({ onUnauthorized }: AdminClientsScreenProps) 
             onSelectClient={setSelectedClientId}
             selectedClientId={selectedClient?.id ?? null}
           />
-
           <ClientDetail
             client={selectedClient}
             isSaving={isSaving}
             onStatusChange={(client) => void handleStatusChange(client)}
             onUpdateProfile={handleUpdateProfile}
           />
-
           {canEnrollClients ? <ClientEnrollmentPanel onUnauthorized={onUnauthorized} /> : null}
         </>
       ) : null}

@@ -2,12 +2,14 @@ import { useState } from "react";
 
 import { PermissionEditor } from "./PermissionEditor";
 import type { AdminPermissionGrant, CreateAdminUserRequest } from "../../../shared/adminContracts";
+import { useTranslation } from "../i18n";
 
 interface AdminUserCreateFormProps {
   onCreate: (request: CreateAdminUserRequest) => Promise<boolean>;
 }
 
 export function AdminUserCreateForm({ onCreate }: AdminUserCreateFormProps) {
+  const { t } = useTranslation();
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -20,14 +22,7 @@ export function AdminUserCreateForm({ onCreate }: AdminUserCreateFormProps) {
     setIsSubmitting(true);
 
     try {
-      const didCreate = await onCreate({
-        displayName,
-        email,
-        isSuperAdmin,
-        password,
-        permissions,
-      });
-
+      const didCreate = await onCreate({ displayName, email, isSuperAdmin, password, permissions });
       if (didCreate) {
         setDisplayName("");
         setEmail("");
@@ -42,54 +37,29 @@ export function AdminUserCreateForm({ onCreate }: AdminUserCreateFormProps) {
 
   return (
     <article className="panel">
-      <h2>Create User</h2>
+      <h2>{t.users.createTitle}</h2>
       <form className="form-grid" onSubmit={(event) => void handleSubmit(event)}>
         <label>
-          <span>Display name</span>
-          <input
-            minLength={2}
-            onChange={(event) => setDisplayName(event.target.value)}
-            required
-            value={displayName}
-          />
+          <span>{t.users.displayNameLabel}</span>
+          <input minLength={2} onChange={(event) => setDisplayName(event.target.value)} required value={displayName} />
         </label>
         <label>
-          <span>Email</span>
-          <input
-            inputMode="email"
-            onChange={(event) => setEmail(event.target.value)}
-            required
-            type="email"
-            value={email}
-          />
+          <span>{t.users.emailLabel}</span>
+          <input inputMode="email" onChange={(event) => setEmail(event.target.value)} required type="email" value={email} />
         </label>
         <label>
-          <span>Password</span>
-          <input
-            minLength={10}
-            onChange={(event) => setPassword(event.target.value)}
-            required
-            type="password"
-            value={password}
-          />
+          <span>{t.users.passwordLabel}</span>
+          <input minLength={10} onChange={(event) => setPassword(event.target.value)} required type="password" value={password} />
         </label>
         <label className="checkbox-row">
-          <input
-            checked={isSuperAdmin}
-            onChange={(event) => setIsSuperAdmin(event.target.checked)}
-            type="checkbox"
-          />
-          <span>Super admin</span>
+          <input checked={isSuperAdmin} onChange={(event) => setIsSuperAdmin(event.target.checked)} type="checkbox" />
+          <span>{t.users.superAdminCheckbox}</span>
         </label>
         {!isSuperAdmin ? (
-          <PermissionEditor
-            disabled={isSubmitting}
-            onChange={setPermissions}
-            permissions={permissions}
-          />
+          <PermissionEditor disabled={isSubmitting} onChange={setPermissions} permissions={permissions} />
         ) : null}
         <button className="primary-button" disabled={isSubmitting} type="submit">
-          {isSubmitting ? "Creating" : "Create user"}
+          {isSubmitting ? t.users.creating : t.users.createButton}
         </button>
       </form>
     </article>
