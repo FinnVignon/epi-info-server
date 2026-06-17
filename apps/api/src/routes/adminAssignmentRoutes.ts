@@ -6,6 +6,7 @@ import { createAdminAuthMiddleware } from "../auth/adminAuth.js";
 import { createRequireAnyAdminPermissionMiddleware } from "../auth/adminPermissions.js";
 import type { ServerConfig } from "../config.js";
 import { listAssets, listClientsForAdmin, listGroupsForAdmin } from "../database.js";
+import type { ClientLiveUpdateHub } from "../live/clientLiveUpdateHub.js";
 import type {
   AssetListResponse,
   AssignmentGroupListResponse,
@@ -15,7 +16,11 @@ import { createAdminClientAssignmentRouter } from "./adminClientAssignmentRoutes
 import { createAdminGlobalAssignmentRouter } from "./adminGlobalAssignmentRoutes.js";
 import { createAdminGroupAssignmentRouter } from "./adminGroupAssignmentRoutes.js";
 
-export function createAdminAssignmentRouter(pool: Pool, config: ServerConfig): Router {
+export function createAdminAssignmentRouter(
+  pool: Pool,
+  config: ServerConfig,
+  liveUpdates: ClientLiveUpdateHub,
+): Router {
   const router = Router();
   const requireAdminAuth = createAdminAuthMiddleware(pool, config.adminAuth.sessionCookieName);
   const requireAnyAssignmentPermission = createRequireAnyAdminPermissionMiddleware(
@@ -66,9 +71,9 @@ export function createAdminAssignmentRouter(pool: Pool, config: ServerConfig): R
     }
   });
 
-  router.use("/clients", createAdminClientAssignmentRouter(pool, config));
-  router.use("/groups", createAdminGroupAssignmentRouter(pool));
-  router.use("/global", createAdminGlobalAssignmentRouter(pool));
+  router.use("/clients", createAdminClientAssignmentRouter(pool, config, liveUpdates));
+  router.use("/groups", createAdminGroupAssignmentRouter(pool, liveUpdates));
+  router.use("/global", createAdminGlobalAssignmentRouter(pool, liveUpdates));
 
   return router;
 }

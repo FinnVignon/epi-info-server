@@ -12,6 +12,15 @@ export interface AuthenticatedClientRequest extends Request {
   };
 }
 
+export interface ClientCredentialAuthenticationInput {
+  clientId: string | null | undefined;
+  clientSecret: string | null | undefined;
+}
+
+export interface AuthenticatedClientIdentity {
+  id: string;
+}
+
 export function createClientSecret(): string {
   return randomBytes(CLIENT_SECRET_BYTES).toString("base64url");
 }
@@ -31,22 +40,15 @@ export function createClientAuthMiddleware(pool: Pool): RequestHandler {
     }
 
     try {
-      const client = await findClientCredentialById(pool, clientId);
+      const identity = await authenticateClientCredential(pool, { clientId, clientSecret });
 
-      if (
-        !client ||
-        client.accessStatus !== "active" ||
-        !client.credentialHash ||
-        !credentialHashesMatch(hashClientCredential(clientSecret), client.credentialHash)
-      ) {
+      if (!identity) {
         sendClientAuthenticationRequired(response);
         return;
       }
 
       Object.assign(request, {
-        clientIdentity: {
-          id: client.id,
-        },
+        clientIdentity: identity,
       });
       next();
     } catch (error) {
@@ -55,7 +57,32 @@ export function createClientAuthMiddleware(pool: Pool): RequestHandler {
   };
 }
 
-function readBearerToken(authorization: string | undefined): string | null {
+export async function authenticateClientCredential(
+  pool: Pool,
+  input: ClientCredentialAuthenticationInput,
+): Promise<AuthenticatedClientIdentity | null> {
+  const clientId = input.clientId?.trim();
+  const clientSecret = input.clientSecret?.trim();
+
+  if (!clientId || !clientSecret) {
+    return null;
+  }
+
+  const client = await findClientCredentialById(pool, clientId);
+
+  if (
+    !client ||
+    client.accessStatus !== "active" ||
+    !client.credentialHash ||
+    !credentialHashesMatch(hashClientCredential(clientSecret), client.credentialHash)
+  ) {
+    return null;
+  }
+
+  return { id: client.id };
+}
+
+export function readBearerToken(authorization: string | undefined): string | null {
   if (!authorization) {
     return null;
   }
