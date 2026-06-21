@@ -5,6 +5,7 @@ import type {
   ClientConnectionStatus,
   ManagedClient,
 } from "../../../shared/clientContracts.js";
+import type { AssignmentTarget } from "./manifests.js";
 
 export type ClientAdminAction = "manage_assignments" | "manage_clients";
 
@@ -21,6 +22,10 @@ interface ClientRow extends RowDataPacket {
   name: string;
   softwareVersion: string | null;
   updatedAt: Date;
+}
+
+interface ClientIdRow extends RowDataPacket {
+  id: string;
 }
 
 export interface ListClientsForAdminInput {
@@ -146,6 +151,50 @@ export async function listClientsInGroup(
   );
 
   return rows.map(mapClient);
+}
+
+export async function listActiveClientIdsForAssignmentTarget(
+  pool: Pool,
+  target: AssignmentTarget,
+): Promise<string[]> {
+  if (target.targetType === "client") {
+    const [rows] = await pool.execute<ClientIdRow[]>(
+      `
+        SELECT id
+        FROM clients
+        WHERE id = ?
+          AND access_status = 'active'
+      `,
+      [target.targetId],
+    );
+
+    return rows.map((row) => row.id);
+  }
+
+  if (target.targetType === "group") {
+    const [rows] = await pool.execute<ClientIdRow[]>(
+      `
+        SELECT clients.id
+        FROM clients
+        INNER JOIN client_groups ON client_groups.client_id = clients.id
+        WHERE client_groups.group_id = ?
+          AND clients.access_status = 'active'
+      `,
+      [target.targetId],
+    );
+
+    return rows.map((row) => row.id);
+  }
+
+  const [rows] = await pool.execute<ClientIdRow[]>(
+    `
+      SELECT id
+      FROM clients
+      WHERE access_status = 'active'
+    `,
+  );
+
+  return rows.map((row) => row.id);
 }
 
 export async function updateClientProfile(

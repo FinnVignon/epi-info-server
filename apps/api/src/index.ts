@@ -2,7 +2,6 @@ import cors from "cors";
 import express from "express";
 import { mkdirSync } from "node:fs";
 import path from "node:path";
-import { WebSocketServer } from "ws";
 
 import { createAdminAuthMiddleware } from "./auth/adminAuth.js";
 import type { AuthenticatedAdminRequest } from "./auth/adminAuth.js";
@@ -15,6 +14,7 @@ import {
   ensureClientConnectionSchema,
   getDashboardSummary,
 } from "./database.js";
+import { createClientLiveUpdateHub } from "./live/clientLiveUpdateHub.js";
 import { createAdminAuthRouter } from "./routes/adminAuthRoutes.js";
 import { createAdminAssetRouter } from "./routes/adminAssetRoutes.js";
 import { createAdminAssignmentRouter } from "./routes/adminAssignmentRoutes.js";
@@ -31,6 +31,7 @@ const config = readConfig();
 const app = express();
 const mysqlPool = createDatabasePool(config.mysql);
 const requireAdminAuth = createAdminAuthMiddleware(mysqlPool, config.adminAuth.sessionCookieName);
+const clientLiveUpdates = createClientLiveUpdateHub(mysqlPool);
 
 mkdirSync(config.assetStoragePath, { recursive: true });
 
@@ -74,7 +75,10 @@ app.get("/api/dashboard", requireAdminAuth, async (request, response) => {
 
 app.use("/media/assets", createAssetDownloadRouter(mysqlPool));
 app.use("/api/admin/assets", createAdminAssetRouter(mysqlPool, config));
-app.use("/api/admin/assignments", createAdminAssignmentRouter(mysqlPool, config));
+app.use(
+  "/api/admin/assignments",
+  createAdminAssignmentRouter(mysqlPool, config, clientLiveUpdates),
+);
 app.use("/api/admin/clients", createAdminClientRouter(mysqlPool, config));
 app.use(
   "/api/admin/client-enrollment-tokens",
@@ -121,16 +125,7 @@ async function startServer(): Promise<void> {
     console.log(`Epi Info server listening on port ${config.port}`);
   });
 
-  const webSocketServer = new WebSocketServer({ server: httpServer, path: "/ws" });
-
-  webSocketServer.on("connection", (socket) => {
-    socket.send(
-      JSON.stringify({
-        service: "epi-info-server",
-        type: "server.hello",
-      }),
-    );
-  });
+  clientLiveUpdates.attach(httpServer);
 }
 
 void startServer().catch((error: unknown) => {

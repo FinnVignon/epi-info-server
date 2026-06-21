@@ -2,16 +2,20 @@ import { Router } from "express";
 import type { Pool } from "mysql2/promise";
 
 import { createRequireAdminPermissionMiddleware } from "../auth/adminPermissions.js";
-import { findGroupById } from "../database.js";
+import { findGroupById, type AssignmentTarget } from "../database.js";
+import type { ClientLiveUpdateHub } from "../live/clientLiveUpdateHub.js";
 import { assignActiveAssetToTarget } from "../services/assetAssignments.js";
 import type { AssignAssetRequest, AssignmentResponse } from "../../../shared/adminContracts.js";
-import { readAssignmentBody } from "./adminAssignmentRouteUtils.js";
+import { notifyAssignmentChanged, readAssignmentBody } from "./adminAssignmentRouteUtils.js";
 
 interface GroupAssignmentRouteParams {
   groupId?: string;
 }
 
-export function createAdminGroupAssignmentRouter(pool: Pool): Router {
+export function createAdminGroupAssignmentRouter(
+  pool: Pool,
+  liveUpdates: ClientLiveUpdateHub,
+): Router {
   const router = Router();
   const requireGroupAssignmentPermission = createRequireAdminPermissionMiddleware(
     pool,
@@ -42,16 +46,18 @@ export function createAdminGroupAssignmentRouter(pool: Pool): Router {
         return;
       }
 
-      const manifest = await assignActiveAssetToTarget(pool, assignment, {
+      const target: AssignmentTarget = {
         targetId: groupId,
         targetType: "group",
-      });
+      };
+      const manifest = await assignActiveAssetToTarget(pool, assignment, target);
 
       if (!manifest) {
         response.status(404).json({ error: "Active asset was not found" });
         return;
       }
 
+      notifyAssignmentChanged(liveUpdates, target);
       response.json({ manifest } satisfies AssignmentResponse);
     } catch (error) {
       next(error);

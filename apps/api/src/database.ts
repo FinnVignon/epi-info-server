@@ -75,6 +75,7 @@ export type {
 
 export {
   findClientById,
+  listActiveClientIdsForAssignmentTarget,
   listClientsInGroup,
   listClientsForAdmin,
   updateClientProfile,

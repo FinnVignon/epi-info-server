@@ -53,6 +53,11 @@ The API also joins the external `epi-info-network` network under the
 `epi-info-server` hostname. Client Compose stacks use this network for
 registration, heartbeats, and content synchronization.
 
+Registered clients also open an authenticated WebSocket connection at
+`/api/clients/live`. The WebSocket only sends lightweight wake-up events such as
+`assignment.changed`; clients still fetch, verify, cache, and activate manifests
+through the normal HTTP synchronization path.
+
 The Clients admin screen can assign an active image or video directly to one
 registered client. The server updates an internal manifest revision so the
 authenticated client can detect and download changed content. This revision is

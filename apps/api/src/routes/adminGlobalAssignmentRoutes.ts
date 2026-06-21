@@ -2,20 +2,25 @@ import { Router } from "express";
 import type { Pool } from "mysql2/promise";
 
 import { createRequireAdminPermissionMiddleware } from "../auth/adminPermissions.js";
+import type { AssignmentTarget } from "../database.js";
+import type { ClientLiveUpdateHub } from "../live/clientLiveUpdateHub.js";
 import { assignActiveAssetToTarget } from "../services/assetAssignments.js";
 import type {
   AssignAssetRequest,
   AssignmentGlobalTargetResponse,
   AssignmentResponse,
 } from "../../../shared/adminContracts.js";
-import { readAssignmentBody } from "./adminAssignmentRouteUtils.js";
+import { notifyAssignmentChanged, readAssignmentBody } from "./adminAssignmentRouteUtils.js";
 
 const GLOBAL_ASSIGNMENT_TARGET = {
   id: "global",
   name: "All displays",
 } as const;
 
-export function createAdminGlobalAssignmentRouter(pool: Pool): Router {
+export function createAdminGlobalAssignmentRouter(
+  pool: Pool,
+  liveUpdates: ClientLiveUpdateHub,
+): Router {
   const router = Router();
   const requireGlobalAssignmentPermission = createRequireAdminPermissionMiddleware(
     pool,
@@ -39,16 +44,18 @@ export function createAdminGlobalAssignmentRouter(pool: Pool): Router {
         return;
       }
 
-      const manifest = await assignActiveAssetToTarget(pool, assignment, {
+      const target: AssignmentTarget = {
         targetId: null,
         targetType: "global",
-      });
+      };
+      const manifest = await assignActiveAssetToTarget(pool, assignment, target);
 
       if (!manifest) {
         response.status(404).json({ error: "Active asset was not found" });
         return;
       }
 
+      notifyAssignmentChanged(liveUpdates, target);
       response.json({ manifest } satisfies AssignmentResponse);
     } catch (error) {
       next(error);
