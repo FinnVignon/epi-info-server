@@ -114,4 +114,6 @@ export type {
 export { checkDatabaseHealth, DATABASE_TABLES } from "./database/health.js";
 export type { DatabaseHealth, DatabaseHealthStatus } from "./database/health.js";
 
+export { isDuplicateEntryError } from "./database/utils.js";
+
 export { createDatabasePool } from "./database/pool.js";

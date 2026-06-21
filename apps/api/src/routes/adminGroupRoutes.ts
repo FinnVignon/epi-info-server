@@ -17,25 +17,19 @@ import {
   deleteGroup,
   findClientById,
   findGroupById,
+  isDuplicateEntryError,
   listClientsForAdmin,
-  listClientsInGroup,
   listGroupsForAdmin,
   removeClientFromGroup,
   updateGroup,
 } from "../database.js";
 import type {
-  CreateGroupRequest,
-  DisplayGroupDetail,
   GroupClientOptionsResponse,
   GroupListResponse,
   GroupResponse,
-  UpdateGroupRequest,
 } from "../../../shared/groupContracts.js";
-
-interface GroupRouteParams {
-  clientId?: string;
-  groupId?: string;
-}
+import { readGroupName, readMembershipRouteIds, readRouteId } from "./adminGroupRequestParsers.js";
+import { loadGroupDetail, requireGroupDetail } from "../services/groupDetails.js";
 
 export function createAdminGroupRouter(pool: Pool, config: ServerConfig): Router {
   const router = Router();
@@ -102,7 +96,7 @@ export function createAdminGroupRouter(pool: Pool, config: ServerConfig): Router
 
   router.post("/", requireGlobalGroupPermission, async (request, response, next) => {
     try {
-      const name = readGroupName((request.body ?? {}) as Partial<CreateGroupRequest>);
+      const name = readGroupName(request.body ?? {});
 
       if (typeof name !== "string") {
         response.status(400).json({ error: name.error });
@@ -119,7 +113,7 @@ export function createAdminGroupRouter(pool: Pool, config: ServerConfig): Router
         group: await requireGroupDetail(pool, groupId, config.clientAuth.offlineAfterSeconds),
       } satisfies GroupResponse);
     } catch (error) {
-      if (isDuplicateGroupNameError(error)) {
+      if (isDuplicateEntryError(error)) {
         response.status(409).json({ error: "A group with this name already exists" });
         return;
       }
@@ -174,7 +168,7 @@ export function createAdminGroupRouter(pool: Pool, config: ServerConfig): Router
   router.patch("/:groupId", requireGroupPermission, async (request, response, next) => {
     try {
       const groupId = readRouteId(request.params, "groupId");
-      const name = readGroupName((request.body ?? {}) as Partial<UpdateGroupRequest>);
+      const name = readGroupName(request.body ?? {});
 
       if (!groupId) {
         response.status(400).json({ error: "Group id is required" });
@@ -195,7 +189,7 @@ export function createAdminGroupRouter(pool: Pool, config: ServerConfig): Router
         group: await requireGroupDetail(pool, groupId, config.clientAuth.offlineAfterSeconds),
       } satisfies GroupResponse);
     } catch (error) {
-      if (isDuplicateGroupNameError(error)) {
+      if (isDuplicateEntryError(error)) {
         response.status(409).json({ error: "A group with this name already exists" });
         return;
       }
@@ -303,76 +297,4 @@ export function createAdminGroupRouter(pool: Pool, config: ServerConfig): Router
   );
 
   return router;
-}
-
-function readRouteId(params: GroupRouteParams, key: keyof GroupRouteParams): string | null {
-  const value = params[key];
-
-  return typeof value === "string" && value.length > 0 ? value : null;
-}
-
-function readMembershipRouteIds(
-  params: GroupRouteParams,
-): { clientId: string; groupId: string } | null {
-  const clientId = readRouteId(params, "clientId");
-  const groupId = readRouteId(params, "groupId");
-
-  return clientId && groupId ? { clientId, groupId } : null;
-}
-
-function readGroupName(
-  body: Partial<CreateGroupRequest | UpdateGroupRequest>,
-): string | { error: string } {
-  if (typeof body.name !== "string") {
-    return { error: "Group name is required" };
-  }
-
-  const name = body.name.trim();
-
-  if (name.length < 2) {
-    return { error: "Group name must be at least 2 characters" };
-  }
-
-  if (name.length > 255) {
-    return { error: "Group name must not exceed 255 characters" };
-  }
-
-  return name;
-}
-
-async function loadGroupDetail(
-  pool: Pool,
-  groupId: string,
-  offlineAfterSeconds: number,
-): Promise<DisplayGroupDetail | null> {
-  const group = await findGroupById(pool, groupId);
-
-  if (!group) {
-    return null;
-  }
-
-  return {
-    ...group,
-    members: await listClientsInGroup(pool, groupId, offlineAfterSeconds),
-  };
-}
-
-async function requireGroupDetail(
-  pool: Pool,
-  groupId: string,
-  offlineAfterSeconds: number,
-): Promise<DisplayGroupDetail> {
-  const group = await loadGroupDetail(pool, groupId, offlineAfterSeconds);
-
-  if (!group) {
-    throw new Error("Updated group could not be loaded");
-  }
-
-  return group;
-}
-
-function isDuplicateGroupNameError(error: unknown): boolean {
-  return (
-    typeof error === "object" && error !== null && "code" in error && error.code === "ER_DUP_ENTRY"
-  );
 }
