@@ -1,4 +1,3 @@
-import cors from "cors";
 import express from "express";
 import { mkdirSync } from "node:fs";
 import path from "node:path";
@@ -35,7 +34,6 @@ const clientLiveUpdates = createClientLiveUpdateHub(mysqlPool);
 
 mkdirSync(config.assetStoragePath, { recursive: true });
 
-app.use(cors());
 app.use(express.json());
 
 app.get("/api/health", async (_request, response) => {
@@ -73,7 +71,7 @@ app.get("/api/dashboard", requireAdminAuth, async (request, response) => {
   }
 });
 
-app.use("/media/assets", createAssetDownloadRouter(mysqlPool));
+app.use("/media/assets", createAssetDownloadRouter(mysqlPool, config.adminAuth.sessionCookieName));
 app.use("/api/admin/assets", createAdminAssetRouter(mysqlPool, config));
 app.use(
   "/api/admin/assignments",
