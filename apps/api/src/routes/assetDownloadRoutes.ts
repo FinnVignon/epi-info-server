@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { Pool } from "mysql2/promise";
 
+import { createAdminAuthMiddleware } from "../auth/adminAuth.js";
 import { findAssetById } from "../database.js";
 import { sendStoredAsset } from "../http/sendStoredAsset.js";
 
@@ -8,8 +9,10 @@ function readAssetId(params: { assetId?: string }): string | null {
   return typeof params.assetId === "string" && params.assetId.length > 0 ? params.assetId : null;
 }
 
-export function createAssetDownloadRouter(pool: Pool): Router {
+export function createAssetDownloadRouter(pool: Pool, sessionCookieName: string): Router {
   const router = Router();
+
+  router.use(createAdminAuthMiddleware(pool, sessionCookieName));
 
   router.get("/:assetId", async (request, response, next) => {
     try {
@@ -27,7 +30,7 @@ export function createAssetDownloadRouter(pool: Pool): Router {
         return;
       }
 
-      await sendStoredAsset(response, next, asset, "public");
+      await sendStoredAsset(response, next, asset, "private");
     } catch (error) {
       next(error);
     }

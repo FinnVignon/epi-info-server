@@ -10,22 +10,13 @@ import {
 import type { ServerConfig } from "../config.js";
 import {
   adminUserHasPermission,
-  findClientById,
   listClientsForAdmin,
   updateClientProfile,
   updateClientStatus,
 } from "../database.js";
-import type {
-  ClientAccessStatus,
-  ClientListResponse,
-  ClientResponse,
-  UpdateClientProfileRequest,
-  UpdateClientStatusRequest,
-} from "../../../shared/clientContracts.js";
-
-interface ClientRouteParams {
-  clientId?: string;
-}
+import { loadClientDetail, requireClientDetail } from "../services/clientDetails.js";
+import type { ClientListResponse, ClientResponse } from "../../../shared/clientContracts.js";
+import { readClientId, readClientName, readClientStatus } from "./adminClientRequestParsers.js";
 
 export function createAdminClientRouter(pool: Pool, config: ServerConfig): Router {
   const router = Router();
@@ -85,7 +76,7 @@ export function createAdminClientRouter(pool: Pool, config: ServerConfig): Route
         return;
       }
 
-      const client = await findClientById(pool, clientId, config.clientAuth.offlineAfterSeconds);
+      const client = await loadClientDetail(pool, clientId, config.clientAuth.offlineAfterSeconds);
 
       if (!client) {
         response.status(404).json({ error: "Client was not found" });
@@ -101,7 +92,7 @@ export function createAdminClientRouter(pool: Pool, config: ServerConfig): Route
   router.patch("/:clientId/profile", requireClientPermission, async (request, response, next) => {
     try {
       const clientId = readClientId(request.params);
-      const name = readClientName((request.body ?? {}) as Partial<UpdateClientProfileRequest>);
+      const name = readClientName(request.body ?? {});
 
       if (!clientId) {
         response.status(400).json({ error: "Client id is required" });
@@ -119,7 +110,7 @@ export function createAdminClientRouter(pool: Pool, config: ServerConfig): Route
       }
 
       response.json({
-        client: await requireClient(pool, clientId, config.clientAuth.offlineAfterSeconds),
+        client: await requireClientDetail(pool, clientId, config.clientAuth.offlineAfterSeconds),
       } satisfies ClientResponse);
     } catch (error) {
       next(error);
@@ -129,9 +120,7 @@ export function createAdminClientRouter(pool: Pool, config: ServerConfig): Route
   router.patch("/:clientId/status", requireClientPermission, async (request, response, next) => {
     try {
       const clientId = readClientId(request.params);
-      const accessStatus = readClientStatus(
-        (request.body ?? {}) as Partial<UpdateClientStatusRequest>,
-      );
+      const accessStatus = readClientStatus(request.body ?? {});
 
       if (!clientId) {
         response.status(400).json({ error: "Client id is required" });
@@ -149,7 +138,7 @@ export function createAdminClientRouter(pool: Pool, config: ServerConfig): Route
       }
 
       response.json({
-        client: await requireClient(pool, clientId, config.clientAuth.offlineAfterSeconds),
+        client: await requireClientDetail(pool, clientId, config.clientAuth.offlineAfterSeconds),
       } satisfies ClientResponse);
     } catch (error) {
       next(error);
@@ -157,46 +146,4 @@ export function createAdminClientRouter(pool: Pool, config: ServerConfig): Route
   });
 
   return router;
-}
-
-function readClientId(params: ClientRouteParams): string | null {
-  return typeof params.clientId === "string" && params.clientId.length > 0 ? params.clientId : null;
-}
-
-function readClientName(body: Partial<UpdateClientProfileRequest>): string | { error: string } {
-  if (typeof body.name !== "string") {
-    return { error: "Client name is required" };
-  }
-
-  const name = body.name.trim();
-
-  if (name.length < 2) {
-    return { error: "Client name must be at least 2 characters" };
-  }
-
-  if (name.length > 255) {
-    return { error: "Client name must not exceed 255 characters" };
-  }
-
-  return name;
-}
-
-function readClientStatus(
-  body: Partial<UpdateClientStatusRequest>,
-): ClientAccessStatus | { error: string } {
-  if (body.accessStatus !== "active" && body.accessStatus !== "disabled") {
-    return { error: "Access status must be active or disabled" };
-  }
-
-  return body.accessStatus;
-}
-
-async function requireClient(pool: Pool, clientId: string, offlineAfterSeconds: number) {
-  const client = await findClientById(pool, clientId, offlineAfterSeconds);
-
-  if (!client) {
-    throw new Error("Updated client could not be loaded");
-  }
-
-  return client;
 }

@@ -1,26 +1,18 @@
 import { randomUUID } from "node:crypto";
-import { Router, type Request, type Response } from "express";
+import { Router } from "express";
 import { Pool } from "mysql2/promise";
 
 import { AuthenticatedAdminRequest, createAdminAuthMiddleware } from "../auth/adminAuth.js";
-import { hashAdminPassword, isValidAdminPassword, verifyAdminPassword } from "../auth/passwords.js";
 import {
-  createFixedWindowRateLimiter,
-  getRequestRateLimitKey,
-  sendRateLimitResponse,
-} from "../auth/rateLimit.js";
-import {
-  createExpiredSessionCookieHeader,
-  createSessionCookieHeader,
-  createSessionExpiry,
-  createSessionToken,
-  hashSessionToken,
-} from "../auth/sessions.js";
+  clearAdminSessionCookie,
+  createAdminSessionResponse,
+  safeAdminUser,
+  setAdminSessionCookie,
+} from "../auth/adminSessionResponses.js";
+import { hashAdminPassword, verifyAdminPassword } from "../auth/passwords.js";
 import { ServerConfig } from "../config.js";
 import {
-  AdminUserWithPasswordHash,
   countAdminUsers,
-  createAdminSession,
   createAdminUser,
   deleteAdminSession,
   findAdminUserByEmail,
@@ -28,163 +20,12 @@ import {
   updateAdminLastLogin,
   withMysqlNamedLock,
 } from "../database.js";
+import type { BootstrapBody, LoginBody } from "./adminAuthRequestParsers.js";
+import { readBootstrapBody, readLoginBody } from "./adminAuthRequestParsers.js";
+import { checkBootstrapRateLimit, checkLoginRateLimit } from "./adminAuthRateLimits.js";
 
 const ADMIN_BOOTSTRAP_LOCK_NAME = "epi-info:admin-bootstrap";
 const ADMIN_BOOTSTRAP_LOCK_TIMEOUT_SECONDS = 10;
-
-const bootstrapRateLimiter = createFixedWindowRateLimiter({
-  maxAttempts: 5,
-  windowMs: 5 * 60 * 1000,
-});
-
-const loginEmailRateLimiter = createFixedWindowRateLimiter({
-  maxAttempts: 10,
-  windowMs: 5 * 60 * 1000,
-});
-
-const loginIpRateLimiter = createFixedWindowRateLimiter({
-  maxAttempts: 20,
-  windowMs: 5 * 60 * 1000,
-});
-
-interface LoginBody {
-  email?: unknown;
-  password?: unknown;
-}
-
-interface BootstrapBody extends LoginBody {
-  displayName?: unknown;
-}
-
-function normalizeEmail(email: string): string {
-  return email.trim().toLowerCase();
-}
-
-function isValidEmail(email: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-
-function readLoginBody(body: LoginBody): { email: string; password: string } | string {
-  if (typeof body.email !== "string" || typeof body.password !== "string") {
-    return "Email and password are required";
-  }
-
-  const email = normalizeEmail(body.email);
-
-  if (!isValidEmail(email)) {
-    return "A valid email is required";
-  }
-
-  if (!isValidAdminPassword(body.password)) {
-    return "Password must be at least 10 characters";
-  }
-
-  return {
-    email,
-    password: body.password,
-  };
-}
-
-function readBootstrapBody(
-  body: BootstrapBody,
-): { displayName: string; email: string; password: string } | string {
-  const loginBody = readLoginBody(body);
-
-  if (typeof loginBody === "string") {
-    return loginBody;
-  }
-
-  if (typeof body.displayName !== "string" || body.displayName.trim().length < 2) {
-    return "Display name must be at least 2 characters";
-  }
-
-  return {
-    ...loginBody,
-    displayName: body.displayName.trim(),
-  };
-}
-
-function checkBootstrapRateLimit(request: Request, response: Response): boolean {
-  const result = bootstrapRateLimiter.consume(getRequestRateLimitKey(request, "admin-bootstrap"));
-
-  if (!result.allowed) {
-    sendRateLimitResponse(response, result);
-    return false;
-  }
-
-  return true;
-}
-
-function checkLoginRateLimit(request: Request, response: Response, email: unknown): boolean {
-  const ipResult = loginIpRateLimiter.consume(getRequestRateLimitKey(request, "admin-login"));
-
-  if (!ipResult.allowed) {
-    sendRateLimitResponse(response, ipResult);
-    return false;
-  }
-
-  if (typeof email === "string" && email.trim().length > 0) {
-    const emailResult = loginEmailRateLimiter.consume(`admin-login-email:${normalizeEmail(email)}`);
-
-    if (!emailResult.allowed) {
-      sendRateLimitResponse(response, emailResult);
-      return false;
-    }
-  }
-
-  return true;
-}
-
-function safeUser(user: AdminUserWithPasswordHash) {
-  return {
-    createdAt: user.createdAt,
-    displayName: user.displayName,
-    email: user.email,
-    id: user.id,
-    isSuperAdmin: user.isSuperAdmin,
-    lastLoginAt: user.lastLoginAt,
-    status: user.status,
-    updatedAt: user.updatedAt,
-  };
-}
-
-async function createAdminSessionResponse(
-  pool: Pool,
-  config: ServerConfig,
-  userId: string,
-): Promise<{ expiresAt: Date; token: string }> {
-  const token = createSessionToken();
-  const tokenHash = hashSessionToken(token);
-  const expiresAt = createSessionExpiry(config.adminAuth.sessionTtlHours);
-
-  await createAdminSession(pool, {
-    expiresAt,
-    id: randomUUID(),
-    tokenHash,
-    userId,
-  });
-
-  return {
-    expiresAt,
-    token,
-  };
-}
-
-function setSessionCookie(
-  response: { setHeader(name: string, value: string): void },
-  config: ServerConfig,
-  token: string,
-  expiresAt: Date,
-): void {
-  response.setHeader(
-    "Set-Cookie",
-    createSessionCookieHeader(token, {
-      cookieName: config.adminAuth.sessionCookieName,
-      expiresAt,
-      isProduction: process.env.NODE_ENV === "production",
-    }),
-  );
-}
 
 export function createAdminAuthRouter(pool: Pool, config: ServerConfig): Router {
   const router = Router();
@@ -247,7 +88,7 @@ export function createAdminAuthRouter(pool: Pool, config: ServerConfig): Router 
         return;
       }
 
-      setSessionCookie(response, config, bootstrap.session.token, bootstrap.session.expiresAt);
+      setAdminSessionCookie(response, config, bootstrap.session.token, bootstrap.session.expiresAt);
       response.status(201).json({
         session: {
           expiresAt: bootstrap.session.expiresAt.toISOString(),
@@ -294,12 +135,12 @@ export function createAdminAuthRouter(pool: Pool, config: ServerConfig): Router 
       const session = await createAdminSessionResponse(pool, config, user.id);
 
       await updateAdminLastLogin(pool, user.id);
-      setSessionCookie(response, config, session.token, session.expiresAt);
+      setAdminSessionCookie(response, config, session.token, session.expiresAt);
       response.json({
         session: {
           expiresAt: session.expiresAt.toISOString(),
         },
-        user: safeUser(user),
+        user: safeAdminUser(user),
       });
     } catch (error) {
       next(error);
@@ -311,13 +152,7 @@ export function createAdminAuthRouter(pool: Pool, config: ServerConfig): Router 
       const adminRequest = request as AuthenticatedAdminRequest;
 
       await deleteAdminSession(pool, adminRequest.adminSessionTokenHash);
-      response.setHeader(
-        "Set-Cookie",
-        createExpiredSessionCookieHeader(
-          config.adminAuth.sessionCookieName,
-          process.env.NODE_ENV === "production",
-        ),
-      );
+      clearAdminSessionCookie(response, config);
       response.status(204).send();
     } catch (error) {
       next(error);
