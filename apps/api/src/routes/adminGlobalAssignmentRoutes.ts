@@ -4,9 +4,8 @@ import type { Pool } from "mysql2/promise";
 import { createRequireAdminPermissionMiddleware } from "../auth/adminPermissions.js";
 import type { AssignmentTarget } from "../database.js";
 import type { ClientLiveUpdateHub } from "../live/clientLiveUpdateHub.js";
-import { assignActiveAssetToTarget } from "../services/assetAssignments.js";
+import { assignDisplayContentToTarget } from "../services/displayAssignments.js";
 import type {
-  AssignAssetRequest,
   AssignmentGlobalTargetResponse,
   AssignmentResponse,
 } from "../../../shared/adminContracts.js";
@@ -37,7 +36,7 @@ export function createAdminGlobalAssignmentRouter(
 
   router.put("/", async (request, response, next) => {
     try {
-      const assignment = readAssignmentBody((request.body ?? {}) as Partial<AssignAssetRequest>);
+      const assignment = readAssignmentBody(request.body ?? {});
 
       if (typeof assignment === "string") {
         response.status(400).json({ error: assignment });
@@ -48,7 +47,7 @@ export function createAdminGlobalAssignmentRouter(
         targetId: null,
         targetType: "global",
       };
-      const manifest = await assignActiveAssetToTarget(pool, assignment, target);
+      const manifest = await assignDisplayContentToTarget(pool, assignment, target);
 
       if (!manifest) {
         response.status(404).json({ error: "Active asset was not found" });

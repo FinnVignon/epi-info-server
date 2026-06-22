@@ -1,5 +1,5 @@
-import { assignAssetToClient, listAssignmentClients } from "../api/adminAssignmentsApi";
-import { AssetAssignmentPanel, type AssignmentTargetOption } from "./AssetAssignmentPanel";
+import { assignContentToClient, listAssignmentClients } from "../api/adminAssignmentsApi";
+import { DisplayAssignmentPanel, type AssignmentTargetOption } from "./DisplayAssignmentPanel";
 
 interface ClientAssignmentPanelProps {
   onUnauthorized: () => void;
@@ -11,8 +11,8 @@ export function ClientAssignmentPanel({
   preferredClientId,
 }: ClientAssignmentPanelProps) {
   return (
-    <AssetAssignmentPanel
-      assignAsset={assignAssetToClient}
+    <DisplayAssignmentPanel
+      assignContent={assignContentToClient}
       loadTargets={loadClientTargets}
       onUnauthorized={onUnauthorized}
       panelClassName="client-assignment-panel"

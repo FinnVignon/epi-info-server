@@ -8,6 +8,7 @@ import { readConfig } from "./config.js";
 import {
   checkDatabaseHealth,
   createDatabasePool,
+  ensureAssignmentContentSchema,
   ensureAssignmentSchema,
   ensureAssetSchema,
   ensureClientConnectionSchema,
@@ -116,6 +117,7 @@ app.use(
 
 async function startServer(): Promise<void> {
   await ensureAssignmentSchema(mysqlPool, config.mysql.database);
+  await ensureAssignmentContentSchema(mysqlPool, config.mysql.database);
   await ensureAssetSchema(mysqlPool, config.mysql.database);
   await ensureClientConnectionSchema(mysqlPool, config.mysql.database);
 

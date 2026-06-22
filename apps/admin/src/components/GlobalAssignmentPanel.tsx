@@ -1,5 +1,5 @@
-import { assignAssetGlobally, getGlobalAssignmentTarget } from "../api/adminAssignmentsApi";
-import { AssetAssignmentPanel, type AssignmentTargetOption } from "./AssetAssignmentPanel";
+import { assignContentGlobally, getGlobalAssignmentTarget } from "../api/adminAssignmentsApi";
+import { DisplayAssignmentPanel, type AssignmentTargetOption } from "./DisplayAssignmentPanel";
 
 interface GlobalAssignmentPanelProps {
   onUnauthorized: () => void;
@@ -7,8 +7,8 @@ interface GlobalAssignmentPanelProps {
 
 export function GlobalAssignmentPanel({ onUnauthorized }: GlobalAssignmentPanelProps) {
   return (
-    <AssetAssignmentPanel
-      assignAsset={assignAssetGlobally}
+    <DisplayAssignmentPanel
+      assignContent={assignContentGlobally}
       hideTargetSelector
       loadTargets={loadGlobalTarget}
       onUnauthorized={onUnauthorized}

@@ -134,8 +134,17 @@ export interface UpdateAssetStatusRequest {
 
 export interface AssignAssetRequest {
   assetId: string;
+  contentType: "asset";
   fit: FitMode;
 }
+
+export interface AssignLiveWebLinkRequest {
+  contentType: "live_web_link";
+  refreshSeconds: number;
+  url: string;
+}
+
+export type AssignDisplayContentRequest = AssignAssetRequest | AssignLiveWebLinkRequest;
 
 export interface AssignmentResponse {
   manifest: Manifest;

@@ -1,5 +1,5 @@
-import { assignAssetToGroup, listAssignmentGroups } from "../api/adminAssignmentsApi";
-import { AssetAssignmentPanel, type AssignmentTargetOption } from "./AssetAssignmentPanel";
+import { assignContentToGroup, listAssignmentGroups } from "../api/adminAssignmentsApi";
+import { DisplayAssignmentPanel, type AssignmentTargetOption } from "./DisplayAssignmentPanel";
 
 interface GroupAssignmentPanelProps {
   onUnauthorized: () => void;
@@ -11,8 +11,8 @@ export function GroupAssignmentPanel({
   preferredGroupId,
 }: GroupAssignmentPanelProps) {
   return (
-    <AssetAssignmentPanel
-      assignAsset={assignAssetToGroup}
+    <DisplayAssignmentPanel
+      assignContent={assignContentToGroup}
       loadTargets={loadGroupTargets}
       onUnauthorized={onUnauthorized}
       panelClassName="group-assignment-panel"

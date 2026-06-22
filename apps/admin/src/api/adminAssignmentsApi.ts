@@ -1,6 +1,6 @@
 import type {
   AssetListResponse,
-  AssignAssetRequest,
+  AssignDisplayContentRequest,
   AssignmentGroupListResponse,
   AssignmentGlobalTargetResponse,
   AssignmentResponse,
@@ -24,9 +24,9 @@ export async function listAssignmentGroups(): Promise<AssignmentGroupListRespons
   );
 }
 
-export async function assignAssetToClient(
+export async function assignContentToClient(
   clientId: string,
-  request: AssignAssetRequest,
+  request: AssignDisplayContentRequest,
 ): Promise<AssignmentResponse> {
   return readJsonResponse<AssignmentResponse>(
     await fetch(`/api/admin/assignments/clients/${encodeURIComponent(clientId)}`, {
@@ -39,9 +39,9 @@ export async function assignAssetToClient(
   );
 }
 
-export async function assignAssetToGroup(
+export async function assignContentToGroup(
   groupId: string,
-  request: AssignAssetRequest,
+  request: AssignDisplayContentRequest,
 ): Promise<AssignmentResponse> {
   return readJsonResponse<AssignmentResponse>(
     await fetch(`/api/admin/assignments/groups/${encodeURIComponent(groupId)}`, {
@@ -60,9 +60,9 @@ export async function getGlobalAssignmentTarget(): Promise<AssignmentGlobalTarge
   );
 }
 
-export async function assignAssetGlobally(
+export async function assignContentGlobally(
   _targetId: string,
-  request: AssignAssetRequest,
+  request: AssignDisplayContentRequest,
 ): Promise<AssignmentResponse> {
   return readJsonResponse<AssignmentResponse>(
     await fetch("/api/admin/assignments/global", {

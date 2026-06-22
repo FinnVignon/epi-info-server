@@ -90,10 +90,16 @@ export type {
 
 export {
   assignAssetToTarget,
+  assignManifestItemToTarget,
+  ensureAssignmentContentSchema,
   ensureAssignmentSchema,
   findEffectiveManifestForClient,
 } from "./database/manifests.js";
-export type { AssignmentTarget, AssignAssetToTargetInput } from "./database/manifests.js";
+export type {
+  AssignmentTarget,
+  AssignAssetToTargetInput,
+  AssignManifestItemToTargetInput,
+} from "./database/manifests.js";
 
 export {
   addClientToGroup,

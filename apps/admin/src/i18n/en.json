@@ -139,15 +139,15 @@
     "target": "Target",
     "noClient": "No permitted client is available.",
     "clientLabel": "Client",
-    "assetLabel": "Asset",
+    "assetLabel": "Content",
     "fitLabel": "Fit",
     "fitContain": "Contain",
     "fitCover": "Cover",
     "noAssets": "Upload an active image or video before creating an assignment.",
     "assigning": "Assigning",
-    "assignButton": "Display asset",
+    "assignButton": "Display content",
     "errorLoad": "Unable to load assignment options",
-    "errorAssign": "Unable to assign asset",
+    "errorAssign": "Unable to assign display content",
     "noticeAssigned": "assigned. The client will activate version"
   },
 
