@@ -1,4 +1,5 @@
 import { assignContentToClient, listAssignmentClients } from "../api/adminAssignmentsApi";
+import { useTranslation } from "../i18n";
 import { DisplayAssignmentPanel, type AssignmentTargetOption } from "./DisplayAssignmentPanel";
 
 interface ClientAssignmentPanelProps {
@@ -10,6 +11,8 @@ export function ClientAssignmentPanel({
   onUnauthorized,
   preferredClientId,
 }: ClientAssignmentPanelProps) {
+  const { t } = useTranslation();
+
   return (
     <DisplayAssignmentPanel
       assignContent={assignContentToClient}
@@ -17,8 +20,8 @@ export function ClientAssignmentPanel({
       onUnauthorized={onUnauthorized}
       panelClassName="client-assignment-panel"
       preferredTargetId={preferredClientId}
-      targetLabel="Client"
-      title="Display Assignment"
+      targetLabel={t.assignment.clientTarget}
+      title={t.assignment.title}
     />
   );
 }

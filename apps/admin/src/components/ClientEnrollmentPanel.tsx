@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { createClientEnrollmentToken } from "../api/adminClientsApi";
 import { ApiError } from "../api/adminApi";
+import { formatTranslation, useTranslation } from "../i18n";
 import type { ClientEnrollmentToken } from "../../../shared/clientContracts";
 
 interface ClientEnrollmentPanelProps {
@@ -9,6 +10,7 @@ interface ClientEnrollmentPanelProps {
 }
 
 export function ClientEnrollmentPanel({ onUnauthorized }: ClientEnrollmentPanelProps) {
+  const { t } = useTranslation();
   const [enrollmentToken, setEnrollmentToken] = useState<ClientEnrollmentToken | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -23,16 +25,14 @@ export function ClientEnrollmentPanel({ onUnauthorized }: ClientEnrollmentPanelP
       const response = await createClientEnrollmentToken();
 
       setEnrollmentToken(response.enrollmentToken);
-      setNotice("Enrollment token created.");
+      setNotice(t.clients.noticeTokenCreated);
     } catch (createError) {
       if (createError instanceof ApiError && createError.status === 401) {
         onUnauthorized();
         return;
       }
 
-      setError(
-        createError instanceof Error ? createError.message : "Unable to create an enrollment token",
-      );
+      setError(createError instanceof Error ? createError.message : t.clients.errorToken);
     } finally {
       setIsCreating(false);
     }
@@ -46,23 +46,23 @@ export function ClientEnrollmentPanel({ onUnauthorized }: ClientEnrollmentPanelP
     try {
       await navigator.clipboard.writeText(enrollmentToken.token);
       setError(null);
-      setNotice("Enrollment token copied.");
+      setNotice(t.clients.noticeTokenCopied);
     } catch {
-      setError("Unable to copy the token. Select it manually.");
+      setError(t.clients.errorTokenCopy);
     }
   }
 
   return (
     <article className="panel client-enrollment-panel">
       <div className="panel-header">
-        <h2>Connect A Client</h2>
+        <h2>{t.clients.connectTitle}</h2>
         <button
           className="primary-button"
           disabled={isCreating}
           onClick={() => void handleCreateToken()}
           type="button"
         >
-          {isCreating ? "Generating" : "Generate token"}
+          {isCreating ? t.clients.generating : t.clients.generateToken}
         </button>
       </div>
 
@@ -72,12 +72,16 @@ export function ClientEnrollmentPanel({ onUnauthorized }: ClientEnrollmentPanelP
       {enrollmentToken ? (
         <div className="enrollment-token-result">
           <div>
-            <span>Enrollment token</span>
+            <span>{t.clients.enrollmentToken}</span>
             <code>{enrollmentToken.token}</code>
           </div>
-          <p className="metric">Expires {new Date(enrollmentToken.expiresAt).toLocaleString()}.</p>
+          <p className="metric">
+            {formatTranslation(t.clients.tokenExpires, {
+              date: new Date(enrollmentToken.expiresAt).toLocaleString(),
+            })}
+          </p>
           <button className="secondary-button" onClick={() => void handleCopyToken()} type="button">
-            Copy token
+            {t.clients.copyToken}
           </button>
         </div>
       ) : null}

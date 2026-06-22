@@ -188,7 +188,7 @@ export function AdminUsersScreen({ currentUser, onUnauthorized }: AdminUsersScre
       <section className="content single-column">
         <article className="panel">
           <h2>{t.users.title}</h2>
-          <p className="metric">Super admin access is required.</p>
+          <p className="metric">{t.users.errorForbidden}</p>
         </article>
       </section>
     );

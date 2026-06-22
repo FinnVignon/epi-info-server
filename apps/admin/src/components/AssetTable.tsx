@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 
+import { useTranslation, type Translations } from "../i18n";
 import type { AdminUser, Asset, AssetStatus, AssetType } from "../../../shared/adminContracts";
 
 type AssetSortDirection = "asc" | "desc";
@@ -22,6 +23,7 @@ export function AssetTable({
   onRefresh,
   onStatusChange,
 }: AssetTableProps) {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
   const [sortDirection, setSortDirection] = useState<AssetSortDirection>("desc");
   const [sortKey, setSortKey] = useState<AssetSortKey>("createdAt");
@@ -71,49 +73,49 @@ export function AssetTable({
   return (
     <article className="panel assets-list-panel">
       <div className="panel-header">
-        <h2>Assets</h2>
+        <h2>{t.assets.title}</h2>
         <button className="secondary-button" onClick={onRefresh} type="button">
-          Refresh
+          {t.common.refresh}
         </button>
       </div>
 
       <div className="table-controls">
         <label className="table-search">
-          <span>Search</span>
+          <span>{t.common.search}</span>
           <input
             onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder="Name, filename, or uploader"
+            placeholder={t.assets.searchPlaceholder}
             value={searchQuery}
           />
         </label>
 
         <label>
-          <span>Status</span>
+          <span>{t.assets.statusFilter}</span>
           <select
             onChange={(event) => setStatusFilter(event.target.value as AssetStatusFilter)}
             value={statusFilter}
           >
-            <option value="active">Active</option>
-            <option value="archived">Archived</option>
-            <option value="all">All</option>
+            <option value="active">{t.common.active}</option>
+            <option value="archived">{t.common.archived}</option>
+            <option value="all">{t.common.all}</option>
           </select>
         </label>
 
         <label>
-          <span>Type</span>
+          <span>{t.assets.typeFilter}</span>
           <select
             onChange={(event) => setTypeFilter(event.target.value as AssetTypeFilter)}
             value={typeFilter}
           >
-            <option value="all">All</option>
-            <option value="image">Images</option>
-            <option value="video">Videos</option>
+            <option value="all">{t.common.all}</option>
+            <option value="image">{t.common.images}</option>
+            <option value="video">{t.common.videos}</option>
           </select>
         </label>
       </div>
 
       {isLoading ? (
-        <p className="metric">Loading assets...</p>
+        <p className="metric">{t.assets.loading}</p>
       ) : assets.length ? (
         <div className="table-wrap">
           <table className="data-table">
@@ -122,46 +124,46 @@ export function AssetTable({
                 <SortableHeader
                   activeSortKey={sortKey}
                   direction={sortDirection}
-                  label="Name"
+                  label={t.common.name}
                   onSort={handleSort}
                   sortKey="displayName"
                 />
                 <SortableHeader
                   activeSortKey={sortKey}
                   direction={sortDirection}
-                  label="Type"
+                  label={t.common.type}
                   onSort={handleSort}
                   sortKey="type"
                 />
                 <SortableHeader
                   activeSortKey={sortKey}
                   direction={sortDirection}
-                  label="Uploader"
+                  label={t.assets.uploader}
                   onSort={handleSort}
                   sortKey="uploader"
                 />
                 <SortableHeader
                   activeSortKey={sortKey}
                   direction={sortDirection}
-                  label="Size"
+                  label={t.assets.size}
                   onSort={handleSort}
                   sortKey="sizeBytes"
                 />
                 <SortableHeader
                   activeSortKey={sortKey}
                   direction={sortDirection}
-                  label="Status"
+                  label={t.common.status}
                   onSort={handleSort}
                   sortKey="status"
                 />
                 <SortableHeader
                   activeSortKey={sortKey}
                   direction={sortDirection}
-                  label="Uploaded"
+                  label={t.assets.uploaded}
                   onSort={handleSort}
                   sortKey="createdAt"
                 />
-                <th>Actions</th>
+                <th>{t.common.actions}</th>
               </tr>
             </thead>
             <tbody>
@@ -178,11 +180,13 @@ export function AssetTable({
                         <small>{asset.originalFilename}</small>
                       </div>
                     </td>
-                    <td>{asset.type}</td>
-                    <td>{formatUploader(asset)}</td>
+                    <td>{formatAssetType(asset.type, t)}</td>
+                    <td>{formatUploader(asset, t)}</td>
                     <td>{formatFileSize(asset.sizeBytes)}</td>
                     <td>
-                      <span className={`status-pill ${asset.status}`}>{asset.status}</span>
+                      <span className={`status-pill ${asset.status}`}>
+                        {formatAssetStatus(asset.status, t)}
+                      </span>
                     </td>
                     <td>{formatDate(asset.createdAt)}</td>
                     <td>
@@ -193,7 +197,7 @@ export function AssetTable({
                           rel="noreferrer"
                           target="_blank"
                         >
-                          Open
+                          {t.common.open}
                         </a>
                         <button
                           className="ghost-button"
@@ -201,7 +205,7 @@ export function AssetTable({
                           onClick={() => onStatusChange(asset, nextStatus)}
                           type="button"
                         >
-                          {asset.status === "active" ? "Archive" : "Restore"}
+                          {asset.status === "active" ? t.common.archive : t.common.restore}
                         </button>
                       </div>
                     </td>
@@ -210,10 +214,10 @@ export function AssetTable({
               })}
             </tbody>
           </table>
-          {!visibleAssets.length ? <p className="metric table-empty">No matching assets.</p> : null}
+          {!visibleAssets.length ? <p className="metric table-empty">{t.assets.noMatch}</p> : null}
         </div>
       ) : (
-        <p className="metric">No assets uploaded yet.</p>
+        <p className="metric">{t.assets.noAssets}</p>
       )}
     </article>
   );
@@ -228,6 +232,7 @@ interface SortableHeaderProps {
 }
 
 function SortableHeader({ activeSortKey, direction, label, onSort, sortKey }: SortableHeaderProps) {
+  const { t } = useTranslation();
   const isActive = activeSortKey === sortKey;
 
   return (
@@ -238,7 +243,7 @@ function SortableHeader({ activeSortKey, direction, label, onSort, sortKey }: So
         type="button"
       >
         <span>{label}</span>
-        <small>{isActive ? (direction === "asc" ? "up" : "down") : ""}</small>
+        <small>{isActive ? (direction === "asc" ? t.common.up : t.common.down) : ""}</small>
       </button>
     </th>
   );
@@ -257,7 +262,7 @@ function compareAssets(firstAsset: Asset, secondAsset: Asset, sortKey: AssetSort
     case "type":
       return compareText(firstAsset.type, secondAsset.type);
     case "uploader":
-      return compareText(formatUploader(firstAsset), formatUploader(secondAsset));
+      return compareText(getUploaderName(firstAsset), getUploaderName(secondAsset));
   }
 }
 
@@ -271,8 +276,20 @@ function formatDate(value: string): string {
   return new Date(value).toLocaleString();
 }
 
-function formatUploader(asset: Asset): string {
-  return asset.uploadedBy?.displayName ?? "Unknown";
+function formatAssetStatus(status: AssetStatus, t: Translations): string {
+  return status === "active" ? t.common.active : t.common.archived;
+}
+
+function formatAssetType(type: AssetType, t: Translations): string {
+  return type === "image" ? t.common.image : t.common.video;
+}
+
+function formatUploader(asset: Asset, t: Translations): string {
+  return asset.uploadedBy?.displayName ?? t.assets.unknownUploader;
+}
+
+function getUploaderName(asset: Asset): string {
+  return asset.uploadedBy?.displayName ?? "";
 }
 
 function formatFileSize(sizeBytes: number): string {

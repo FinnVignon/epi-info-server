@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 
+import { useTranslation, type Translations } from "../i18n";
 import { formatDate } from "../utils/formatDate";
 import type {
   ClientAccessStatus,
@@ -27,6 +28,7 @@ export function ClientTable({
   onSelectClient,
   selectedClientId,
 }: ClientTableProps) {
+  const { t } = useTranslation();
   const [accessFilter, setAccessFilter] = useState<AccessFilter>("all");
   const [connectionFilter, setConnectionFilter] = useState<ConnectionFilter>("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -67,48 +69,48 @@ export function ClientTable({
   return (
     <article className="panel clients-list-panel">
       <div className="panel-header">
-        <h2>Clients</h2>
+        <h2>{t.clients.title}</h2>
         <button className="secondary-button" onClick={onRefresh} type="button">
-          Refresh
+          {t.common.refresh}
         </button>
       </div>
 
       <div className="table-controls">
         <label>
-          <span>Search</span>
+          <span>{t.common.search}</span>
           <input
             onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder="Name, ID, or software"
+            placeholder={t.clients.searchPlaceholder}
             value={searchQuery}
           />
         </label>
         <label>
-          <span>Connection</span>
+          <span>{t.clients.connection}</span>
           <select
             onChange={(event) => setConnectionFilter(event.target.value as ConnectionFilter)}
             value={connectionFilter}
           >
-            <option value="all">All</option>
-            <option value="online">Online</option>
-            <option value="offline">Offline</option>
-            <option value="unknown">Unknown</option>
+            <option value="all">{t.common.all}</option>
+            <option value="online">{t.clients.connectionOnline}</option>
+            <option value="offline">{t.clients.connectionOffline}</option>
+            <option value="unknown">{t.clients.connectionUnknown}</option>
           </select>
         </label>
         <label>
-          <span>Access</span>
+          <span>{t.clients.access}</span>
           <select
             onChange={(event) => setAccessFilter(event.target.value as AccessFilter)}
             value={accessFilter}
           >
-            <option value="all">All</option>
-            <option value="active">Active</option>
-            <option value="disabled">Disabled</option>
+            <option value="all">{t.common.all}</option>
+            <option value="active">{t.common.active}</option>
+            <option value="disabled">{t.common.disabled}</option>
           </select>
         </label>
       </div>
 
       {isLoading ? (
-        <p className="metric">Loading clients...</p>
+        <p className="metric">{t.clients.loading}</p>
       ) : clients.length ? (
         <div className="table-wrap">
           <table className="data-table clients-table">
@@ -117,35 +119,35 @@ export function ClientTable({
                 <SortableHeader
                   activeSortKey={sortKey}
                   direction={sortDirection}
-                  label="Name"
+                  label={t.common.name}
                   onSort={handleSort}
                   sortKey="name"
                 />
                 <SortableHeader
                   activeSortKey={sortKey}
                   direction={sortDirection}
-                  label="Connection"
+                  label={t.clients.connection}
                   onSort={handleSort}
                   sortKey="connection"
                 />
                 <SortableHeader
                   activeSortKey={sortKey}
                   direction={sortDirection}
-                  label="Access"
+                  label={t.clients.access}
                   onSort={handleSort}
                   sortKey="access"
                 />
                 <SortableHeader
                   activeSortKey={sortKey}
                   direction={sortDirection}
-                  label="Software"
+                  label={t.clients.software}
                   onSort={handleSort}
                   sortKey="software"
                 />
                 <SortableHeader
                   activeSortKey={sortKey}
                   direction={sortDirection}
-                  label="Last seen"
+                  label={t.clients.lastSeen}
                   onSort={handleSort}
                   sortKey="lastSeen"
                 />
@@ -166,26 +168,26 @@ export function ClientTable({
                   </td>
                   <td>
                     <span className={`status-pill ${client.connectionStatus}`}>
-                      {client.connectionStatus}
+                      {formatConnectionStatus(client.connectionStatus, t)}
                     </span>
                   </td>
                   <td>
                     <span className={`status-pill ${client.accessStatus}`}>
-                      {client.accessStatus}
+                      {formatAccessStatus(client.accessStatus, t)}
                     </span>
                   </td>
-                  <td>{client.softwareVersion ?? "Unknown"}</td>
-                  <td>{formatDate(client.lastSeenAt)}</td>
+                  <td>{client.softwareVersion ?? t.common.unknown}</td>
+                  <td>{formatDate(client.lastSeenAt, t.common.never)}</td>
                 </tr>
               ))}
             </tbody>
           </table>
           {!visibleClients.length ? (
-            <p className="metric table-empty">No matching clients.</p>
+            <p className="metric table-empty">{t.clients.noMatch}</p>
           ) : null}
         </div>
       ) : (
-        <p className="metric">No clients registered yet.</p>
+        <p className="metric">{t.clients.noClients}</p>
       )}
     </article>
   );
@@ -200,6 +202,7 @@ interface SortableHeaderProps {
 }
 
 function SortableHeader({ activeSortKey, direction, label, onSort, sortKey }: SortableHeaderProps) {
+  const { t } = useTranslation();
   const isActive = activeSortKey === sortKey;
 
   return (
@@ -210,7 +213,7 @@ function SortableHeader({ activeSortKey, direction, label, onSort, sortKey }: So
         type="button"
       >
         <span>{label}</span>
-        <small>{isActive ? (direction === "asc" ? "up" : "down") : ""}</small>
+        <small>{isActive ? (direction === "asc" ? t.common.up : t.common.down) : ""}</small>
       </button>
     </th>
   );
@@ -243,6 +246,21 @@ function compareText(firstValue: string, secondValue: string): number {
   return firstValue.localeCompare(secondValue, undefined, {
     sensitivity: "base",
   });
+}
+
+function formatAccessStatus(status: ClientAccessStatus, t: Translations): string {
+  return status === "active" ? t.common.active : t.common.disabled;
+}
+
+function formatConnectionStatus(status: ClientConnectionStatus, t: Translations): string {
+  switch (status) {
+    case "offline":
+      return t.clients.connectionOffline;
+    case "online":
+      return t.clients.connectionOnline;
+    case "unknown":
+      return t.clients.connectionUnknown;
+  }
 }
 
 function shortClientId(clientId: string): string {

@@ -1,4 +1,5 @@
 import { assignContentToGroup, listAssignmentGroups } from "../api/adminAssignmentsApi";
+import { useTranslation } from "../i18n";
 import { DisplayAssignmentPanel, type AssignmentTargetOption } from "./DisplayAssignmentPanel";
 
 interface GroupAssignmentPanelProps {
@@ -10,6 +11,8 @@ export function GroupAssignmentPanel({
   onUnauthorized,
   preferredGroupId,
 }: GroupAssignmentPanelProps) {
+  const { t } = useTranslation();
+
   return (
     <DisplayAssignmentPanel
       assignContent={assignContentToGroup}
@@ -17,8 +20,8 @@ export function GroupAssignmentPanel({
       onUnauthorized={onUnauthorized}
       panelClassName="group-assignment-panel"
       preferredTargetId={preferredGroupId}
-      targetLabel="Group"
-      title="Group Display Assignment"
+      targetLabel={t.assignment.groupTarget}
+      title={t.assignment.groupTitle}
     />
   );
 }

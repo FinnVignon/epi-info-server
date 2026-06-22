@@ -1,4 +1,5 @@
 import { assignContentGlobally, getGlobalAssignmentTarget } from "../api/adminAssignmentsApi";
+import { useTranslation } from "../i18n";
 import { DisplayAssignmentPanel, type AssignmentTargetOption } from "./DisplayAssignmentPanel";
 
 interface GlobalAssignmentPanelProps {
@@ -6,6 +7,8 @@ interface GlobalAssignmentPanelProps {
 }
 
 export function GlobalAssignmentPanel({ onUnauthorized }: GlobalAssignmentPanelProps) {
+  const { t } = useTranslation();
+
   return (
     <DisplayAssignmentPanel
       assignContent={assignContentGlobally}
@@ -14,9 +17,9 @@ export function GlobalAssignmentPanel({ onUnauthorized }: GlobalAssignmentPanelP
       onUnauthorized={onUnauthorized}
       panelClassName="global-assignment-panel"
       preferredTargetId="global"
-      targetLabel="Target"
-      title="All Displays"
-      unavailableMessage="Global assignment permission is required to manage all displays."
+      targetLabel={t.assignment.globalTarget}
+      title={t.assignment.globalTitle}
+      unavailableMessage={t.assignment.unavailableGlobal}
     />
   );
 }

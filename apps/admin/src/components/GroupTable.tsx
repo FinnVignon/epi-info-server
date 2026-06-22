@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 
+import { useTranslation } from "../i18n";
 import { formatDate } from "../utils/formatDate";
 import type { DisplayGroup } from "../../../shared/groupContracts";
 
@@ -21,6 +22,7 @@ export function GroupTable({
   onSelectGroup,
   selectedGroupId,
 }: GroupTableProps) {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [sortKey, setSortKey] = useState<SortKey>("name");
@@ -54,23 +56,23 @@ export function GroupTable({
   return (
     <article className="panel groups-list-panel">
       <div className="panel-header">
-        <h2>Groups</h2>
+        <h2>{t.groups.title}</h2>
         <button className="secondary-button" onClick={onRefresh} type="button">
-          Refresh
+          {t.common.refresh}
         </button>
       </div>
 
       <label className="table-search">
-        <span>Search</span>
+        <span>{t.common.search}</span>
         <input
           onChange={(event) => setSearchQuery(event.target.value)}
-          placeholder="Name or ID"
+          placeholder={t.groups.searchPlaceholder}
           value={searchQuery}
         />
       </label>
 
       {isLoading ? (
-        <p className="metric">Loading groups...</p>
+        <p className="metric">{t.groups.loading}</p>
       ) : groups.length ? (
         <div className="table-wrap">
           <table className="data-table groups-table">
@@ -79,21 +81,21 @@ export function GroupTable({
                 <SortableHeader
                   activeSortKey={sortKey}
                   direction={sortDirection}
-                  label="Name"
+                  label={t.common.name}
                   onSort={handleSort}
                   sortKey="name"
                 />
                 <SortableHeader
                   activeSortKey={sortKey}
                   direction={sortDirection}
-                  label="Members"
+                  label={t.groups.members}
                   onSort={handleSort}
                   sortKey="members"
                 />
                 <SortableHeader
                   activeSortKey={sortKey}
                   direction={sortDirection}
-                  label="Updated"
+                  label={t.groups.updated}
                   onSort={handleSort}
                   sortKey="updated"
                 />
@@ -118,10 +120,10 @@ export function GroupTable({
               ))}
             </tbody>
           </table>
-          {!visibleGroups.length ? <p className="metric table-empty">No matching groups.</p> : null}
+          {!visibleGroups.length ? <p className="metric table-empty">{t.groups.noMatch}</p> : null}
         </div>
       ) : (
-        <p className="metric">No groups created yet.</p>
+        <p className="metric">{t.groups.noGroups}</p>
       )}
     </article>
   );
@@ -136,6 +138,7 @@ interface SortableHeaderProps {
 }
 
 function SortableHeader({ activeSortKey, direction, label, onSort, sortKey }: SortableHeaderProps) {
+  const { t } = useTranslation();
   const isActive = activeSortKey === sortKey;
 
   return (
@@ -146,7 +149,7 @@ function SortableHeader({ activeSortKey, direction, label, onSort, sortKey }: So
         type="button"
       >
         <span>{label}</span>
-        <small>{isActive ? (direction === "asc" ? "up" : "down") : ""}</small>
+        <small>{isActive ? (direction === "asc" ? t.common.up : t.common.down) : ""}</small>
       </button>
     </th>
   );

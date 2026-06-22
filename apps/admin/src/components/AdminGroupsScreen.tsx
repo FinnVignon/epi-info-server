@@ -11,6 +11,7 @@ import {
   updateGroup,
 } from "../api/adminGroupsApi";
 import { ApiError } from "../api/adminApi";
+import { useTranslation } from "../i18n";
 import { GroupAssignmentPanel } from "./GroupAssignmentPanel";
 import { GroupCreatePanel } from "./GroupCreatePanel";
 import { GroupDetail } from "./GroupDetail";
@@ -27,6 +28,7 @@ interface AdminGroupsScreenProps {
 }
 
 export function AdminGroupsScreen({ onUnauthorized }: AdminGroupsScreenProps) {
+  const { t } = useTranslation();
   const [canCreateGroups, setCanCreateGroups] = useState(false);
   const [canManageGroups, setCanManageGroups] = useState<boolean | null>(null);
   const [clientOptions, setClientOptions] = useState<ManagedClient[]>([]);
@@ -69,7 +71,7 @@ export function AdminGroupsScreen({ onUnauthorized }: AdminGroupsScreenProps) {
         }
       } catch (loadError) {
         if (!cancelled) {
-          handleApiError(loadError, "Unable to load group");
+          handleApiError(loadError, t.groups.errorLoadDetail);
         }
       } finally {
         if (!cancelled) {
@@ -108,7 +110,7 @@ export function AdminGroupsScreen({ onUnauthorized }: AdminGroupsScreenProps) {
         setSelectedGroup(null);
         setSelectedGroupId(null);
       } else {
-        handleApiError(loadError, "Unable to load groups");
+        handleApiError(loadError, t.groups.errorLoad);
       }
     } finally {
       setIsLoading(false);
@@ -125,10 +127,10 @@ export function AdminGroupsScreen({ onUnauthorized }: AdminGroupsScreenProps) {
 
       setGroups((currentGroups) => [...currentGroups, toGroupSummary(response.group)]);
       setSelectedGroupId(response.group.id);
-      setNotice("Group created.");
+      setNotice(t.groups.noticeCreated);
       return true;
     } catch (createError) {
-      handleApiError(createError, "Unable to create group");
+      handleApiError(createError, t.groups.errorCreate);
       return false;
     } finally {
       setIsSaving(false);
@@ -142,8 +144,8 @@ export function AdminGroupsScreen({ onUnauthorized }: AdminGroupsScreenProps) {
 
     return runGroupUpdate(
       () => updateGroup(selectedGroupId, { name }),
-      "Group updated.",
-      "Unable to update group",
+      t.groups.noticeUpdated,
+      t.groups.errorUpdate,
     );
   }
 
@@ -163,9 +165,9 @@ export function AdminGroupsScreen({ onUnauthorized }: AdminGroupsScreenProps) {
       setGroups(remainingGroups);
       setSelectedGroup(null);
       setSelectedGroupId(remainingGroups[0]?.id ?? null);
-      setNotice("Group deleted.");
+      setNotice(t.groups.noticeDeleted);
     } catch (deleteError) {
-      handleApiError(deleteError, "Unable to delete group");
+      handleApiError(deleteError, t.groups.errorDelete);
     } finally {
       setIsSaving(false);
     }
@@ -178,8 +180,8 @@ export function AdminGroupsScreen({ onUnauthorized }: AdminGroupsScreenProps) {
 
     const didUpdate = await runGroupUpdate(
       () => addGroupMember(selectedGroupId, clientId),
-      "Client added to group.",
-      "Unable to add client to group",
+      t.groups.noticeMemberAdded,
+      t.groups.errorAddMember,
     );
 
     if (didUpdate) {
@@ -194,8 +196,8 @@ export function AdminGroupsScreen({ onUnauthorized }: AdminGroupsScreenProps) {
 
     const didUpdate = await runGroupUpdate(
       () => removeGroupMember(selectedGroupId, clientId),
-      "Client removed from group.",
-      "Unable to remove client from group",
+      t.groups.noticeMemberRemoved,
+      t.groups.errorRemoveMember,
     );
 
     if (didUpdate) {
@@ -241,7 +243,7 @@ export function AdminGroupsScreen({ onUnauthorized }: AdminGroupsScreenProps) {
 
       setClientOptions(response.clients);
     } catch (loadError) {
-      handleApiError(loadError, "Unable to refresh permitted clients");
+      handleApiError(loadError, t.groups.errorRefreshClients);
     }
   }
 

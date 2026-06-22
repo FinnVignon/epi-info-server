@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { listAssignmentAssets } from "../api/adminAssignmentsApi";
 import { ApiError } from "../api/adminApi";
+import { formatTranslation, useTranslation, type Translations } from "../i18n";
 import type {
   AssignDisplayContentRequest,
   AssignmentResponse,
@@ -42,6 +43,7 @@ export function DisplayAssignmentPanel({
   title,
   unavailableMessage,
 }: DisplayAssignmentPanelProps) {
+  const { t } = useTranslation();
   const [assets, setAssets] = useState<Asset[]>([]);
   const [assetId, setAssetId] = useState("");
   const [contentType, setContentType] = useState<AssignmentContentType>("asset");
@@ -105,7 +107,7 @@ export function DisplayAssignmentPanel({
             setIsAvailable(false);
           } else {
             setIsAvailable(true);
-            handleApiError(loadError, "Unable to load assignment options");
+            handleApiError(loadError, t.assignment.errorLoad);
           }
         }
       } finally {
@@ -141,7 +143,7 @@ export function DisplayAssignmentPanel({
     const request = createAssignmentRequest();
 
     if (!request) {
-      setError("Choose valid display content before sending.");
+      setError(t.assignment.errorInvalidContent);
       return;
     }
 
@@ -153,10 +155,13 @@ export function DisplayAssignmentPanel({
       const response = await assignContent(selectedTarget.id, request);
 
       setNotice(
-        `${response.manifest.name} sent to ${selectedTarget.name}. Affected displays will download, verify, and activate it on their next sync.`,
+        formatTranslation(t.assignment.noticeSent, {
+          manifest: response.manifest.name,
+          target: selectedTarget.name,
+        }),
       );
     } catch (assignmentError) {
-      handleApiError(assignmentError, "Unable to assign display content");
+      handleApiError(assignmentError, t.assignment.errorAssign);
     } finally {
       setIsSaving(false);
     }
@@ -215,8 +220,10 @@ export function DisplayAssignmentPanel({
           <h2>{title}</h2>
           <p className="metric">
             {selectedTarget
-              ? `Target: ${selectedTarget.name}`
-              : `No permitted ${targetLabel.toLowerCase()} is available.`}
+              ? formatTranslation(t.assignment.targetSummary, { target: selectedTarget.name })
+              : formatTranslation(t.assignment.noTarget, {
+                  target: targetLabel.toLocaleLowerCase(),
+                })}
           </p>
         </div>
       </div>
@@ -243,20 +250,20 @@ export function DisplayAssignmentPanel({
         ) : null}
 
         <label>
-          <span>Content</span>
+          <span>{t.assignment.contentLabel}</span>
           <select
             disabled={isSaving}
             onChange={(event) => setContentType(event.target.value as AssignmentContentType)}
             value={contentType}
           >
-            <option value="asset">Uploaded image or video</option>
-            <option value="live_web_link">Live web link</option>
+            <option value="asset">{t.assignment.contentAsset}</option>
+            <option value="live_web_link">{t.assignment.contentLiveWebLink}</option>
           </select>
         </label>
 
         {contentType === "asset" ? (
           <label>
-            <span>Asset</span>
+            <span>{t.assignment.assetLabel}</span>
             <select
               disabled={isLoading || isSaving || assets.length === 0}
               onChange={(event) => setAssetId(event.target.value)}
@@ -264,7 +271,7 @@ export function DisplayAssignmentPanel({
             >
               {assets.map((asset) => (
                 <option key={asset.id} value={asset.id}>
-                  {asset.displayName} ({asset.type})
+                  {asset.displayName} ({formatAssetType(asset.type, t)})
                 </option>
               ))}
             </select>
@@ -272,19 +279,19 @@ export function DisplayAssignmentPanel({
         ) : (
           <>
             <label>
-              <span>Web link</span>
+              <span>{t.assignment.webLinkLabel}</span>
               <input
                 disabled={isSaving}
                 maxLength={2048}
                 onChange={(event) => setLiveUrl(event.target.value)}
-                placeholder="https://example.com/dashboard"
+                placeholder={t.assignment.webLinkPlaceholder}
                 type="url"
                 value={liveUrl}
               />
             </label>
 
             <label>
-              <span>Refresh seconds</span>
+              <span>{t.assignment.refreshSecondsLabel}</span>
               <input
                 disabled={isSaving}
                 max={86400}
@@ -299,28 +306,32 @@ export function DisplayAssignmentPanel({
 
         {contentType === "asset" ? (
           <label className="assignment-fit-field">
-            <span>Fit</span>
+            <span>{t.assignment.fitLabel}</span>
             <select
               disabled={isSaving}
               onChange={(event) => setFit(event.target.value as FitMode)}
               value={fit}
             >
-              <option value="contain">Contain</option>
-              <option value="cover">Cover</option>
+              <option value="contain">{t.assignment.fitContain}</option>
+              <option value="cover">{t.assignment.fitCover}</option>
             </select>
           </label>
         ) : null}
 
         {contentType === "asset" && assets.length === 0 && !isLoading ? (
-          <p className="metric">Upload an active image or video before creating an assignment.</p>
+          <p className="metric">{t.assignment.noAssets}</p>
         ) : null}
 
         <div className="assignment-actions">
           <button className="primary-button" disabled={!canSubmit} type="submit">
-            {isSaving ? "Working" : "Display content"}
+            {isSaving ? t.common.working : t.assignment.assignButton}
           </button>
         </div>
       </form>
     </article>
   );
+}
+
+function formatAssetType(type: Asset["type"], t: Translations): string {
+  return type === "image" ? t.common.image : t.common.video;
 }

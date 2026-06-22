@@ -1,7 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 
+import { formatTranslation, useTranslation, type Translations } from "../i18n";
 import { formatDate } from "../utils/formatDate";
-import type { ManagedClient } from "../../../shared/clientContracts";
+import type {
+  ClientAccessStatus,
+  ClientConnectionStatus,
+  ManagedClient,
+} from "../../../shared/clientContracts";
 import type { DisplayGroupDetail } from "../../../shared/groupContracts";
 
 interface GroupDetailProps {
@@ -25,6 +30,7 @@ export function GroupDetail({
   onRemoveMember,
   onUpdate,
 }: GroupDetailProps) {
+  const { t } = useTranslation();
   const [clientId, setClientId] = useState("");
   const [name, setName] = useState("");
   const manageableClientIds = useMemo(
@@ -63,7 +69,7 @@ export function GroupDetail({
   }
 
   async function handleDelete(groupName: string): Promise<void> {
-    if (window.confirm(`Delete the group "${groupName}"?`)) {
+    if (window.confirm(formatTranslation(t.groups.deleteConfirm, { name: groupName }))) {
       await onDelete();
     }
   }
@@ -71,7 +77,7 @@ export function GroupDetail({
   if (isLoading) {
     return (
       <article className="panel groups-detail-panel">
-        <p className="metric">Loading group...</p>
+        <p className="metric">{t.groups.loadingDetail}</p>
       </article>
     );
   }
@@ -79,7 +85,7 @@ export function GroupDetail({
   if (!group) {
     return (
       <article className="panel groups-detail-panel">
-        <p className="metric">Select a group.</p>
+        <p className="metric">{t.groups.selectGroup}</p>
       </article>
     );
   }
@@ -97,28 +103,28 @@ export function GroupDetail({
           onClick={() => void handleDelete(group.name)}
           type="button"
         >
-          Delete
+          {t.common.delete}
         </button>
       </div>
 
       <div className="detail-grid">
         <p>
-          <span>Members</span>
+          <span>{t.groups.members}</span>
           <strong>{group.memberCount}</strong>
         </p>
         <p>
-          <span>Created</span>
+          <span>{t.groups.created}</span>
           <strong>{formatDate(group.createdAt)}</strong>
         </p>
         <p>
-          <span>Updated</span>
+          <span>{t.groups.updated}</span>
           <strong>{formatDate(group.updatedAt)}</strong>
         </p>
       </div>
 
       <form className="form-grid compact-form" onSubmit={(event) => void handleUpdate(event)}>
         <label>
-          <span>Group name</span>
+          <span>{t.groups.groupName}</span>
           <input
             maxLength={255}
             minLength={2}
@@ -128,12 +134,12 @@ export function GroupDetail({
           />
         </label>
         <button className="secondary-button" disabled={isSaving} type="submit">
-          Save name
+          {t.common.saveName}
         </button>
       </form>
 
       <section className="section-block">
-        <h3>Members</h3>
+        <h3>{t.groups.members}</h3>
         {group.members.length ? (
           <ul className="group-member-list">
             {group.members.map((member) => (
@@ -141,7 +147,8 @@ export function GroupDetail({
                 <div>
                   <strong>{member.name}</strong>
                   <span>
-                    {member.connectionStatus} / {member.accessStatus}
+                    {formatConnectionStatus(member.connectionStatus, t)} /{" "}
+                    {formatAccessStatus(member.accessStatus, t)}
                   </span>
                 </div>
                 <button
@@ -150,23 +157,23 @@ export function GroupDetail({
                   onClick={() => void onRemoveMember(member.id)}
                   title={
                     manageableClientIds.has(member.id)
-                      ? "Remove client from group"
-                      : "Client management permission is required"
+                      ? t.groups.removeClientTitle
+                      : t.groups.permissionRequired
                   }
                   type="button"
                 >
-                  Remove
+                  {t.common.remove}
                 </button>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="metric">This group has no clients.</p>
+          <p className="metric">{t.groups.noMembers}</p>
         )}
 
         <form className="form-grid compact-form" onSubmit={(event) => void handleAddMember(event)}>
           <label>
-            <span>Add client</span>
+            <span>{t.groups.addClient}</span>
             <select
               disabled={isSaving || availableClients.length === 0}
               onChange={(event) => setClientId(event.target.value)}
@@ -180,13 +187,26 @@ export function GroupDetail({
             </select>
           </label>
           <button className="secondary-button" disabled={isSaving || !clientId} type="submit">
-            Add
+            {t.common.add}
           </button>
         </form>
-        {!availableClients.length ? (
-          <p className="metric">No additional permitted clients are available.</p>
-        ) : null}
+        {!availableClients.length ? <p className="metric">{t.groups.noAdditionalClients}</p> : null}
       </section>
     </article>
   );
+}
+
+function formatAccessStatus(status: ClientAccessStatus, t: Translations): string {
+  return status === "active" ? t.common.active : t.common.disabled;
+}
+
+function formatConnectionStatus(status: ClientConnectionStatus, t: Translations): string {
+  switch (status) {
+    case "offline":
+      return t.clients.connectionOffline;
+    case "online":
+      return t.clients.connectionOnline;
+    case "unknown":
+      return t.clients.connectionUnknown;
+  }
 }

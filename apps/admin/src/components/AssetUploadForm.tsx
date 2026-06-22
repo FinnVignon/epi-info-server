@@ -1,11 +1,14 @@
 import { useState } from "react";
 
+import { useTranslation } from "../i18n";
+
 interface AssetUploadFormProps {
   isUploading: boolean;
   onUpload: (file: File, displayName: string) => Promise<boolean>;
 }
 
 export function AssetUploadForm({ isUploading, onUpload }: AssetUploadFormProps) {
+  const { t } = useTranslation();
   const [displayName, setDisplayName] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
@@ -35,10 +38,10 @@ export function AssetUploadForm({ isUploading, onUpload }: AssetUploadFormProps)
 
   return (
     <article className="panel assets-upload-panel">
-      <h2>Upload Asset</h2>
+      <h2>{t.assets.uploadTitle}</h2>
       <form className="form-grid" onSubmit={(event) => void handleSubmit(event)}>
         <label>
-          <span>Name</span>
+          <span>{t.assets.nameLabel}</span>
           <input
             maxLength={255}
             minLength={2}
@@ -48,7 +51,7 @@ export function AssetUploadForm({ isUploading, onUpload }: AssetUploadFormProps)
           />
         </label>
         <label>
-          <span>File</span>
+          <span>{t.assets.fileLabel}</span>
           <input
             accept="image/avif,image/gif,image/jpeg,image/png,image/webp,video/mp4,video/ogg,video/quicktime,video/webm"
             onChange={handleFileChange}
@@ -66,7 +69,7 @@ export function AssetUploadForm({ isUploading, onUpload }: AssetUploadFormProps)
           disabled={isUploading || !selectedFile || displayName.trim().length < 2}
           type="submit"
         >
-          {isUploading ? "Uploading" : "Upload"}
+          {isUploading ? t.assets.uploading : t.assets.uploadButton}
         </button>
       </form>
     </article>

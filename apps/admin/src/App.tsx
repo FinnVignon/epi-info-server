@@ -17,6 +17,7 @@ import type { AdminScreen } from "./components/AdminShell";
 import { AdminUsersScreen } from "./components/AdminUsersScreen";
 import { AuthScreen } from "./components/AuthScreen";
 import { LoadingScreen } from "./components/LoadingScreen";
+import { useTranslation } from "./i18n";
 import type { AdminAuthResponse, AdminUser } from "../../shared/adminContracts";
 import type { DashboardResponse, HealthResponse } from "../../shared/dashboardContracts";
 import "./App.css";
@@ -25,6 +26,7 @@ type ApiStatus = "checking" | "ok" | "error";
 type AuthMode = "checking" | "bootstrap" | "login" | "authenticated";
 
 export function App() {
+  const { t } = useTranslation();
   const [activeScreen, setActiveScreen] = useState<AdminScreen>("dashboard");
   const [apiStatus, setApiStatus] = useState<ApiStatus>("checking");
   const [authError, setAuthError] = useState<string | null>(null);
@@ -57,9 +59,7 @@ export function App() {
         }
       } catch (error) {
         if (!cancelled) {
-          setAuthError(
-            error instanceof Error ? error.message : "Impossible de vérifier la session admin",
-          );
+          setAuthError(error instanceof Error ? error.message : t.auth.sessionError);
           setAuthMode("login");
         }
       }

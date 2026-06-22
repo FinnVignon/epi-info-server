@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import { listAssets, updateAssetStatus, uploadAsset } from "../api/adminAssetsApi";
 import { ApiError } from "../api/adminApi";
+import { useTranslation } from "../i18n";
 import { AssetTable } from "./AssetTable";
 import { AssetUploadForm } from "./AssetUploadForm";
 import type { AdminUser, Asset, AssetStatus } from "../../../shared/adminContracts";
@@ -12,6 +13,7 @@ interface AdminAssetsScreenProps {
 }
 
 export function AdminAssetsScreen({ currentUser, onUnauthorized }: AdminAssetsScreenProps) {
+  const { t } = useTranslation();
   const [assets, setAssets] = useState<Asset[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -31,7 +33,7 @@ export function AdminAssetsScreen({ currentUser, onUnauthorized }: AdminAssetsSc
 
       setAssets(response.assets);
     } catch (loadError) {
-      handleApiError(loadError, "Unable to load assets");
+      handleApiError(loadError, t.assets.errorLoad);
     } finally {
       setIsLoading(false);
     }
@@ -49,10 +51,10 @@ export function AdminAssetsScreen({ currentUser, onUnauthorized }: AdminAssetsSc
         response.asset,
         ...currentAssets.filter((asset) => asset.id !== response.asset.id),
       ]);
-      setNotice("Asset uploaded.");
+      setNotice(t.assets.noticeUploaded);
       return true;
     } catch (uploadError) {
-      handleApiError(uploadError, "Unable to upload asset");
+      handleApiError(uploadError, t.assets.errorUpload);
       return false;
     } finally {
       setIsUploading(false);
@@ -67,9 +69,9 @@ export function AdminAssetsScreen({ currentUser, onUnauthorized }: AdminAssetsSc
       const response = await updateAssetStatus(asset.id, { status });
 
       replaceAsset(response.asset);
-      setNotice(status === "archived" ? "Asset archived." : "Asset restored.");
+      setNotice(status === "archived" ? t.assets.noticeArchived : t.assets.noticeRestored);
     } catch (statusError) {
-      handleApiError(statusError, "Unable to update asset");
+      handleApiError(statusError, t.assets.errorUpdate);
     }
   }
 

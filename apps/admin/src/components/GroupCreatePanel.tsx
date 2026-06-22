@@ -1,11 +1,14 @@
 import { useState } from "react";
 
+import { useTranslation } from "../i18n";
+
 interface GroupCreatePanelProps {
   isSaving: boolean;
   onCreate: (name: string) => Promise<boolean>;
 }
 
 export function GroupCreatePanel({ isSaving, onCreate }: GroupCreatePanelProps) {
+  const { t } = useTranslation();
   const [name, setName] = useState("");
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>): Promise<void> {
@@ -18,10 +21,10 @@ export function GroupCreatePanel({ isSaving, onCreate }: GroupCreatePanelProps) 
 
   return (
     <article className="panel group-create-panel">
-      <h2>Create Group</h2>
+      <h2>{t.groups.createTitle}</h2>
       <form className="form-grid" onSubmit={(event) => void handleSubmit(event)}>
         <label>
-          <span>Group name</span>
+          <span>{t.groups.groupName}</span>
           <input
             maxLength={255}
             minLength={2}
@@ -31,7 +34,7 @@ export function GroupCreatePanel({ isSaving, onCreate }: GroupCreatePanelProps) 
           />
         </label>
         <button className="primary-button" disabled={isSaving} type="submit">
-          {isSaving ? "Creating" : "Create group"}
+          {isSaving ? t.groups.creating : t.groups.createButton}
         </button>
       </form>
     </article>
