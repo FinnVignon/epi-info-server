@@ -35,6 +35,26 @@ MySQL data and uploaded assets are stored in Docker volumes, so they survive con
 
 Archived assets are kept for 30 days by default, then deleted automatically once they no longer apply to any active client.
 
+## Backup And Restore
+
+Create a backup of the MySQL database and uploaded assets:
+
+```sh
+npm run backup:docker
+```
+
+Backups are written to `backups/<timestamp>/` by default. The `backups/` folder is ignored by Git.
+
+Backups contain admin account data, password hashes, sessions, client credentials, and uploaded media. Keep them private.
+
+Restore a backup:
+
+```sh
+npm run restore:docker -- backups/<timestamp> --yes
+```
+
+Restore replaces the current server database tables and uploaded asset files. Stop clients or avoid changing assignments while restoring.
+
 ## Connect A Client
 
 1. Start this server.
@@ -79,6 +99,12 @@ Run checks:
 npm run lint
 npm test
 npm audit --audit-level=low
+```
+
+Create a Docker-volume backup:
+
+```sh
+npm run backup:docker
 ```
 
 Stop Docker containers:
