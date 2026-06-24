@@ -25,6 +25,7 @@ import { createAdminUserRouter } from "./routes/adminUserRoutes.js";
 import { createAssetDownloadRouter } from "./routes/assetDownloadRoutes.js";
 import { createClientConnectionRouter } from "./routes/clientConnectionRoutes.js";
 import { createClientManifestRouter } from "./routes/clientManifestRoutes.js";
+import { startArchivedAssetCleanup } from "./services/assetCleanup.js";
 import { SUPPORTED_MANIFEST_ITEM_TYPES } from "../../shared/contracts.js";
 
 const config = readConfig();
@@ -120,6 +121,7 @@ async function startServer(): Promise<void> {
   await ensureAssignmentContentSchema(mysqlPool, config.mysql.database);
   await ensureAssetSchema(mysqlPool, config.mysql.database);
   await ensureClientConnectionSchema(mysqlPool, config.mysql.database);
+  startArchivedAssetCleanup(mysqlPool, config.assetCleanup);
 
   const httpServer = app.listen(config.port, () => {
     console.log(`Epi Info server listening on port ${config.port}`);

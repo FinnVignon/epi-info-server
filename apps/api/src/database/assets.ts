@@ -30,7 +30,21 @@ interface AssetColumnRow extends RowDataPacket {
   columnName: string;
 }
 
+interface AssetCleanupCandidateRow extends RowDataPacket {
+  id: string;
+  storagePath: string;
+}
+
+interface CountRow extends RowDataPacket {
+  count: number | string;
+}
+
 export interface AssetWithStoragePath extends Asset {
+  storagePath: string;
+}
+
+export interface ArchivedAssetCleanupCandidate {
+  id: string;
   storagePath: string;
 }
 
@@ -74,6 +88,82 @@ const ASSET_SELECT_FIELDS = `
 const ASSET_JOIN = `
   FROM assets
   LEFT JOIN admin_users ON admin_users.id = assets.uploaded_by_user_id
+`;
+
+const ACTIVE_ASSIGNMENT_REFERENCE_EXISTS = `
+  SELECT 1
+  FROM manifest_items cleanup_manifest_items
+  INNER JOIN assignments cleanup_assignments
+    ON cleanup_assignments.manifest_id = cleanup_manifest_items.manifest_id
+  WHERE cleanup_manifest_items.asset_id = assets.id
+    AND (
+      (
+        cleanup_assignments.target_type = 'client'
+        AND EXISTS (
+          SELECT 1
+          FROM clients cleanup_clients
+          WHERE cleanup_clients.id = cleanup_assignments.target_id
+            AND cleanup_clients.access_status = 'active'
+        )
+      )
+      OR (
+        cleanup_assignments.target_type = 'group'
+        AND EXISTS (
+          SELECT 1
+          FROM client_groups cleanup_client_groups
+          INNER JOIN clients cleanup_group_clients
+            ON cleanup_group_clients.id = cleanup_client_groups.client_id
+          WHERE cleanup_client_groups.group_id = cleanup_assignments.target_id
+            AND cleanup_group_clients.access_status = 'active'
+        )
+      )
+      OR (
+        cleanup_assignments.target_type = 'global'
+        AND EXISTS (
+          SELECT 1
+          FROM clients cleanup_global_clients
+          WHERE cleanup_global_clients.access_status = 'active'
+        )
+      )
+    )
+`;
+
+const ACTIVE_ASSIGNMENT_REFERENCE_COUNT = `
+  SELECT COUNT(*) AS count
+  FROM manifest_items cleanup_manifest_items
+  INNER JOIN assignments cleanup_assignments
+    ON cleanup_assignments.manifest_id = cleanup_manifest_items.manifest_id
+  WHERE cleanup_manifest_items.asset_id = ?
+    AND (
+      (
+        cleanup_assignments.target_type = 'client'
+        AND EXISTS (
+          SELECT 1
+          FROM clients cleanup_clients
+          WHERE cleanup_clients.id = cleanup_assignments.target_id
+            AND cleanup_clients.access_status = 'active'
+        )
+      )
+      OR (
+        cleanup_assignments.target_type = 'group'
+        AND EXISTS (
+          SELECT 1
+          FROM client_groups cleanup_client_groups
+          INNER JOIN clients cleanup_group_clients
+            ON cleanup_group_clients.id = cleanup_client_groups.client_id
+          WHERE cleanup_client_groups.group_id = cleanup_assignments.target_id
+            AND cleanup_group_clients.access_status = 'active'
+        )
+      )
+      OR (
+        cleanup_assignments.target_type = 'global'
+        AND EXISTS (
+          SELECT 1
+          FROM clients cleanup_global_clients
+          WHERE cleanup_global_clients.access_status = 'active'
+        )
+      )
+    )
 `;
 
 function mapAsset(row: AssetRow): AssetWithStoragePath {
@@ -135,6 +225,8 @@ export async function ensureAssetSchema(pool: Pool, databaseName: string): Promi
       "ALTER TABLE assets ADD COLUMN archived_at TIMESTAMP NULL AFTER uploaded_by_user_id",
     );
   }
+
+  await ensureAssetArchivedAtIndex(pool, databaseName);
 }
 
 async function getAssetColumns(pool: Pool, databaseName: string): Promise<Set<string>> {
@@ -149,6 +241,24 @@ async function getAssetColumns(pool: Pool, databaseName: string): Promise<Set<st
   );
 
   return new Set(rows.map((row) => row.columnName));
+}
+
+async function ensureAssetArchivedAtIndex(pool: Pool, databaseName: string): Promise<void> {
+  const [rows] = await pool.execute<RowDataPacket[]>(
+    `
+      SELECT 1
+      FROM INFORMATION_SCHEMA.STATISTICS
+      WHERE TABLE_SCHEMA = ?
+        AND TABLE_NAME = 'assets'
+        AND INDEX_NAME = 'assets_archived_at_index'
+      LIMIT 1
+    `,
+    [databaseName],
+  );
+
+  if (!rows[0]) {
+    await pool.execute("CREATE INDEX assets_archived_at_index ON assets (archived_at)");
+  }
 }
 
 export async function createAsset(pool: Pool, input: CreateAssetInput): Promise<Asset> {
@@ -264,4 +374,108 @@ export async function updateAssetStatus(
   );
 
   return result.affectedRows > 0;
+}
+
+export async function listArchivedAssetCleanupCandidates(
+  pool: Pool,
+  retentionDays: number,
+): Promise<ArchivedAssetCleanupCandidate[]> {
+  const [rows] = await pool.execute<AssetCleanupCandidateRow[]>(
+    `
+      SELECT
+        assets.id,
+        assets.storage_path AS storagePath
+      FROM assets
+      WHERE assets.status = 'archived'
+        AND assets.archived_at IS NOT NULL
+        AND assets.archived_at <= DATE_SUB(NOW(), INTERVAL ? DAY)
+        AND NOT EXISTS (${ACTIVE_ASSIGNMENT_REFERENCE_EXISTS})
+      ORDER BY assets.archived_at ASC
+    `,
+    [retentionDays],
+  );
+
+  return rows.map((row) => ({
+    id: row.id,
+    storagePath: row.storagePath,
+  }));
+}
+
+export async function deleteArchivedAssetIfEligible(
+  pool: Pool,
+  assetId: string,
+  retentionDays: number,
+): Promise<ArchivedAssetCleanupCandidate | null> {
+  const connection = await pool.getConnection();
+
+  try {
+    await connection.beginTransaction();
+
+    const [assetRows] = await connection.execute<AssetCleanupCandidateRow[]>(
+      `
+        SELECT
+          id,
+          storage_path AS storagePath
+        FROM assets
+        WHERE id = ?
+          AND status = 'archived'
+          AND archived_at IS NOT NULL
+          AND archived_at <= DATE_SUB(NOW(), INTERVAL ? DAY)
+        LIMIT 1
+        FOR UPDATE
+      `,
+      [assetId, retentionDays],
+    );
+    const asset = assetRows[0];
+
+    if (!asset) {
+      await connection.rollback();
+      return null;
+    }
+
+    const [activeReferenceRows] = await connection.execute<CountRow[]>(
+      ACTIVE_ASSIGNMENT_REFERENCE_COUNT,
+      [assetId],
+    );
+
+    if (Number(activeReferenceRows[0]?.count ?? 0) > 0) {
+      await connection.rollback();
+      return null;
+    }
+
+    await connection.execute<ResultSetHeader>(
+      `
+        DELETE cleanup_assignments
+        FROM assignments cleanup_assignments
+        INNER JOIN manifest_items cleanup_manifest_items
+          ON cleanup_manifest_items.manifest_id = cleanup_assignments.manifest_id
+        WHERE cleanup_manifest_items.asset_id = ?
+      `,
+      [assetId],
+    );
+
+    await connection.execute<ResultSetHeader>(
+      `
+        DELETE cleanup_manifests
+        FROM manifests cleanup_manifests
+        INNER JOIN manifest_items cleanup_manifest_items
+          ON cleanup_manifest_items.manifest_id = cleanup_manifests.id
+        WHERE cleanup_manifest_items.asset_id = ?
+      `,
+      [assetId],
+    );
+
+    await connection.execute<ResultSetHeader>("DELETE FROM assets WHERE id = ?", [assetId]);
+    await connection.commit();
+
+    return {
+      id: asset.id,
+      storagePath: asset.storagePath,
+    };
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
 }

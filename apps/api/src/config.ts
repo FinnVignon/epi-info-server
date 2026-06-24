@@ -7,6 +7,10 @@ export interface ServerConfig {
     sessionTtlHours: number;
   };
   adminDistPath?: string;
+  assetCleanup: {
+    intervalHours: number;
+    retentionDays: number;
+  };
   assetUploadMaxBytes: number;
   assetStoragePath: string;
   clientAuth: {
@@ -62,6 +66,10 @@ export function readConfig(): ServerConfig {
       sessionTtlHours: readPositiveNumber("ADMIN_SESSION_TTL_HOURS", 12),
     },
     adminDistPath: process.env.ADMIN_DIST_PATH,
+    assetCleanup: {
+      intervalHours: readPositiveNumber("ASSET_CLEANUP_INTERVAL_HOURS", 24),
+      retentionDays: readPositiveNumber("ASSET_ARCHIVE_RETENTION_DAYS", 30),
+    },
     assetUploadMaxBytes: readPositiveNumber("ASSET_UPLOAD_MAX_BYTES", 500 * 1024 * 1024),
     assetStoragePath: process.env.ASSET_STORAGE_PATH ?? "./data/assets",
     clientAuth: {

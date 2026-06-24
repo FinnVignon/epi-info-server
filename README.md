@@ -33,6 +33,8 @@ On a fresh database, the admin panel asks you to create the first super admin.
 
 MySQL data and uploaded assets are stored in Docker volumes, so they survive container restarts.
 
+Archived assets are kept for 30 days by default, then deleted automatically once they no longer apply to any active client.
+
 ## Connect A Client
 
 1. Start this server.

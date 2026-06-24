@@ -122,6 +122,7 @@ CREATE TABLE IF NOT EXISTS assets (
   UNIQUE KEY assets_sha256_unique (sha256),
   INDEX assets_uploaded_by_user_id_index (uploaded_by_user_id),
   INDEX assets_status_index (status),
+  INDEX assets_archived_at_index (archived_at),
   CONSTRAINT assets_uploaded_by_user_id_fk
     FOREIGN KEY (uploaded_by_user_id) REFERENCES admin_users (id)
     ON DELETE SET NULL

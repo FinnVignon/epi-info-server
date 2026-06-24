@@ -47,13 +47,16 @@ export type { DashboardSummaryInput } from "./database/dashboard.js";
 
 export {
   createAsset,
+  deleteArchivedAssetIfEligible,
   ensureAssetSchema,
   findAssetById,
   findAssetBySha256,
+  listArchivedAssetCleanupCandidates,
   listAssets,
   updateAssetStatus,
 } from "./database/assets.js";
 export type {
+  ArchivedAssetCleanupCandidate,
   AssetWithStoragePath,
   CreateAssetInput,
   UpdateAssetStatusInput,
