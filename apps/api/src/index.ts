@@ -4,6 +4,7 @@ import path from "node:path";
 
 import { createAdminAuthMiddleware } from "./auth/adminAuth.js";
 import type { AuthenticatedAdminRequest } from "./auth/adminAuth.js";
+import { createAdminOriginProtectionMiddleware } from "./auth/adminOriginProtection.js";
 import { readConfig } from "./config.js";
 import {
   checkDatabaseHealth,
@@ -37,6 +38,7 @@ const clientLiveUpdates = createClientLiveUpdateHub(mysqlPool);
 mkdirSync(config.assetStoragePath, { recursive: true });
 
 app.use(express.json());
+app.use("/api/admin", createAdminOriginProtectionMiddleware(config));
 
 app.get("/api/health", async (_request, response) => {
   const database = await checkDatabaseHealth(mysqlPool, config.mysql.database);

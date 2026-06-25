@@ -2,6 +2,7 @@ import "dotenv/config";
 
 export interface ServerConfig {
   adminAuth: {
+    allowedOrigins: string[];
     passwordBcryptRounds: number;
     sessionCookieName: string;
     sessionTtlHours: number;
@@ -56,11 +57,19 @@ function readPositiveNumber(name: string, fallback: number): number {
   return value;
 }
 
+function readCsv(name: string): string[] {
+  return (process.env[name] ?? "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter((value) => value.length > 0);
+}
+
 export function readConfig(): ServerConfig {
   const mysqlSocketPath = process.env.MYSQL_SOCKET_PATH?.trim();
 
   return {
     adminAuth: {
+      allowedOrigins: readCsv("ADMIN_ALLOWED_ORIGINS"),
       passwordBcryptRounds: readPositiveNumber("ADMIN_PASSWORD_BCRYPT_ROUNDS", 12),
       sessionCookieName: process.env.ADMIN_SESSION_COOKIE_NAME ?? "epi_info_admin_session",
       sessionTtlHours: readPositiveNumber("ADMIN_SESSION_TTL_HOURS", 12),

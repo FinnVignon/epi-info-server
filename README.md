@@ -35,6 +35,17 @@ MySQL data and uploaded assets are stored in Docker volumes, so they survive con
 
 Archived assets are kept for 30 days by default, then deleted automatically once they no longer apply to any active client.
 
+## Admin Request Protection
+
+Admin `POST`, `PUT`, `PATCH`, and `DELETE` requests are accepted only from the same host, `PUBLIC_BASE_URL`, local Vite development origins, or comma-separated origins listed in `ADMIN_ALLOWED_ORIGINS`.
+
+For example, when serving the admin panel behind a hostname:
+
+```env
+PUBLIC_BASE_URL=https://screens.example.com
+ADMIN_ALLOWED_ORIGINS=https://screens.example.com
+```
+
 ## Backup And Restore
 
 Create a backup of the MySQL database and uploaded assets:
