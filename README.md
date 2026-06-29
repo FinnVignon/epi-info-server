@@ -21,7 +21,7 @@ docker network create epi-info-network
 Clone or update the repository, then start the server stack:
 
 ```sh
-git clone <server-repository-url> epi-info-server
+git clone https://github.com/FinnVignon/epi-info-server epi-info-server
 cd epi-info-server
 ```
 
