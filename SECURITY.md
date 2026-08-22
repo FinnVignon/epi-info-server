@@ -21,6 +21,8 @@ sharing technical details. Do not test against systems or displays you do not ow
 - Use unique MySQL passwords and keep port 3306 off untrusted networks.
 - Restrict `ADMIN_ALLOWED_ORIGINS` to real admin origins.
 - Protect backups because they contain password hashes, sessions, client credentials, and media.
+- Restore only backups from a trusted source; checksums detect damage but do not prove who created a
+  backup.
 - Remove enrollment tokens from client configuration after successful enrollment.
 - Keep the host, Docker Engine, MySQL image, and Epi Info images patched.
 
