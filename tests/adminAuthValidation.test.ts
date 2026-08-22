@@ -1,6 +1,12 @@
+import bcrypt from "bcryptjs";
 import { describe, expect, it } from "vitest";
 
-import { readAdminPasswordValidationError } from "../apps/api/src/auth/passwords.js";
+import {
+  adminPasswordHashNeedsUpgrade,
+  hashAdminPassword,
+  readAdminPasswordValidationError,
+  verifyAdminPassword,
+} from "../apps/api/src/auth/passwords.js";
 import {
   readBootstrapBody,
   readLoginBody,
@@ -43,5 +49,23 @@ describe("admin password validation", () => {
       email: "admin@example.com",
       password,
     });
+  });
+
+  it("distinguishes passwords that only differ after bcrypt's input boundary", async () => {
+    const password = `${"a".repeat(72)}-first`;
+    const passwordHash = await hashAdminPassword(password, { bcryptRounds: 4 });
+
+    await expect(verifyAdminPassword(password, passwordHash)).resolves.toBe(true);
+    await expect(verifyAdminPassword(`${"a".repeat(72)}-second`, passwordHash)).resolves.toBe(
+      false,
+    );
+    expect(adminPasswordHashNeedsUpgrade(passwordHash, 4)).toBe(false);
+  });
+
+  it("recognizes legacy bcrypt hashes for transparent login upgrades", async () => {
+    const legacyHash = await bcrypt.hash("testing12345", 4);
+
+    await expect(verifyAdminPassword("testing12345", legacyHash)).resolves.toBe(true);
+    expect(adminPasswordHashNeedsUpgrade(legacyHash, 4)).toBe(true);
   });
 });
