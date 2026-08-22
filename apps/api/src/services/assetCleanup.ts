@@ -1,4 +1,5 @@
-import { rm } from "node:fs/promises";
+import { randomUUID } from "node:crypto";
+import { rename, rm } from "node:fs/promises";
 import type { Pool } from "mysql2/promise";
 
 import {
@@ -15,6 +16,11 @@ export interface ArchivedAssetCleanupOptions {
 export interface ArchivedAssetCleanupSummary {
   deletedAssetIds: string[];
   scannedCount: number;
+}
+
+export interface PreparedAssetFileDeletion {
+  commit(): Promise<void>;
+  rollback(): Promise<void>;
 }
 
 export function startArchivedAssetCleanup(
@@ -62,18 +68,31 @@ export async function runArchivedAssetCleanup(
   const deletedAssetIds: string[] = [];
 
   for (const candidate of candidates) {
-    const deletedAsset = await deleteArchivedAssetIfEligible(
-      pool,
-      candidate.id,
-      options.retentionDays,
-    );
+    const preparedFileDeletion = await prepareAssetFileDeletion(candidate);
+    let databaseRecordDeleted = false;
 
-    if (!deletedAsset) {
-      continue;
+    try {
+      const deletedAsset = await deleteArchivedAssetIfEligible(
+        pool,
+        candidate.id,
+        options.retentionDays,
+      );
+
+      if (!deletedAsset) {
+        await preparedFileDeletion.rollback();
+        continue;
+      }
+
+      databaseRecordDeleted = true;
+      await preparedFileDeletion.commit();
+      deletedAssetIds.push(deletedAsset.id);
+    } catch (error) {
+      if (!databaseRecordDeleted) {
+        await preparedFileDeletion.rollback();
+      }
+
+      throw error;
     }
-
-    await deleteStoredAssetFile(deletedAsset);
-    deletedAssetIds.push(deletedAsset.id);
   }
 
   return {
@@ -82,14 +101,38 @@ export async function runArchivedAssetCleanup(
   };
 }
 
-async function deleteStoredAssetFile(asset: ArchivedAssetCleanupCandidate): Promise<void> {
+export async function prepareAssetFileDeletion(
+  asset: ArchivedAssetCleanupCandidate,
+): Promise<PreparedAssetFileDeletion> {
+  const quarantinePath = `${asset.storagePath}.deleting-${randomUUID()}`;
+  let quarantined = false;
+
   try {
-    await rm(asset.storagePath, { force: true });
+    await rename(asset.storagePath, quarantinePath);
+    quarantined = true;
   } catch (error) {
-    console.error(
-      `Archived asset ${asset.id} was removed from the database but its file could not be deleted: ${
-        error instanceof Error ? error.message : String(error)
-      }`,
-    );
+    if (!hasErrorCode(error, "ENOENT")) {
+      throw error;
+    }
   }
+
+  return {
+    async commit(): Promise<void> {
+      if (quarantined) {
+        await rm(quarantinePath, { force: true });
+        quarantined = false;
+      }
+    },
+
+    async rollback(): Promise<void> {
+      if (quarantined) {
+        await rename(quarantinePath, asset.storagePath);
+        quarantined = false;
+      }
+    },
+  };
+}
+
+function hasErrorCode(error: unknown, code: string): boolean {
+  return typeof error === "object" && error !== null && "code" in error && error.code === code;
 }

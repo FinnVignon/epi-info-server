@@ -61,6 +61,7 @@ export function createAdminAssetRouter(pool: Pool, config: ServerConfig): Router
       );
 
       if (displayName instanceof AssetUploadValidationError) {
+        await removeFile(request.file.path);
         response.status(400).json({ error: displayName.message });
         return;
       }
