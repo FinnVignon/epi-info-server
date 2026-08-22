@@ -63,7 +63,7 @@ docker network create epi-info-network
 Pull the published image:
 
 ```sh
-docker pull shortplanet/epi-info-server:1.0.0
+docker pull shortplanet/epi-info-server:1.0.1
 ```
 
 Create `docker-compose.yml`:
@@ -92,7 +92,7 @@ services:
       - mysql-data:/var/lib/mysql
 
   server:
-    image: shortplanet/epi-info-server:1.0.0
+    image: shortplanet/epi-info-server:1.0.1
     restart: unless-stopped
     depends_on:
       mysql:
@@ -181,20 +181,32 @@ docker cp "$(docker compose ps -q server):/app/scripts/restore-server-data.sh" s
 chmod +x scripts/*.sh
 ```
 
-Create a backup of the MySQL database and uploaded assets:
+For a repository installation, create a backup with:
 
 ```sh
 npm run backup:docker
+```
+
+For a Docker Hub-only installation, run the extracted script directly:
+
+```sh
+scripts/backup-server-data.sh
 ```
 
 Backups are written to `backups/<timestamp>/` by default. The `backups/` folder is ignored by Git.
 
 Backups contain admin account data, password hashes, sessions, client credentials, and uploaded media. Keep them private.
 
-Restore a backup:
+For a repository installation, restore a backup with:
 
 ```sh
 npm run restore:docker -- backups/<timestamp> --yes
+```
+
+For a Docker Hub-only installation:
+
+```sh
+scripts/restore-server-data.sh backups/<timestamp> --yes
 ```
 
 Restore replaces the current server database tables and uploaded asset files. Stop clients or avoid changing assignments while restoring.
@@ -209,7 +221,7 @@ Restore replaces the current server database tables and uploaded asset files. St
 
 After the client enrolls, it appears in the admin panel and can receive individual, group, or global display assignments.
 
-## Content Supported In 1.0
+## Content Supported In 1.0.x
 
 - uploaded images;
 - uploaded videos;
@@ -258,3 +270,6 @@ docker compose down
 ```
 
 To reset local server data, remove the Docker volumes intentionally.
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for code boundaries, [CONTRIBUTING.md](CONTRIBUTING.md)
+for the development workflow, and [SECURITY.md](SECURITY.md) for vulnerability reporting.
