@@ -7,6 +7,7 @@ import {
   listArchivedAssetCleanupCandidates,
   type ArchivedAssetCleanupCandidate,
 } from "../database.js";
+import { startPeriodicTask } from "./periodicTask.js";
 
 export interface ArchivedAssetCleanupOptions {
   intervalHours: number;
@@ -27,17 +28,10 @@ export function startArchivedAssetCleanup(
   pool: Pool,
   options: ArchivedAssetCleanupOptions,
 ): () => void {
-  let isRunning = false;
-  const intervalMs = options.intervalHours * 60 * 60 * 1000;
-
-  async function runOnce(): Promise<void> {
-    if (isRunning) {
-      return;
-    }
-
-    isRunning = true;
-
-    try {
+  return startPeriodicTask({
+    intervalMs: options.intervalHours * 60 * 60 * 1000,
+    name: "Archived asset cleanup",
+    task: async () => {
       const summary = await runArchivedAssetCleanup(pool, options);
 
       if (summary.deletedAssetIds.length > 0) {
@@ -45,19 +39,8 @@ export function startArchivedAssetCleanup(
           `Deleted ${summary.deletedAssetIds.length} archived asset(s): ${summary.deletedAssetIds.join(", ")}`,
         );
       }
-    } catch (error) {
-      console.error(
-        `Archived asset cleanup failed: ${error instanceof Error ? error.message : String(error)}`,
-      );
-    } finally {
-      isRunning = false;
-    }
-  }
-
-  void runOnce();
-  const timer = setInterval(() => void runOnce(), intervalMs);
-
-  return () => clearInterval(timer);
+    },
+  });
 }
 
 export async function runArchivedAssetCleanup(

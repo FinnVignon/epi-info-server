@@ -27,6 +27,7 @@ import { createAssetDownloadRouter } from "./routes/assetDownloadRoutes.js";
 import { createClientConnectionRouter } from "./routes/clientConnectionRoutes.js";
 import { createClientManifestRouter } from "./routes/clientManifestRoutes.js";
 import { startArchivedAssetCleanup } from "./services/assetCleanup.js";
+import { startTemporaryRecordCleanup } from "./services/temporaryRecordCleanup.js";
 import { runDatabaseMigrations } from "./database/migrations.js";
 import { SUPPORTED_MANIFEST_ITEM_TYPES } from "../../shared/contracts.js";
 
@@ -130,13 +131,53 @@ async function startServer(): Promise<void> {
   await ensureAssignmentContentSchema(mysqlPool, config.mysql.database);
   await ensureAssetSchema(mysqlPool, config.mysql.database);
   await ensureClientConnectionSchema(mysqlPool, config.mysql.database);
-  startArchivedAssetCleanup(mysqlPool, config.assetCleanup);
+  const stopBackgroundTasks = [
+    startArchivedAssetCleanup(mysqlPool, config.assetCleanup),
+    startTemporaryRecordCleanup(mysqlPool, config.temporaryRecordCleanup),
+  ];
 
   const httpServer = app.listen(config.port, () => {
     console.log(`Epi Info server listening on port ${config.port}`);
   });
 
   clientLiveUpdates.attach(httpServer);
+  let isShuttingDown = false;
+
+  async function shutdown(signal: NodeJS.Signals): Promise<void> {
+    if (isShuttingDown) {
+      return;
+    }
+
+    isShuttingDown = true;
+    console.info(`Received ${signal}; shutting down Epi Info server`);
+    const forcedShutdown = setTimeout(() => {
+      console.error("Server shutdown timed out");
+      process.exit(1);
+    }, 10_000);
+
+    forcedShutdown.unref();
+
+    for (const stopTask of stopBackgroundTasks) {
+      stopTask();
+    }
+
+    clientLiveUpdates.close();
+
+    try {
+      await new Promise<void>((resolve, reject) => {
+        httpServer.close((error) => (error ? reject(error) : resolve()));
+      });
+      await mysqlPool.end();
+      clearTimeout(forcedShutdown);
+      console.info("Epi Info server stopped");
+    } catch (error) {
+      console.error(error);
+      process.exitCode = 1;
+    }
+  }
+
+  process.once("SIGINT", () => void shutdown("SIGINT"));
+  process.once("SIGTERM", () => void shutdown("SIGTERM"));
 }
 
 void startServer().catch((error: unknown) => {

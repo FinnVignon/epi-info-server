@@ -30,6 +30,10 @@ export interface ServerConfig {
   };
   port: number;
   publicBaseUrl: string;
+  temporaryRecordCleanup: {
+    intervalHours: number;
+    usedEnrollmentTokenRetentionDays: number;
+  };
 }
 
 function readNumber(name: string, fallback: number): number {
@@ -98,5 +102,12 @@ export function readConfig(): ServerConfig {
     },
     port: readNumber("SERVER_PORT", 4000),
     publicBaseUrl: process.env.PUBLIC_BASE_URL ?? "http://localhost:4000",
+    temporaryRecordCleanup: {
+      intervalHours: readPositiveNumber("TEMPORARY_RECORD_CLEANUP_INTERVAL_HOURS", 24),
+      usedEnrollmentTokenRetentionDays: readPositiveNumber(
+        "USED_ENROLLMENT_TOKEN_RETENTION_DAYS",
+        30,
+      ),
+    },
   };
 }

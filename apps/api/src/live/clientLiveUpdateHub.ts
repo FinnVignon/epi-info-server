@@ -12,23 +12,36 @@ const CLIENT_LIVE_PATH = "/api/clients/live";
 
 export interface ClientLiveUpdateHub {
   attach(server: Server): void;
+  close(): void;
   notifyAssignmentChanged(target: AssignmentTarget): Promise<void>;
 }
 
 export function createClientLiveUpdateHub(pool: Pool): ClientLiveUpdateHub {
   const webSocketServer = new WebSocketServer({ noServer: true });
   const socketsByClientId = new Map<string, Set<WebSocket>>();
+  let attachedServer: Server | null = null;
 
   return {
     attach(server: Server): void {
-      server.on("upgrade", (request, socket, head) => {
-        if (readUpgradePath(request) !== CLIENT_LIVE_PATH) {
-          socket.destroy();
-          return;
-        }
+      if (attachedServer) {
+        throw new Error("Client live-update hub is already attached");
+      }
 
-        void handleUpgrade(request, socket, head);
-      });
+      attachedServer = server;
+      server.on("upgrade", handleServerUpgrade);
+    },
+
+    close(): void {
+      attachedServer?.off("upgrade", handleServerUpgrade);
+      attachedServer = null;
+
+      for (const sockets of socketsByClientId.values()) {
+        for (const socket of sockets) {
+          socket.terminate();
+        }
+      }
+
+      socketsByClientId.clear();
     },
 
     async notifyAssignmentChanged(target: AssignmentTarget): Promise<void> {
@@ -39,6 +52,15 @@ export function createClientLiveUpdateHub(pool: Pool): ClientLiveUpdateHub {
       }
     },
   };
+
+  function handleServerUpgrade(request: IncomingMessage, socket: Duplex, head: Buffer): void {
+    if (readUpgradePath(request) !== CLIENT_LIVE_PATH) {
+      socket.destroy();
+      return;
+    }
+
+    void handleUpgrade(request, socket, head);
+  }
 
   async function handleUpgrade(
     request: IncomingMessage,
