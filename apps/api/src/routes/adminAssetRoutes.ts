@@ -19,15 +19,8 @@ import {
   readAssetDisplayName,
   safeAsset,
 } from "../services/assetUploads.js";
-import type { AssetStatus, UpdateAssetStatusRequest } from "../../../shared/adminContracts.js";
-
-function readAssetStatusBody(body: Partial<UpdateAssetStatusRequest>): AssetStatus | string {
-  if (body.status !== "active" && body.status !== "archived") {
-    return "Status must be active or archived";
-  }
-
-  return body.status;
-}
+import type { UpdateAssetStatusRequest } from "../../../shared/adminContracts.js";
+import { readAssetStatusBody } from "./adminAssetRequestParsers.js";
 
 export function createAdminAssetRouter(pool: Pool, config: ServerConfig): Router {
   const router = Router();
@@ -96,8 +89,8 @@ export function createAdminAssetRouter(pool: Pool, config: ServerConfig): Router
 
       const status = readAssetStatusBody((request.body ?? {}) as Partial<UpdateAssetStatusRequest>);
 
-      if (typeof status === "string") {
-        response.status(400).json({ error: status });
+      if (!status) {
+        response.status(400).json({ error: "Status must be active or archived" });
         return;
       }
 
