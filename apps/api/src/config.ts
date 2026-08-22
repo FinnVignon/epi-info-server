@@ -14,6 +14,7 @@ export interface ServerConfig {
   };
   assetUploadMaxBytes: number;
   assetStoragePath: string;
+  databaseMigrationsPath: string;
   clientAuth: {
     enrollmentTokenTtlMinutes: number;
     heartbeatIntervalSeconds: number;
@@ -81,6 +82,7 @@ export function readConfig(): ServerConfig {
     },
     assetUploadMaxBytes: readPositiveNumber("ASSET_UPLOAD_MAX_BYTES", 500 * 1024 * 1024),
     assetStoragePath: process.env.ASSET_STORAGE_PATH ?? "./data/assets",
+    databaseMigrationsPath: process.env.DATABASE_MIGRATIONS_PATH ?? "docker/mysql/migrations",
     clientAuth: {
       enrollmentTokenTtlMinutes: readPositiveNumber("CLIENT_ENROLLMENT_TOKEN_TTL_MINUTES", 15),
       heartbeatIntervalSeconds: readPositiveNumber("CLIENT_HEARTBEAT_INTERVAL_SECONDS", 30),

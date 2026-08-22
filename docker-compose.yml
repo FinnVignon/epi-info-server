@@ -1,6 +1,7 @@
 services:
   mysql:
     image: mysql:8.4
+    restart: unless-stopped
     command: ["--bind-address=0.0.0.0"]
     environment:
       MYSQL_DATABASE: ${MYSQL_DATABASE:-epi_info}
@@ -18,10 +19,10 @@ services:
       retries: 20
     volumes:
       - mysql-data:/var/lib/mysql
-      - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
 
   server:
     build: .
+    restart: unless-stopped
     depends_on:
       mysql:
         condition: service_healthy
@@ -32,6 +33,7 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE:-epi_info}
       MYSQL_USER: ${MYSQL_USER:-epi_info}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-epi_info_dev_password}
+      DATABASE_MIGRATIONS_PATH: /app/database/migrations
       ASSET_STORAGE_PATH: /data/assets
       ASSET_UPLOAD_MAX_BYTES: ${ASSET_UPLOAD_MAX_BYTES:-524288000}
       ASSET_ARCHIVE_RETENTION_DAYS: ${ASSET_ARCHIVE_RETENTION_DAYS:-30}
@@ -46,6 +48,18 @@ services:
       - "4000:4000"
     volumes:
       - server-assets:/data/assets
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:4000/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
     networks:
       default:
       epi-info:

@@ -27,6 +27,7 @@ import { createAssetDownloadRouter } from "./routes/assetDownloadRoutes.js";
 import { createClientConnectionRouter } from "./routes/clientConnectionRoutes.js";
 import { createClientManifestRouter } from "./routes/clientManifestRoutes.js";
 import { startArchivedAssetCleanup } from "./services/assetCleanup.js";
+import { runDatabaseMigrations } from "./database/migrations.js";
 import { SUPPORTED_MANIFEST_ITEM_TYPES } from "../../shared/contracts.js";
 
 const config = readConfig();
@@ -119,6 +120,12 @@ app.use(
 );
 
 async function startServer(): Promise<void> {
+  const migrations = await runDatabaseMigrations(config.mysql, config.databaseMigrationsPath);
+
+  if (migrations.applied.length > 0) {
+    console.info(`Applied database migration(s): ${migrations.applied.join(", ")}`);
+  }
+
   await ensureAssignmentSchema(mysqlPool, config.mysql.database);
   await ensureAssignmentContentSchema(mysqlPool, config.mysql.database);
   await ensureAssetSchema(mysqlPool, config.mysql.database);
