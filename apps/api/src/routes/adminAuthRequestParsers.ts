@@ -1,5 +1,5 @@
 import { isValidAdminEmail, normalizeAdminEmail } from "../auth/adminCredentials.js";
-import { isValidAdminPassword } from "../auth/passwords.js";
+import { readAdminPasswordValidationError } from "../auth/passwords.js";
 
 export interface LoginBody {
   email?: unknown;
@@ -21,8 +21,8 @@ export function readLoginBody(body: LoginBody): { email: string; password: strin
     return "A valid email is required";
   }
 
-  if (!isValidAdminPassword(body.password)) {
-    return "Password must be at least 10 characters";
+  if (body.password.length === 0) {
+    return "Password is required";
   }
 
   return {
@@ -40,8 +40,18 @@ export function readBootstrapBody(
     return loginBody;
   }
 
+  const passwordError = readAdminPasswordValidationError(loginBody.password);
+
+  if (passwordError) {
+    return passwordError;
+  }
+
   if (typeof body.displayName !== "string" || body.displayName.trim().length < 2) {
     return "Display name must be at least 2 characters";
+  }
+
+  if (body.displayName.trim().length > 255) {
+    return "Display name must not exceed 255 characters";
   }
 
   return {

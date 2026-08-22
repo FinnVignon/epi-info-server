@@ -3,5 +3,5 @@ export function normalizeAdminEmail(email: string): string {
 }
 
 export function isValidAdminEmail(email: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  return email.length <= 320 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }

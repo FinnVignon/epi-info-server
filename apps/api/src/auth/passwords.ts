@@ -18,6 +18,14 @@ export async function verifyAdminPassword(
   return bcrypt.compare(password, passwordHash);
 }
 
-export function isValidAdminPassword(password: string): boolean {
-  return password.length >= 10;
+export function readAdminPasswordValidationError(password: string): string | null {
+  if (password.length < 10) {
+    return "Password must be at least 10 characters";
+  }
+
+  if (bcrypt.truncates(password)) {
+    return "Password must not exceed 72 bytes when encoded as UTF-8";
+  }
+
+  return null;
 }
