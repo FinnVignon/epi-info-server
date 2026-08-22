@@ -7,9 +7,11 @@ import {
   listArchivedAssetCleanupCandidates,
   type ArchivedAssetCleanupCandidate,
 } from "../database.js";
+import { resolveAssetStoragePath } from "./assetStoragePaths.js";
 import { startPeriodicTask } from "./periodicTask.js";
 
 export interface ArchivedAssetCleanupOptions {
+  assetStoragePath: string;
   intervalHours: number;
   retentionDays: number;
 }
@@ -51,7 +53,10 @@ export async function runArchivedAssetCleanup(
   const deletedAssetIds: string[] = [];
 
   for (const candidate of candidates) {
-    const preparedFileDeletion = await prepareAssetFileDeletion(candidate);
+    const preparedFileDeletion = await prepareAssetFileDeletion(
+      candidate,
+      options.assetStoragePath,
+    );
     let databaseRecordDeleted = false;
 
     try {
@@ -86,12 +91,20 @@ export async function runArchivedAssetCleanup(
 
 export async function prepareAssetFileDeletion(
   asset: ArchivedAssetCleanupCandidate,
+  assetStoragePath: string,
 ): Promise<PreparedAssetFileDeletion> {
-  const quarantinePath = `${asset.storagePath}.deleting-${randomUUID()}`;
+  const storedAssetPath = resolveAssetStoragePath(assetStoragePath, asset.storagePath);
+
+  if (!storedAssetPath) {
+    console.warn(`Skipped unsafe storage path while deleting archived asset ${asset.id}`);
+    return createNoopFileDeletion();
+  }
+
+  const quarantinePath = `${storedAssetPath}.deleting-${randomUUID()}`;
   let quarantined = false;
 
   try {
-    await rename(asset.storagePath, quarantinePath);
+    await rename(storedAssetPath, quarantinePath);
     quarantined = true;
   } catch (error) {
     if (!hasErrorCode(error, "ENOENT")) {
@@ -109,10 +122,17 @@ export async function prepareAssetFileDeletion(
 
     async rollback(): Promise<void> {
       if (quarantined) {
-        await rename(quarantinePath, asset.storagePath);
+        await rename(quarantinePath, storedAssetPath);
         quarantined = false;
       }
     },
+  };
+}
+
+function createNoopFileDeletion(): PreparedAssetFileDeletion {
+  return {
+    async commit(): Promise<void> {},
+    async rollback(): Promise<void> {},
   };
 }
 

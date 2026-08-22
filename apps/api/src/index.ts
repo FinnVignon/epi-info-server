@@ -77,7 +77,13 @@ app.get("/api/dashboard", requireAdminAuth, async (request, response) => {
   }
 });
 
-app.use("/media/assets", createAssetDownloadRouter(mysqlPool, config.adminAuth.sessionCookieName));
+app.use(
+  "/media/assets",
+  createAssetDownloadRouter(mysqlPool, {
+    assetStoragePath: config.assetStoragePath,
+    sessionCookieName: config.adminAuth.sessionCookieName,
+  }),
+);
 app.use("/api/admin/assets", createAdminAssetRouter(mysqlPool, config));
 app.use(
   "/api/admin/assignments",
@@ -92,7 +98,7 @@ app.use("/api/admin/groups", createAdminGroupRouter(mysqlPool, config));
 app.use("/api/admin/users", createAdminUserRouter(mysqlPool, config));
 app.use("/api/admin", createAdminAuthRouter(mysqlPool, config));
 app.use("/api/clients", createClientConnectionRouter(mysqlPool, config));
-app.use("/api/clients", createClientManifestRouter(mysqlPool));
+app.use("/api/clients", createClientManifestRouter(mysqlPool, config.assetStoragePath));
 
 if (config.adminDistPath) {
   const adminDistPath = path.resolve(config.adminDistPath);
@@ -132,7 +138,10 @@ async function startServer(): Promise<void> {
   await ensureAssetSchema(mysqlPool, config.mysql.database);
   await ensureClientConnectionSchema(mysqlPool, config.mysql.database);
   const stopBackgroundTasks = [
-    startArchivedAssetCleanup(mysqlPool, config.assetCleanup),
+    startArchivedAssetCleanup(mysqlPool, {
+      ...config.assetCleanup,
+      assetStoragePath: config.assetStoragePath,
+    }),
     startTemporaryRecordCleanup(mysqlPool, config.temporaryRecordCleanup),
   ];
 

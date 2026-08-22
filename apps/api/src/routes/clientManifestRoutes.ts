@@ -13,7 +13,7 @@ interface ClientAssetRouteParams {
   assetId?: string;
 }
 
-export function createClientManifestRouter(pool: Pool): Router {
+export function createClientManifestRouter(pool: Pool, assetStoragePath: string): Router {
   const router = Router();
   const requireClientAuth = createClientAuthMiddleware(pool);
 
@@ -58,7 +58,7 @@ export function createClientManifestRouter(pool: Pool): Router {
         return;
       }
 
-      await sendStoredAsset(response, next, asset, "private");
+      await sendStoredAsset(response, next, asset, "private", assetStoragePath);
     } catch (error) {
       next(error);
     }
