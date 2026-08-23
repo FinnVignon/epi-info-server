@@ -268,6 +268,8 @@
     "selectGroup": "Sélectionnez un groupe.",
     "createTitle": "Créer un groupe",
     "groupName": "Nom du groupe",
+    "technicalDetails": "Détails techniques",
+    "groupId": "ID du groupe",
     "createButton": "Créer le groupe",
     "creating": "Création",
     "deleteConfirm": "Supprimer le groupe « {name} » ?",

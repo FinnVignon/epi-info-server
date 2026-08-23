@@ -11,7 +11,9 @@ import {
   updateGroup,
 } from "../api/adminGroupsApi";
 import { ApiError } from "../api/adminApi";
+import { useTemporaryNotice } from "../hooks/useTemporaryNotice";
 import { useTranslation } from "../i18n";
+import { AdminFeedback } from "./AdminFeedback";
 import { GroupAssignmentPanel } from "./GroupAssignmentPanel";
 import { GroupCreatePanel } from "./GroupCreatePanel";
 import { GroupDetail } from "./GroupDetail";
@@ -37,7 +39,7 @@ export function AdminGroupsScreen({ onUnauthorized }: AdminGroupsScreenProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [notice, setNotice] = useState<string | null>(null);
+  const [notice, setNotice] = useTemporaryNotice();
   const [selectedGroup, setSelectedGroup] = useState<DisplayGroupDetail | null>(null);
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
 
@@ -260,12 +262,7 @@ export function AdminGroupsScreen({ onUnauthorized }: AdminGroupsScreenProps) {
     <section
       className={`content groups-layout ${canManageGroups === false ? "assignment-only" : ""}`}
     >
-      {error || notice ? (
-        <div className="screen-alerts">
-          {error ? <p className="form-error">{error}</p> : null}
-          {notice ? <p className="form-notice">{notice}</p> : null}
-        </div>
-      ) : null}
+      <AdminFeedback className="screen-alerts" error={error} notice={notice} />
 
       {canManageGroups !== false ? (
         <GroupTable

@@ -93,10 +93,7 @@ export function GroupDetail({
   return (
     <article className="panel groups-detail-panel">
       <div className="panel-header">
-        <div>
-          <h2>{group.name}</h2>
-          <p className="metric">{group.id}</p>
-        </div>
+        <h2>{group.name}</h2>
         <button
           className="danger-button"
           disabled={isSaving}
@@ -192,6 +189,16 @@ export function GroupDetail({
         </form>
         {!availableClients.length ? <p className="metric">{t.groups.noAdditionalClients}</p> : null}
       </section>
+
+      <details className="advanced-details">
+        <summary>{t.groups.technicalDetails}</summary>
+        <dl>
+          <div>
+            <dt>{t.groups.groupId}</dt>
+            <dd>{group.id}</dd>
+          </div>
+        </dl>
+      </details>
     </article>
   );
 }

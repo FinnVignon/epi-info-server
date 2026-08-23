@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { StatusMessage } from "./AdminFeedback";
 import type {
   AdminPermissionAction,
   AdminPermissionGrant,
@@ -151,7 +152,7 @@ export function PermissionEditor({ disabled, onChange, permissions }: Permission
           ))}
         </div>
 
-        {draftError ? <p className="form-error">{draftError}</p> : null}
+        {draftError ? <StatusMessage kind="error">{draftError}</StatusMessage> : null}
 
         <button
           className="secondary-button"

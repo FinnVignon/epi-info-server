@@ -1,9 +1,10 @@
 import { useMemo, useState } from "react";
 
+import { RefreshButton } from "./RefreshButton";
+import { SortableTableHeader, type SortDirection } from "./SortableTableHeader";
 import { useTranslation, type Translations } from "../i18n";
 import type { AdminUser, Asset, AssetStatus, AssetType } from "../../../shared/adminContracts";
 
-type AssetSortDirection = "asc" | "desc";
 type AssetSortKey = "createdAt" | "displayName" | "sizeBytes" | "status" | "type" | "uploader";
 type AssetStatusFilter = "active" | "all" | "archived";
 type AssetTypeFilter = "all" | AssetType;
@@ -25,7 +26,7 @@ export function AssetTable({
 }: AssetTableProps) {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortDirection, setSortDirection] = useState<AssetSortDirection>("desc");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [sortKey, setSortKey] = useState<AssetSortKey>("createdAt");
   const [statusFilter, setStatusFilter] = useState<AssetStatusFilter>("active");
   const [typeFilter, setTypeFilter] = useState<AssetTypeFilter>("all");
@@ -74,9 +75,7 @@ export function AssetTable({
     <article className="panel assets-list-panel">
       <div className="panel-header">
         <h2>{t.assets.title}</h2>
-        <button className="secondary-button" onClick={onRefresh} type="button">
-          {t.common.refresh}
-        </button>
+        <RefreshButton label={t.common.refresh} onClick={onRefresh} />
       </div>
 
       <div className="table-controls">
@@ -121,42 +120,42 @@ export function AssetTable({
           <table className="data-table">
             <thead>
               <tr>
-                <SortableHeader
+                <SortableTableHeader
                   activeSortKey={sortKey}
                   direction={sortDirection}
                   label={t.common.name}
                   onSort={handleSort}
                   sortKey="displayName"
                 />
-                <SortableHeader
+                <SortableTableHeader
                   activeSortKey={sortKey}
                   direction={sortDirection}
                   label={t.common.type}
                   onSort={handleSort}
                   sortKey="type"
                 />
-                <SortableHeader
+                <SortableTableHeader
                   activeSortKey={sortKey}
                   direction={sortDirection}
                   label={t.assets.uploader}
                   onSort={handleSort}
                   sortKey="uploader"
                 />
-                <SortableHeader
+                <SortableTableHeader
                   activeSortKey={sortKey}
                   direction={sortDirection}
                   label={t.assets.size}
                   onSort={handleSort}
                   sortKey="sizeBytes"
                 />
-                <SortableHeader
+                <SortableTableHeader
                   activeSortKey={sortKey}
                   direction={sortDirection}
                   label={t.common.status}
                   onSort={handleSort}
                   sortKey="status"
                 />
-                <SortableHeader
+                <SortableTableHeader
                   activeSortKey={sortKey}
                   direction={sortDirection}
                   label={t.assets.uploaded}
@@ -220,32 +219,6 @@ export function AssetTable({
         <p className="metric">{t.assets.noAssets}</p>
       )}
     </article>
-  );
-}
-
-interface SortableHeaderProps {
-  activeSortKey: AssetSortKey;
-  direction: AssetSortDirection;
-  label: string;
-  onSort: (sortKey: AssetSortKey) => void;
-  sortKey: AssetSortKey;
-}
-
-function SortableHeader({ activeSortKey, direction, label, onSort, sortKey }: SortableHeaderProps) {
-  const { t } = useTranslation();
-  const isActive = activeSortKey === sortKey;
-
-  return (
-    <th>
-      <button
-        className={`sort-button ${isActive ? "active" : ""}`}
-        onClick={() => onSort(sortKey)}
-        type="button"
-      >
-        <span>{label}</span>
-        <small>{isActive ? (direction === "asc" ? t.common.up : t.common.down) : ""}</small>
-      </button>
-    </th>
   );
 }
 

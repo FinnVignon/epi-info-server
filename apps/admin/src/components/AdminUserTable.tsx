@@ -1,9 +1,10 @@
 import { useMemo, useState } from "react";
 
+import { RefreshButton } from "./RefreshButton";
+import { SortableTableHeader, type SortDirection } from "./SortableTableHeader";
 import type { AdminUserWithPermissions } from "../../../shared/adminContracts";
 import { useTranslation } from "../i18n";
 
-type SortDirection = "asc" | "desc";
 type SortKey = "displayName" | "permissions" | "status" | "superAdmin";
 
 interface AdminUserTableProps {
@@ -55,9 +56,7 @@ export function AdminUserTable({
     <article className="panel users-list-panel">
       <div className="panel-header">
         <h2>{t.users.title}</h2>
-        <button className="secondary-button" onClick={onRefresh} type="button">
-          {t.users.refresh}
-        </button>
+        <RefreshButton label={t.users.refresh} onClick={onRefresh} />
       </div>
 
       <label className="table-search">
@@ -76,28 +75,28 @@ export function AdminUserTable({
           <table className="data-table">
             <thead>
               <tr>
-                <SortableHeader
+                <SortableTableHeader
                   activeSortKey={sortKey}
                   direction={sortDirection}
                   label={t.users.colName}
                   onSort={handleSort}
                   sortKey="displayName"
                 />
-                <SortableHeader
+                <SortableTableHeader
                   activeSortKey={sortKey}
                   direction={sortDirection}
                   label={t.users.colStatus}
                   onSort={handleSort}
                   sortKey="status"
                 />
-                <SortableHeader
+                <SortableTableHeader
                   activeSortKey={sortKey}
                   direction={sortDirection}
                   label={t.users.colSuperAdmin}
                   onSort={handleSort}
                   sortKey="superAdmin"
                 />
-                <SortableHeader
+                <SortableTableHeader
                   activeSortKey={sortKey}
                   direction={sortDirection}
                   label={t.users.colPermissions}
@@ -120,7 +119,9 @@ export function AdminUserTable({
                     </button>
                   </td>
                   <td>
-                    <span className={`status-pill ${user.status}`}>{user.status}</span>
+                    <span className={`status-pill ${user.status}`}>
+                      {user.status === "active" ? t.users.statusActive : t.users.statusInactive}
+                    </span>
                   </td>
                   <td>{user.isSuperAdmin ? t.users.yes : t.users.no}</td>
                   <td>
@@ -138,30 +139,6 @@ export function AdminUserTable({
         <p className="metric">{t.users.noUsers}</p>
       )}
     </article>
-  );
-}
-
-interface SortableHeaderProps {
-  activeSortKey: SortKey;
-  direction: SortDirection;
-  label: string;
-  onSort: (sortKey: SortKey) => void;
-  sortKey: SortKey;
-}
-
-function SortableHeader({ activeSortKey, direction, label, onSort, sortKey }: SortableHeaderProps) {
-  const isActive = activeSortKey === sortKey;
-  return (
-    <th>
-      <button
-        className={`sort-button ${isActive ? "active" : ""}`}
-        onClick={() => onSort(sortKey)}
-        type="button"
-      >
-        <span>{label}</span>
-        <small>{isActive ? (direction === "asc" ? "↑" : "↓") : ""}</small>
-      </button>
-    </th>
   );
 }
 

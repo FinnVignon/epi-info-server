@@ -1,6 +1,8 @@
-import { Monitor, RefreshCw } from "lucide-react";
+import { Monitor } from "lucide-react";
 import { useMemo, useState } from "react";
 
+import { RefreshButton } from "./RefreshButton";
+import { SortableTableHeader, type SortDirection } from "./SortableTableHeader";
 import { useTranslation, type Translations } from "../i18n";
 import { formatDate } from "../utils/formatDate";
 import type {
@@ -9,7 +11,6 @@ import type {
   ManagedClient,
 } from "../../../shared/clientContracts";
 
-type SortDirection = "asc" | "desc";
 type SortKey = "access" | "connection" | "lastSeen" | "name" | "software";
 type AccessFilter = "all" | ClientAccessStatus;
 type ConnectionFilter = "all" | ClientConnectionStatus;
@@ -81,15 +82,7 @@ export function ClientTable({
             </p>
           </div>
         </div>
-        <button
-          aria-label={t.common.refresh}
-          className="icon-button panel-icon-button"
-          onClick={onRefresh}
-          title={t.common.refresh}
-          type="button"
-        >
-          <RefreshCw aria-hidden="true" size={17} />
-        </button>
+        <RefreshButton label={t.common.refresh} onClick={onRefresh} />
       </div>
 
       <div className="table-controls">
@@ -133,35 +126,35 @@ export function ClientTable({
           <table className="data-table clients-table">
             <thead>
               <tr>
-                <SortableHeader
+                <SortableTableHeader
                   activeSortKey={sortKey}
                   direction={sortDirection}
                   label={t.common.name}
                   onSort={handleSort}
                   sortKey="name"
                 />
-                <SortableHeader
+                <SortableTableHeader
                   activeSortKey={sortKey}
                   direction={sortDirection}
                   label={t.clients.connection}
                   onSort={handleSort}
                   sortKey="connection"
                 />
-                <SortableHeader
+                <SortableTableHeader
                   activeSortKey={sortKey}
                   direction={sortDirection}
                   label={t.clients.access}
                   onSort={handleSort}
                   sortKey="access"
                 />
-                <SortableHeader
+                <SortableTableHeader
                   activeSortKey={sortKey}
                   direction={sortDirection}
                   label={t.clients.software}
                   onSort={handleSort}
                   sortKey="software"
                 />
-                <SortableHeader
+                <SortableTableHeader
                   activeSortKey={sortKey}
                   direction={sortDirection}
                   label={t.clients.lastSeen}
@@ -206,32 +199,6 @@ export function ClientTable({
         <p className="metric">{t.clients.noClients}</p>
       )}
     </article>
-  );
-}
-
-interface SortableHeaderProps {
-  activeSortKey: SortKey;
-  direction: SortDirection;
-  label: string;
-  onSort: (sortKey: SortKey) => void;
-  sortKey: SortKey;
-}
-
-function SortableHeader({ activeSortKey, direction, label, onSort, sortKey }: SortableHeaderProps) {
-  const { t } = useTranslation();
-  const isActive = activeSortKey === sortKey;
-
-  return (
-    <th>
-      <button
-        className={`sort-button ${isActive ? "active" : ""}`}
-        onClick={() => onSort(sortKey)}
-        type="button"
-      >
-        <span>{label}</span>
-        <small>{isActive ? (direction === "asc" ? t.common.up : t.common.down) : ""}</small>
-      </button>
-    </th>
   );
 }
 

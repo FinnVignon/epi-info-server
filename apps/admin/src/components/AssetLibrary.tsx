@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { listAssets, updateAssetStatus, uploadAsset } from "../api/adminAssetsApi";
 import { ApiError } from "../api/adminApi";
 import { useTranslation } from "../i18n";
+import { useTemporaryNotice } from "../hooks/useTemporaryNotice";
+import { AdminFeedback } from "./AdminFeedback";
 import { AssetTable } from "./AssetTable";
 import { AssetUploadForm } from "./AssetUploadForm";
 import type { AdminUser, Asset, AssetStatus } from "../../../shared/adminContracts";
@@ -18,7 +20,7 @@ export function AssetLibrary({ currentUser, onUnauthorized }: AssetLibraryProps)
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
-  const [notice, setNotice] = useState<string | null>(null);
+  const [notice, setNotice] = useTemporaryNotice();
 
   useEffect(() => {
     void loadAssets();
@@ -91,12 +93,7 @@ export function AssetLibrary({ currentUser, onUnauthorized }: AssetLibraryProps)
 
   return (
     <div className="asset-library-layout">
-      {error || notice ? (
-        <div className="screen-alerts">
-          {error ? <p className="form-error">{error}</p> : null}
-          {notice ? <p className="form-notice">{notice}</p> : null}
-        </div>
-      ) : null}
+      <AdminFeedback className="screen-alerts" error={error} notice={notice} />
 
       <AssetUploadForm isUploading={isUploading} onUpload={handleUpload} />
       <AssetTable

@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 
 import { listClients, updateClientProfile, updateClientStatus } from "../api/adminClientsApi";
 import { ApiError } from "../api/adminApi";
+import { useTemporaryNotice } from "../hooks/useTemporaryNotice";
+import { AdminFeedback } from "./AdminFeedback";
 import { ClientAssignmentPanel } from "./ClientAssignmentPanel";
 import { ClientDetail } from "./ClientDetail";
 import { ClientEnrollmentPanel } from "./ClientEnrollmentPanel";
@@ -21,7 +23,7 @@ export function AdminClientsScreen({ onUnauthorized }: AdminClientsScreenProps) 
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [notice, setNotice] = useState<string | null>(null);
+  const [notice, setNotice] = useTemporaryNotice();
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const selectedClient = useMemo(
     () => clients.find((client) => client.id === selectedClientId) ?? clients[0] ?? null,
@@ -115,12 +117,7 @@ export function AdminClientsScreen({ onUnauthorized }: AdminClientsScreenProps) 
     <section
       className={`content clients-layout ${canManageClients === false ? "assignment-only" : ""}`}
     >
-      {error || notice ? (
-        <div className="screen-alerts">
-          {error ? <p className="form-error">{error}</p> : null}
-          {notice ? <p className="form-notice">{notice}</p> : null}
-        </div>
-      ) : null}
+      <AdminFeedback className="screen-alerts" error={error} notice={notice} />
 
       {canManageClients !== false ? (
         <>

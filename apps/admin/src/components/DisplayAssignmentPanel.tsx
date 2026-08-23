@@ -2,7 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 
 import { listAssignmentAssets } from "../api/adminAssignmentsApi";
 import { ApiError } from "../api/adminApi";
+import { useTemporaryNotice } from "../hooks/useTemporaryNotice";
 import { formatTranslation, useTranslation, type Translations } from "../i18n";
+import { AdminFeedback } from "./AdminFeedback";
 import type {
   AssignDisplayContentRequest,
   AssignmentResponse,
@@ -53,7 +55,7 @@ export function DisplayAssignmentPanel({
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [liveUrl, setLiveUrl] = useState("");
-  const [notice, setNotice] = useState<string | null>(null);
+  const [notice, setNotice] = useTemporaryNotice();
   const [refreshSecondsInput, setRefreshSecondsInput] = useState("60");
   const [targetId, setTargetId] = useState("");
   const [targets, setTargets] = useState<AssignmentTargetOption[]>([]);
@@ -228,8 +230,7 @@ export function DisplayAssignmentPanel({
         </div>
       </div>
 
-      {error ? <p className="form-error">{error}</p> : null}
-      {notice ? <p className="form-notice">{notice}</p> : null}
+      <AdminFeedback error={error} notice={notice} />
 
       <form className="form-grid assignment-form" onSubmit={(event) => void handleSubmit(event)}>
         {!hideTargetSelector ? (

@@ -119,23 +119,41 @@ select:focus-visible {
 }
 
 .form-error {
+  align-items: flex-start;
   background: #fdeeee;
   border: 1px solid #efb4b4;
   border-radius: 6px;
   color: #9a2d2d;
+  display: flex;
   font-size: 13px;
+  gap: 8px;
   margin: 0;
   padding: 10px;
 }
 
 .form-notice {
+  align-items: flex-start;
   background: #e8f6ee;
   border: 1px solid #9bd3b0;
   border-radius: 6px;
   color: #1c6b3a;
+  display: flex;
   font-size: 13px;
+  gap: 8px;
   margin: 0;
   padding: 10px;
+}
+
+.form-error svg,
+.form-notice svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.feedback-stack {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 14px;
 }
 
 .primary-button,
@@ -1161,10 +1179,9 @@ select:focus-visible {
   color: #172026;
 }
 
-.sort-button small {
+.sort-button svg {
   color: #5d6b78;
-  font-size: 11px;
-  min-width: 28px;
+  flex: 0 0 auto;
 }
 
 .data-table td {
