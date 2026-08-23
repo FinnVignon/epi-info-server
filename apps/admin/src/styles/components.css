@@ -1,0 +1,236 @@
+.panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.panel h2 {
+  font-size: 15px;
+  margin: 0 0 12px;
+}
+
+.panel h3 {
+  color: var(--color-text-soft);
+  font-size: 13px;
+  margin: 0;
+}
+
+.panel-header {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.panel-header h2 {
+  margin: 0;
+}
+
+.metric {
+  color: var(--color-muted);
+  font-size: 13px;
+  margin: 0;
+}
+
+.content-types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.content-type {
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  color: var(--color-text-soft);
+  font-size: 13px;
+  padding: 6px 10px;
+}
+
+.summary-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.summary-grid h3 {
+  color: var(--color-text-soft);
+  font-size: 13px;
+  margin: 0 0 8px;
+}
+
+.summary-list {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.permission-list {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.summary-list li {
+  align-items: center;
+  background: var(--color-surface-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  min-height: 36px;
+  padding: 8px 10px;
+}
+
+.permission-list li {
+  align-items: center;
+  background: var(--color-surface-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  min-height: 40px;
+  padding: 8px 10px;
+}
+
+.summary-list span {
+  color: var(--color-text);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.summary-list small {
+  color: var(--color-muted);
+  flex: 0 0 auto;
+  font-size: 12px;
+}
+
+.permission-list span {
+  color: var(--color-text);
+  display: block;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.permission-list small {
+  color: var(--color-muted);
+  display: block;
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.permission-list.readonly {
+  margin-top: 10px;
+}
+
+.permission-editor {
+  display: grid;
+  gap: 12px;
+}
+
+.permission-builder {
+  border-top: 1px solid var(--color-border);
+  display: grid;
+  gap: 12px;
+  padding-top: 12px;
+}
+
+.form-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.form-grid.compact-form {
+  align-items: end;
+  border-top: 1px solid var(--color-border);
+  grid-template-columns: minmax(0, 1fr) auto;
+  margin-top: 16px;
+  padding-top: 16px;
+}
+
+.form-grid label,
+.permission-builder label {
+  display: grid;
+  gap: 6px;
+}
+
+.form-grid label span,
+.permission-builder label span {
+  color: var(--color-text-soft);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.form-grid input,
+.form-grid select,
+.permission-builder input,
+.permission-builder select {
+  background: var(--color-surface);
+  border: 1px solid var(--color-input-border);
+  border-radius: 6px;
+  color: var(--color-text);
+  min-height: 38px;
+  outline: none;
+  padding: 8px 10px;
+  width: 100%;
+}
+
+.form-grid input:focus,
+.form-grid select:focus,
+.permission-builder input:focus,
+.permission-builder select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--focus-shadow);
+}
+
+.checkbox-row {
+  align-items: center;
+  display: flex !important;
+  gap: 8px !important;
+}
+
+.checkbox-row input {
+  min-height: auto;
+  width: auto;
+}
+
+.checkbox-grid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.checkbox-grid label {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
+.checkbox-grid input {
+  min-height: auto;
+  width: auto;
+}
+
+.users-list-panel,
+.users-detail-panel,
+.assets-upload-panel,
+.assets-list-panel,
+.clients-list-panel,
+.clients-detail-panel,
+.client-assignment-panel,
+.client-enrollment-panel,
+.groups-list-panel,
+.groups-detail-panel,
+.group-create-panel,
+.group-assignment-panel,
+.global-assignment-panel {
+  align-self: start;
+}

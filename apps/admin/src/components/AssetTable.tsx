@@ -2,12 +2,19 @@ import { useMemo, useState } from "react";
 
 import { RefreshButton } from "./RefreshButton";
 import { SortableTableHeader, type SortDirection } from "./SortableTableHeader";
-import { useTranslation, type Translations } from "../i18n";
-import type { AdminUser, Asset, AssetStatus, AssetType } from "../../../shared/adminContracts";
-
-type AssetSortKey = "createdAt" | "displayName" | "sizeBytes" | "status" | "type" | "uploader";
-type AssetStatusFilter = "active" | "all" | "archived";
-type AssetTypeFilter = "all" | AssetType;
+import { useTranslation } from "../i18n";
+import {
+  filterAndSortAssets,
+  formatAssetStatus,
+  formatAssetType,
+  formatAssetUploader,
+  formatFileSize,
+  type AssetSortKey,
+  type AssetStatusFilter,
+  type AssetTypeFilter,
+} from "../utils/assetTable";
+import { formatDate } from "../utils/formatDate";
+import type { AdminUser, Asset, AssetStatus } from "../../../shared/adminContracts";
 
 interface AssetTableProps {
   assets: Asset[];
@@ -30,36 +37,17 @@ export function AssetTable({
   const [sortKey, setSortKey] = useState<AssetSortKey>("createdAt");
   const [statusFilter, setStatusFilter] = useState<AssetStatusFilter>("active");
   const [typeFilter, setTypeFilter] = useState<AssetTypeFilter>("all");
-  const visibleAssets = useMemo(() => {
-    const normalizedQuery = searchQuery.trim().toLowerCase();
-    const filteredAssets = assets.filter((asset) => {
-      if (statusFilter !== "all" && asset.status !== statusFilter) {
-        return false;
-      }
-
-      if (typeFilter !== "all" && asset.type !== typeFilter) {
-        return false;
-      }
-
-      if (!normalizedQuery) {
-        return true;
-      }
-
-      const uploader = asset.uploadedBy
-        ? `${asset.uploadedBy.displayName} ${asset.uploadedBy.email}`
-        : "";
-
-      return [asset.displayName, asset.originalFilename, uploader].some((value) =>
-        value.toLowerCase().includes(normalizedQuery),
-      );
-    });
-
-    return filteredAssets.sort((firstAsset, secondAsset) => {
-      const comparison = compareAssets(firstAsset, secondAsset, sortKey);
-
-      return sortDirection === "asc" ? comparison : -comparison;
-    });
-  }, [assets, searchQuery, sortDirection, sortKey, statusFilter, typeFilter]);
+  const visibleAssets = useMemo(
+    () =>
+      filterAndSortAssets(assets, {
+        searchQuery,
+        sortDirection,
+        sortKey,
+        statusFilter,
+        typeFilter,
+      }),
+    [assets, searchQuery, sortDirection, sortKey, statusFilter, typeFilter],
+  );
 
   function handleSort(nextSortKey: AssetSortKey): void {
     if (nextSortKey === sortKey) {
@@ -180,7 +168,7 @@ export function AssetTable({
                       </div>
                     </td>
                     <td>{formatAssetType(asset.type, t)}</td>
-                    <td>{formatUploader(asset, t)}</td>
+                    <td>{formatAssetUploader(asset, t)}</td>
                     <td>{formatFileSize(asset.sizeBytes)}</td>
                     <td>
                       <span className={`status-pill ${asset.status}`}>
@@ -220,64 +208,4 @@ export function AssetTable({
       )}
     </article>
   );
-}
-
-function compareAssets(firstAsset: Asset, secondAsset: Asset, sortKey: AssetSortKey): number {
-  switch (sortKey) {
-    case "createdAt":
-      return Date.parse(firstAsset.createdAt) - Date.parse(secondAsset.createdAt);
-    case "displayName":
-      return compareText(firstAsset.displayName, secondAsset.displayName);
-    case "sizeBytes":
-      return firstAsset.sizeBytes - secondAsset.sizeBytes;
-    case "status":
-      return compareText(firstAsset.status, secondAsset.status);
-    case "type":
-      return compareText(firstAsset.type, secondAsset.type);
-    case "uploader":
-      return compareText(getUploaderName(firstAsset), getUploaderName(secondAsset));
-  }
-}
-
-function compareText(firstValue: string, secondValue: string): number {
-  return firstValue.localeCompare(secondValue, undefined, {
-    sensitivity: "base",
-  });
-}
-
-function formatDate(value: string): string {
-  return new Date(value).toLocaleString();
-}
-
-function formatAssetStatus(status: AssetStatus, t: Translations): string {
-  return status === "active" ? t.common.active : t.common.archived;
-}
-
-function formatAssetType(type: AssetType, t: Translations): string {
-  return type === "image" ? t.common.image : t.common.video;
-}
-
-function formatUploader(asset: Asset, t: Translations): string {
-  return asset.uploadedBy?.displayName ?? t.assets.unknownUploader;
-}
-
-function getUploaderName(asset: Asset): string {
-  return asset.uploadedBy?.displayName ?? "";
-}
-
-function formatFileSize(sizeBytes: number): string {
-  if (sizeBytes < 1024) {
-    return `${sizeBytes} B`;
-  }
-
-  const units = ["KB", "MB", "GB"];
-  let size = sizeBytes / 1024;
-  let unitIndex = 0;
-
-  while (size >= 1024 && unitIndex < units.length - 1) {
-    size /= 1024;
-    unitIndex += 1;
-  }
-
-  return `${size.toFixed(size >= 10 ? 0 : 1)} ${units[unitIndex]}`;
 }

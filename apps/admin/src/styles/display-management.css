@@ -1,0 +1,134 @@
+.section-block {
+  border-top: 1px solid var(--color-border);
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
+}
+
+.client-enrollment-panel {
+  align-self: start;
+}
+
+.enrollment-token-result {
+  background: var(--color-surface-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 14px;
+}
+
+.enrollment-token-result > div {
+  display: grid;
+  gap: 6px;
+}
+
+.enrollment-token-result span {
+  color: var(--color-text-soft);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.enrollment-token-result code {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 4px;
+  color: var(--color-text);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+  padding: 10px;
+  user-select: all;
+}
+
+.enrollment-token-result .secondary-button {
+  justify-self: start;
+}
+
+.clients-detail-panel .panel-header > div {
+  min-width: 0;
+}
+
+.clients-detail-panel .panel-header .metric {
+  overflow-wrap: anywhere;
+}
+
+.assignment-form label,
+.assignment-form .form-error,
+.assignment-form .form-notice,
+.assignment-form .metric,
+.assignment-form > button,
+.assignment-form .assignment-actions {
+  grid-column: 1 / -1;
+}
+
+.assignment-form .assignment-fit-field {
+  max-width: 220px;
+}
+
+.assignment-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.assignment-form > button,
+.assignment-actions {
+  justify-self: start;
+}
+
+.client-error-detail {
+  background: var(--color-error-bg);
+  border: 1px solid var(--color-error-border);
+  border-radius: 6px;
+  color: var(--color-error-text);
+  font-size: 13px;
+  margin: 0;
+  overflow-wrap: anywhere;
+  padding: 10px;
+  white-space: pre-wrap;
+}
+
+.clients-table {
+  min-width: 840px;
+}
+
+.groups-table {
+  min-width: 560px;
+}
+
+.group-member-list {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.group-member-list li {
+  align-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 10px;
+}
+
+.group-member-list li > div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.group-member-list strong {
+  color: var(--color-text);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.group-member-list span {
+  color: var(--color-muted);
+  font-size: 12px;
+}

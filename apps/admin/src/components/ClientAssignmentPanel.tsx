@@ -1,6 +1,7 @@
 import { assignContentToClient, listAssignmentClients } from "../api/adminAssignmentsApi";
 import { useTranslation } from "../i18n";
-import { DisplayAssignmentPanel, type AssignmentTargetOption } from "./DisplayAssignmentPanel";
+import { DisplayAssignmentPanel } from "./DisplayAssignmentPanel";
+import type { AssignmentTargetOption } from "./displayAssignmentTypes";
 
 interface ClientAssignmentPanelProps {
   onUnauthorized: () => void;

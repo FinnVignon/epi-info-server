@@ -1,0 +1,101 @@
+.settings-panel {
+  align-self: start;
+}
+
+.panel-heading {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.panel-heading h2 {
+  margin: 0;
+}
+
+.panel-heading.compact {
+  margin: 0;
+}
+
+.panel-heading.compact > div {
+  display: grid;
+  gap: 2px;
+}
+
+.panel-heading-icon {
+  align-items: center;
+  background: var(--color-surface-muted);
+  border-radius: 6px;
+  color: var(--color-text-soft);
+  display: inline-flex;
+  height: 32px;
+  justify-content: center;
+  width: 32px;
+}
+
+.segmented-control {
+  background: var(--color-hover);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  display: inline-grid;
+  gap: 2px;
+  grid-template-columns: repeat(2, minmax(100px, 1fr));
+  padding: 3px;
+}
+
+.segmented-control button {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 4px;
+  color: var(--color-muted);
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 700;
+  gap: 6px;
+  justify-content: center;
+  min-height: 34px;
+  padding: 6px 10px;
+}
+
+.segmented-control.theme-control {
+  grid-template-columns: repeat(3, minmax(90px, 1fr));
+}
+
+.segmented-control button.active {
+  background: var(--color-surface);
+  box-shadow: 0 1px 2px var(--shadow-control);
+  color: var(--color-text);
+}
+
+.settings-details {
+  display: grid;
+  margin: 0;
+}
+
+.settings-details > div {
+  align-items: baseline;
+  border-top: 1px solid var(--color-border-soft);
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(110px, 0.5fr) minmax(0, 1fr);
+  padding: 11px 0;
+}
+
+.settings-details > div:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.settings-details dt {
+  color: var(--color-muted);
+  font-size: 12px;
+}
+
+.settings-details dd {
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 650;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
