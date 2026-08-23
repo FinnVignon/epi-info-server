@@ -124,7 +124,7 @@ export function DisplayAssignmentPanel({
     return () => {
       cancelled = true;
     };
-  }, [loadTargets]);
+  }, [loadTargets, preferredTargetId]);
 
   useEffect(() => {
     setError(null);
