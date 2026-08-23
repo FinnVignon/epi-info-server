@@ -14,13 +14,14 @@ export function AssetUploadForm({ isUploading, onUpload }: AssetUploadFormProps)
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
+    const form = event.currentTarget;
 
     if (!selectedFile) {
       return;
     }
 
     if (await onUpload(selectedFile, displayName)) {
-      event.currentTarget.reset();
+      form.reset();
       setDisplayName("");
       setSelectedFile(null);
     }
