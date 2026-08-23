@@ -33,19 +33,40 @@
 
   "nav": {
     "dashboard": "Tableau de bord",
-    "global": "Tous les écrans",
     "users": "Utilisateurs",
-    "assets": "Contenus",
-    "clients": "Clients",
+    "content": "Contenus",
+    "screens": "Écrans",
     "groups": "Groupes",
+    "settings": "Paramètres",
     "logout": "Déconnexion",
-    "sections": "Sections admin"
+    "sections": "Sections d'administration",
+    "openMenu": "Ouvrir la navigation",
+    "closeMenu": "Fermer la navigation",
+    "changeLanguage": "Changer de langue"
+  },
+
+  "shell": {
+    "controlPanel": "Panneau de contrôle"
   },
 
   "apiStatus": {
     "checking": "vérification",
     "ok": "connectée",
     "error": "erreur"
+  },
+
+  "settings": {
+    "languageTitle": "Langue",
+    "accountTitle": "Compte",
+    "systemTitle": "Système",
+    "displayName": "Nom affiché",
+    "email": "Adresse e-mail",
+    "access": "Accès",
+    "superAdmin": "Super administrateur",
+    "scopedAccess": "Administrateur limité",
+    "api": "API",
+    "service": "Service",
+    "database": "Base de données"
   },
 
   "auth": {

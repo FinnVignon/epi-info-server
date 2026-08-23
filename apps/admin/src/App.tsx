@@ -10,10 +10,10 @@ import {
 import { AdminAssetsScreen } from "./components/AdminAssetsScreen";
 import { AdminClientsScreen } from "./components/AdminClientsScreen";
 import { AdminDashboard } from "./components/AdminDashboard";
-import { AdminGlobalAssignmentScreen } from "./components/AdminGlobalAssignmentScreen";
 import { AdminGroupsScreen } from "./components/AdminGroupsScreen";
 import { AdminShell } from "./components/AdminShell";
 import type { AdminScreen } from "./components/AdminShell";
+import { AdminSettingsScreen } from "./components/AdminSettingsScreen";
 import { AdminUsersScreen } from "./components/AdminUsersScreen";
 import { AuthScreen } from "./components/AuthScreen";
 import { LoadingScreen } from "./components/LoadingScreen";
@@ -161,6 +161,7 @@ export function App() {
           currentUser,
           dashboard,
           health,
+          apiStatus,
           onUnauthorized: handleSessionExpired,
         })}
       </AdminShell>
@@ -171,6 +172,7 @@ export function App() {
 }
 
 interface AdminScreenRenderState {
+  apiStatus: ApiStatus;
   currentUser: AdminUser;
   dashboard: DashboardResponse | null;
   health: HealthResponse | null;
@@ -179,18 +181,24 @@ interface AdminScreenRenderState {
 
 function renderAdminScreen(activeScreen: AdminScreen, state: AdminScreenRenderState) {
   switch (activeScreen) {
-    case "assets":
+    case "content":
       return (
         <AdminAssetsScreen currentUser={state.currentUser} onUnauthorized={state.onUnauthorized} />
       );
-    case "clients":
+    case "screens":
       return <AdminClientsScreen onUnauthorized={state.onUnauthorized} />;
     case "dashboard":
       return <AdminDashboard dashboard={state.dashboard} health={state.health} />;
     case "groups":
       return <AdminGroupsScreen onUnauthorized={state.onUnauthorized} />;
-    case "global":
-      return <AdminGlobalAssignmentScreen onUnauthorized={state.onUnauthorized} />;
+    case "settings":
+      return (
+        <AdminSettingsScreen
+          apiStatus={state.apiStatus}
+          currentUser={state.currentUser}
+          health={state.health}
+        />
+      );
     case "users":
       return (
         <AdminUsersScreen currentUser={state.currentUser} onUnauthorized={state.onUnauthorized} />
