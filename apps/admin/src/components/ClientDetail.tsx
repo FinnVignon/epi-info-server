@@ -44,10 +44,7 @@ export function ClientDetail({
   return (
     <article className="panel clients-detail-panel">
       <div className="panel-header">
-        <div>
-          <h2>{client.name}</h2>
-          <p className="metric">{client.id}</p>
-        </div>
+        <h2>{client.name}</h2>
         <button
           className="secondary-button"
           disabled={isSaving}
@@ -68,16 +65,8 @@ export function ClientDetail({
           <strong>{formatAccessStatus(client.accessStatus, t)}</strong>
         </p>
         <p>
-          <span>{t.clients.clientSoftware}</span>
-          <strong>{client.softwareVersion ?? t.common.unknown}</strong>
-        </p>
-        <p>
           <span>{t.clients.lastSeen}</span>
           <strong>{formatDate(client.lastSeenAt, t.common.never)}</strong>
-        </p>
-        <p>
-          <span>{t.clients.manifest}</span>
-          <strong>{client.currentManifestId ?? t.common.none}</strong>
         </p>
         <p>
           <span>{t.clients.lastSync}</span>
@@ -110,6 +99,24 @@ export function ClientDetail({
           <p className="client-error-detail">{client.lastError}</p>
         </section>
       ) : null}
+
+      <details className="advanced-details">
+        <summary>{t.clients.technicalDetails}</summary>
+        <dl>
+          <div>
+            <dt>{t.clients.screenId}</dt>
+            <dd>{client.id}</dd>
+          </div>
+          <div>
+            <dt>{t.clients.clientSoftware}</dt>
+            <dd>{client.softwareVersion ?? t.common.unknown}</dd>
+          </div>
+          <div>
+            <dt>{t.clients.manifest}</dt>
+            <dd>{client.currentManifestId ?? t.common.none}</dd>
+          </div>
+        </dl>
+      </details>
     </article>
   );
 }

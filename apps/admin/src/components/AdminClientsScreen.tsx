@@ -131,20 +131,23 @@ export function AdminClientsScreen({ onUnauthorized }: AdminClientsScreenProps) 
             onSelectClient={setSelectedClientId}
             selectedClientId={selectedClient?.id ?? null}
           />
-          <ClientDetail
-            client={selectedClient}
-            isSaving={isSaving}
-            onStatusChange={(client) => void handleStatusChange(client)}
-            onUpdateProfile={handleUpdateProfile}
-          />
-          {canEnrollClients ? <ClientEnrollmentPanel onUnauthorized={onUnauthorized} /> : null}
+          <div className="screens-side-column">
+            <ClientDetail
+              client={selectedClient}
+              isSaving={isSaving}
+              onStatusChange={(client) => void handleStatusChange(client)}
+              onUpdateProfile={handleUpdateProfile}
+            />
+            <ClientAssignmentPanel
+              onUnauthorized={onUnauthorized}
+              preferredClientId={selectedClient?.id ?? null}
+            />
+            {canEnrollClients ? <ClientEnrollmentPanel onUnauthorized={onUnauthorized} /> : null}
+          </div>
         </>
-      ) : null}
-
-      <ClientAssignmentPanel
-        onUnauthorized={onUnauthorized}
-        preferredClientId={selectedClient?.id ?? null}
-      />
+      ) : (
+        <ClientAssignmentPanel onUnauthorized={onUnauthorized} preferredClientId={null} />
+      )}
     </section>
   );
 }

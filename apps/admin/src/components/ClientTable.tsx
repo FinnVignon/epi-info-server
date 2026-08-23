@@ -1,3 +1,4 @@
+import { Monitor, RefreshCw } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { useTranslation, type Translations } from "../i18n";
@@ -69,9 +70,25 @@ export function ClientTable({
   return (
     <article className="panel clients-list-panel">
       <div className="panel-header">
-        <h2>{t.clients.title}</h2>
-        <button className="secondary-button" onClick={onRefresh} type="button">
-          {t.common.refresh}
+        <div className="panel-heading compact">
+          <span className="panel-heading-icon">
+            <Monitor aria-hidden="true" size={18} />
+          </span>
+          <div>
+            <h2>{t.clients.title}</h2>
+            <p className="metric">
+              {t.clients.screenCount.replace("{count}", String(clients.length))}
+            </p>
+          </div>
+        </div>
+        <button
+          aria-label={t.common.refresh}
+          className="icon-button panel-icon-button"
+          onClick={onRefresh}
+          title={t.common.refresh}
+          type="button"
+        >
+          <RefreshCw aria-hidden="true" size={17} />
         </button>
       </div>
 
@@ -163,7 +180,6 @@ export function ClientTable({
                   <td>
                     <button className="table-link" type="button">
                       <span>{client.name}</span>
-                      <small>{shortClientId(client.id)}</small>
                     </button>
                   </td>
                   <td>
@@ -261,8 +277,4 @@ function formatConnectionStatus(status: ClientConnectionStatus, t: Translations)
     case "unknown":
       return t.clients.connectionUnknown;
   }
-}
-
-function shortClientId(clientId: string): string {
-  return clientId.length > 16 ? `${clientId.slice(0, 8)}...${clientId.slice(-4)}` : clientId;
 }

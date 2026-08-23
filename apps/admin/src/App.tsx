@@ -162,6 +162,7 @@ export function App() {
           dashboard,
           health,
           apiStatus,
+          onNavigate: setActiveScreen,
           onUnauthorized: handleSessionExpired,
         })}
       </AdminShell>
@@ -176,6 +177,7 @@ interface AdminScreenRenderState {
   currentUser: AdminUser;
   dashboard: DashboardResponse | null;
   health: HealthResponse | null;
+  onNavigate: (screen: AdminScreen) => void;
   onUnauthorized: () => void;
 }
 
@@ -188,7 +190,13 @@ function renderAdminScreen(activeScreen: AdminScreen, state: AdminScreenRenderSt
     case "screens":
       return <AdminClientsScreen onUnauthorized={state.onUnauthorized} />;
     case "dashboard":
-      return <AdminDashboard dashboard={state.dashboard} health={state.health} />;
+      return (
+        <AdminDashboard
+          dashboard={state.dashboard}
+          health={state.health}
+          onNavigate={state.onNavigate}
+        />
+      );
     case "groups":
       return <AdminGroupsScreen onUnauthorized={state.onUnauthorized} />;
     case "settings":
