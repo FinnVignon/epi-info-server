@@ -31,8 +31,15 @@
     "working": "Working"
   },
 
+  "accountTypes": {
+    "user": "User",
+    "admin": "Admin",
+    "superAdmin": "Super admin"
+  },
+
   "nav": {
     "dashboard": "Dashboard",
+    "display": "Display",
     "users": "Users",
     "content": "Content",
     "screens": "Screens",
@@ -42,7 +49,10 @@
     "sections": "Admin sections",
     "openMenu": "Open navigation",
     "closeMenu": "Close navigation",
-    "changeLanguage": "Change language"
+    "changeLanguage": "Change language",
+    "workspace": "Workspace",
+    "administration": "Administration",
+    "preferences": "Preferences"
   },
 
   "shell": {
@@ -57,6 +67,11 @@
 
   "settings": {
     "languageTitle": "Language",
+    "appearanceTitle": "Appearance",
+    "theme": "Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeSystem": "System",
     "accountTitle": "Account",
     "systemTitle": "System",
     "displayName": "Display name",
@@ -75,6 +90,14 @@
     "allScreens": "All screens"
   },
 
+  "display": {
+    "targetType": "Display target",
+    "groups": "Groups",
+    "screens": "Screens",
+    "allScreens": "All screens",
+    "unavailable": "No display targets are available for this account."
+  },
+
   "auth": {
     "loginTitle": "Admin sign in",
     "bootstrapTitle": "Create the first administrator",
@@ -90,6 +113,8 @@
   },
 
   "dashboard": {
+    "displayContent": "Display content",
+    "displayTargets": "Groups, screens, or all screens",
     "serverTitle": "System health",
     "service": "Service",
     "database": "Database",
@@ -122,6 +147,8 @@
     "colStatus": "Status",
     "colSuperAdmin": "Super admin",
     "colPermissions": "Permissions",
+    "accountType": "Account type",
+    "accountPermissionsRequired": "Add the permissions required for this account type.",
     "yes": "Yes",
     "no": "No",
     "allPermissions": "All",
@@ -252,7 +279,8 @@
     "errorStatus": "Unable to update screen status",
     "noticeUpdated": "Screen updated.",
     "noticeEnabled": "Screen enabled.",
-    "noticeDisabled": "Screen disabled."
+    "noticeDisabled": "Screen disabled.",
+    "managementUnavailable": "Screen management permission is required."
   },
 
   "groups": {
@@ -290,13 +318,14 @@
     "errorDelete": "Unable to delete group",
     "errorAddMember": "Unable to add screen to group",
     "errorRemoveMember": "Unable to remove screen from group",
-    "errorRefreshClients": "Unable to refresh permitted screens"
+    "errorRefreshClients": "Unable to refresh permitted screens",
+    "managementUnavailable": "Group management permission is required."
   },
 
   "assignment": {
-    "title": "Display Assignment",
-    "groupTitle": "Group Display Assignment",
-    "globalTitle": "All screens",
+    "title": "Display on a screen",
+    "groupTitle": "Display on a group",
+    "globalTitle": "Display on all screens",
     "target": "Target",
     "clientTarget": "Screen",
     "groupTarget": "Group",
@@ -315,14 +344,14 @@
     "fitLabel": "Fit",
     "fitContain": "Contain",
     "fitCover": "Cover",
-    "noAssets": "Upload an active image or video before creating an assignment.",
-    "assigning": "Assigning",
+    "noAssets": "Upload an active image or video before displaying it.",
+    "assigning": "Sending",
     "assignButton": "Display content",
     "errorInvalidContent": "Choose valid display content before sending.",
-    "errorLoad": "Unable to load assignment options",
-    "errorAssign": "Unable to assign display content",
-    "noticeSent": "{manifest} sent to {target}. Affected displays will download, verify, and activate it on their next sync.",
-    "unavailableGlobal": "Global assignment permission is required to manage all displays."
+    "errorLoad": "Unable to load display options",
+    "errorAssign": "Unable to send display content",
+    "noticeSent": "{manifest} sent to {target}. Affected screens will download, verify, and display it on their next sync.",
+    "unavailableGlobal": "Permission to display on all screens is required."
   },
 
   "api": {

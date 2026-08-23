@@ -13,7 +13,7 @@ import { notifyAssignmentChanged, readAssignmentBody } from "./adminAssignmentRo
 
 const GLOBAL_ASSIGNMENT_TARGET = {
   id: "global",
-  name: "All displays",
+  name: "All screens",
 } as const;
 
 export function createAdminGlobalAssignmentRouter(

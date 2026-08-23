@@ -33,7 +33,10 @@ export async function getDashboardSummary(
         SELECT 1
         FROM admin_permissions
         WHERE admin_permissions.user_id = ?
-          AND admin_permissions.can_manage_clients = TRUE
+          AND (
+            admin_permissions.can_manage_clients = TRUE
+            OR admin_permissions.can_manage_assignments = TRUE
+          )
           AND (
             admin_permissions.target_type = 'global'
             OR (
@@ -77,7 +80,10 @@ export async function getDashboardSummary(
         SELECT 1
         FROM admin_permissions
         WHERE admin_permissions.user_id = ?
-          AND admin_permissions.can_manage_groups = TRUE
+          AND (
+            admin_permissions.can_manage_groups = TRUE
+            OR admin_permissions.can_manage_assignments = TRUE
+          )
           AND (
             admin_permissions.target_type = 'global'
             OR (

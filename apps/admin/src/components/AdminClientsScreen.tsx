@@ -4,7 +4,6 @@ import { listClients, updateClientProfile, updateClientStatus } from "../api/adm
 import { ApiError } from "../api/adminApi";
 import { useTemporaryNotice } from "../hooks/useTemporaryNotice";
 import { AdminFeedback } from "./AdminFeedback";
-import { ClientAssignmentPanel } from "./ClientAssignmentPanel";
 import { ClientDetail } from "./ClientDetail";
 import { ClientEnrollmentPanel } from "./ClientEnrollmentPanel";
 import { ClientTable } from "./ClientTable";
@@ -114,9 +113,7 @@ export function AdminClientsScreen({ onUnauthorized }: AdminClientsScreenProps) 
   }
 
   return (
-    <section
-      className={`content clients-layout ${canManageClients === false ? "assignment-only" : ""}`}
-    >
+    <section className="content clients-layout">
       <AdminFeedback className="screen-alerts" error={error} notice={notice} />
 
       {canManageClients !== false ? (
@@ -135,15 +132,13 @@ export function AdminClientsScreen({ onUnauthorized }: AdminClientsScreenProps) 
               onStatusChange={(client) => void handleStatusChange(client)}
               onUpdateProfile={handleUpdateProfile}
             />
-            <ClientAssignmentPanel
-              onUnauthorized={onUnauthorized}
-              preferredClientId={selectedClient?.id ?? null}
-            />
             {canEnrollClients ? <ClientEnrollmentPanel onUnauthorized={onUnauthorized} /> : null}
           </div>
         </>
       ) : (
-        <ClientAssignmentPanel onUnauthorized={onUnauthorized} preferredClientId={null} />
+        <article className="panel">
+          <p className="metric">{t.clients.managementUnavailable}</p>
+        </article>
       )}
     </section>
   );

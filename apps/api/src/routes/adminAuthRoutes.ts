@@ -3,6 +3,7 @@ import { Router } from "express";
 import { Pool } from "mysql2/promise";
 
 import { AuthenticatedAdminRequest, createAdminAuthMiddleware } from "../auth/adminAuth.js";
+import { loadAdminAccess } from "../auth/adminAccess.js";
 import {
   clearAdminSessionCookie,
   createAdminSessionResponse,
@@ -95,6 +96,7 @@ export function createAdminAuthRouter(pool: Pool, config: ServerConfig): Router 
 
       setAdminSessionCookie(response, config, bootstrap.session.token, bootstrap.session.expiresAt);
       response.status(201).json({
+        access: await loadAdminAccess(pool, bootstrap.user),
         session: {
           expiresAt: bootstrap.session.expiresAt.toISOString(),
         },
@@ -151,11 +153,14 @@ export function createAdminAuthRouter(pool: Pool, config: ServerConfig): Router 
 
       await updateAdminLastLogin(pool, user.id);
       setAdminSessionCookie(response, config, session.token, session.expiresAt);
+      const safeUser = safeAdminUser(user);
+
       response.json({
+        access: await loadAdminAccess(pool, safeUser),
         session: {
           expiresAt: session.expiresAt.toISOString(),
         },
-        user: safeAdminUser(user),
+        user: safeUser,
       });
     } catch (error) {
       next(error);
@@ -174,16 +179,21 @@ export function createAdminAuthRouter(pool: Pool, config: ServerConfig): Router 
     }
   });
 
-  router.get("/me", requireAdminAuth, (request, response) => {
-    const adminRequest = request as AuthenticatedAdminRequest;
+  router.get("/me", requireAdminAuth, async (request, response, next) => {
+    try {
+      const adminRequest = request as AuthenticatedAdminRequest;
 
-    response.json({
-      session: {
-        expiresAt: adminRequest.adminSession.expiresAt,
-        id: adminRequest.adminSession.id,
-      },
-      user: adminRequest.adminSession.user,
-    });
+      response.json({
+        access: await loadAdminAccess(pool, adminRequest.adminSession.user),
+        session: {
+          expiresAt: adminRequest.adminSession.expiresAt,
+          id: adminRequest.adminSession.id,
+        },
+        user: adminRequest.adminSession.user,
+      });
+    } catch (error) {
+      next(error);
+    }
   });
 
   return router;

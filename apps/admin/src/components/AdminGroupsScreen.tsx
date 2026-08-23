@@ -14,7 +14,6 @@ import { ApiError } from "../api/adminApi";
 import { useTemporaryNotice } from "../hooks/useTemporaryNotice";
 import { useTranslation } from "../i18n";
 import { AdminFeedback } from "./AdminFeedback";
-import { GroupAssignmentPanel } from "./GroupAssignmentPanel";
 import { GroupCreatePanel } from "./GroupCreatePanel";
 import { GroupDetail } from "./GroupDetail";
 import { GroupTable } from "./GroupTable";
@@ -259,9 +258,7 @@ export function AdminGroupsScreen({ onUnauthorized }: AdminGroupsScreenProps) {
   }
 
   return (
-    <section
-      className={`content groups-layout ${canManageGroups === false ? "assignment-only" : ""}`}
-    >
+    <section className="content groups-layout">
       <AdminFeedback className="screen-alerts" error={error} notice={notice} />
 
       {canManageGroups !== false ? (
@@ -294,7 +291,11 @@ export function AdminGroupsScreen({ onUnauthorized }: AdminGroupsScreenProps) {
           </>
         ) : null}
 
-        <GroupAssignmentPanel onUnauthorized={onUnauthorized} preferredGroupId={selectedGroupId} />
+        {canManageGroups === false ? (
+          <article className="panel">
+            <p className="metric">{t.groups.managementUnavailable}</p>
+          </article>
+        ) : null}
       </div>
     </section>
   );

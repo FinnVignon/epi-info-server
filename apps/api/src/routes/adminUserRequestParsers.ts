@@ -32,11 +32,12 @@ export function readCreateUserBody(
   body: Partial<CreateAdminUserRequest>,
 ): CreateAdminUserRequest | string {
   if (
+    (body.accountType !== "admin" && body.accountType !== "user") ||
     typeof body.displayName !== "string" ||
     typeof body.email !== "string" ||
     typeof body.password !== "string"
   ) {
-    return "Display name, email, and password are required";
+    return "Account type, display name, email, and password are required";
   }
 
   const displayName = body.displayName.trim();
@@ -60,23 +61,52 @@ export function readCreateUserBody(
     return passwordError;
   }
 
-  if (body.isSuperAdmin !== undefined && typeof body.isSuperAdmin !== "boolean") {
-    return "isSuperAdmin must be a boolean";
-  }
-
   const permissions = readPermissionGrants(body.permissions ?? []);
 
   if (typeof permissions === "string") {
     return permissions;
   }
 
+  const accountTypeError = readAccountTypePermissionError(body.accountType, permissions);
+
+  if (accountTypeError) {
+    return accountTypeError;
+  }
+
   return {
+    accountType: body.accountType,
     displayName,
     email,
-    isSuperAdmin: body.isSuperAdmin ?? false,
     password: body.password,
     permissions,
   };
+}
+
+function readAccountTypePermissionError(
+  accountType: CreateAdminUserRequest["accountType"],
+  permissions: AdminPermissionGrant[],
+): string | null {
+  const actions = new Set(permissions.flatMap((permission) => permission.actions));
+
+  if (actions.has("manage_users")) {
+    return "Only the super admin can manage users";
+  }
+
+  if (accountType === "user") {
+    if (actions.has("manage_clients") || actions.has("manage_groups")) {
+      return "User accounts cannot receive screen or group management permissions";
+    }
+
+    if (!actions.has("manage_content") || !actions.has("manage_assignments")) {
+      return "User accounts require content and assignment permissions";
+    }
+
+    return null;
+  }
+
+  return actions.has("manage_clients") || actions.has("manage_groups")
+    ? null
+    : "Admin accounts require screen or group management permission";
 }
 
 export function readPasswordBody(

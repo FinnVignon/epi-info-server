@@ -1,86 +1,63 @@
-import { Activity, ArrowRight, Monitor, MonitorCheck, Server, UsersRound } from "lucide-react";
+import { Activity, ArrowRight, Monitor, MonitorCheck, MonitorPlay, UsersRound } from "lucide-react";
 
 import type { AdminScreen } from "./AdminShell";
-import type { DashboardResponse, HealthResponse } from "../../../shared/dashboardContracts";
+import type { AdminAccess } from "../../../shared/adminContracts";
+import type { DashboardResponse } from "../../../shared/dashboardContracts";
 import { useTranslation } from "../i18n";
 
 interface AdminDashboardProps {
+  access: AdminAccess;
   dashboard: DashboardResponse | null;
-  health: HealthResponse | null;
   onNavigate: (screen: AdminScreen) => void;
 }
 
-export function AdminDashboard({ dashboard, health, onNavigate }: AdminDashboardProps) {
+export function AdminDashboard({ access, dashboard, onNavigate }: AdminDashboardProps) {
   const { t } = useTranslation();
   const clients = dashboard?.clients ?? [];
   const groups = dashboard?.groups ?? [];
   const onlineCount = clients.filter((client) => client.status === "online").length;
   const needsAttentionCount = clients.filter((client) => client.status !== "online").length;
+  const canDisplay =
+    access.canAssignAllScreens || access.canAssignGroups || access.canAssignScreens;
 
   return (
     <section className="content dashboard-layout">
+      {canDisplay ? (
+        <button
+          className="dashboard-primary-action"
+          onClick={() => onNavigate("display")}
+          type="button"
+        >
+          <span className="dashboard-primary-icon">
+            <MonitorPlay aria-hidden="true" size={22} />
+          </span>
+          <span>
+            <strong>{t.dashboard.displayContent}</strong>
+            <small>{t.dashboard.displayTargets}</small>
+          </span>
+          <ArrowRight aria-hidden="true" size={18} />
+        </button>
+      ) : null}
+
       <div className="dashboard-metrics">
-        <DashboardMetric
-          icon={Monitor}
-          label={t.dashboard.screensTotal}
-          onClick={() => onNavigate("screens")}
-          value={clients.length}
-        />
+        <DashboardMetric icon={Monitor} label={t.dashboard.screensTotal} value={clients.length} />
         <DashboardMetric
           icon={MonitorCheck}
           label={t.dashboard.screensOnline}
-          onClick={() => onNavigate("screens")}
           tone="positive"
           value={onlineCount}
         />
         <DashboardMetric
           icon={Activity}
           label={t.dashboard.needsAttention}
-          onClick={() => onNavigate("screens")}
           tone={needsAttentionCount ? "warning" : "neutral"}
           value={needsAttentionCount}
         />
-        <DashboardMetric
-          icon={UsersRound}
-          label={t.dashboard.groupsTitle}
-          onClick={() => onNavigate("groups")}
-          value={groups.length}
-        />
+        <DashboardMetric icon={UsersRound} label={t.dashboard.groupsTitle} value={groups.length} />
       </div>
 
-      <article className="panel dashboard-status-panel">
-        <div className="panel-heading">
-          <span className="panel-heading-icon">
-            <Server aria-hidden="true" size={18} />
-          </span>
-          <h2>{t.dashboard.serverTitle}</h2>
-        </div>
-        <dl className="settings-details">
-          <div>
-            <dt>{t.dashboard.service}</dt>
-            <dd>{health?.service ?? t.dashboard.notConnected}</dd>
-          </div>
-          <div>
-            <dt>{t.dashboard.database}</dt>
-            <dd>{health?.database.status ?? t.dashboard.unknown}</dd>
-          </div>
-          {health?.database.missingTables.length ? (
-            <div>
-              <dt>{t.dashboard.missingTables}</dt>
-              <dd className="status-text-error">{health.database.missingTables.join(", ")}</dd>
-            </div>
-          ) : null}
-        </dl>
-      </article>
-
       <article className="panel dashboard-screens-panel">
-        <div className="panel-header">
-          <h2>{t.dashboard.screensTitle}</h2>
-          <button className="panel-link" onClick={() => onNavigate("screens")} type="button">
-            {t.dashboard.viewScreens}
-            <ArrowRight aria-hidden="true" size={15} />
-          </button>
-        </div>
+        <h2>{t.dashboard.screensTitle}</h2>
         {clients.length ? (
           <ul className="summary-list operational-list">
             {clients.slice(0, 8).map((client) => (
@@ -98,13 +75,7 @@ export function AdminDashboard({ dashboard, health, onNavigate }: AdminDashboard
       </article>
 
       <article className="panel dashboard-groups-panel">
-        <div className="panel-header">
-          <h2>{t.dashboard.groupsTitle}</h2>
-          <button className="panel-link" onClick={() => onNavigate("groups")} type="button">
-            {t.dashboard.viewGroups}
-            <ArrowRight aria-hidden="true" size={15} />
-          </button>
-        </div>
+        <h2>{t.dashboard.groupsTitle}</h2>
         {groups.length ? (
           <ul className="summary-list operational-list">
             {groups.slice(0, 8).map((group) => (
@@ -127,20 +98,13 @@ export function AdminDashboard({ dashboard, health, onNavigate }: AdminDashboard
 interface DashboardMetricProps {
   icon: typeof Monitor;
   label: string;
-  onClick: () => void;
   tone?: "neutral" | "positive" | "warning";
   value: number;
 }
 
-function DashboardMetric({
-  icon: Icon,
-  label,
-  onClick,
-  tone = "neutral",
-  value,
-}: DashboardMetricProps) {
+function DashboardMetric({ icon: Icon, label, tone = "neutral", value }: DashboardMetricProps) {
   return (
-    <button className={`dashboard-metric ${tone}`} onClick={onClick} type="button">
+    <article className={`dashboard-metric ${tone}`}>
       <span className="dashboard-metric-icon">
         <Icon aria-hidden="true" size={19} />
       </span>
@@ -148,6 +112,6 @@ function DashboardMetric({
         <strong>{value}</strong>
         <small>{label}</small>
       </span>
-    </button>
+    </article>
   );
 }

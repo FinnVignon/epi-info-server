@@ -2,10 +2,11 @@ import { useMemo, useState } from "react";
 
 import { RefreshButton } from "./RefreshButton";
 import { SortableTableHeader, type SortDirection } from "./SortableTableHeader";
+import { getAdminUserAccountType } from "../utils/adminAccountType";
 import type { AdminUserWithPermissions } from "../../../shared/adminContracts";
 import { useTranslation } from "../i18n";
 
-type SortKey = "displayName" | "permissions" | "status" | "superAdmin";
+type SortKey = "accountType" | "displayName" | "permissions" | "status";
 
 interface AdminUserTableProps {
   isLoading: boolean;
@@ -92,9 +93,9 @@ export function AdminUserTable({
                 <SortableTableHeader
                   activeSortKey={sortKey}
                   direction={sortDirection}
-                  label={t.users.colSuperAdmin}
+                  label={t.users.accountType}
                   onSort={handleSort}
-                  sortKey="superAdmin"
+                  sortKey="accountType"
                 />
                 <SortableTableHeader
                   activeSortKey={sortKey}
@@ -123,7 +124,7 @@ export function AdminUserTable({
                       {user.status === "active" ? t.users.statusActive : t.users.statusInactive}
                     </span>
                   </td>
-                  <td>{user.isSuperAdmin ? t.users.yes : t.users.no}</td>
+                  <td>{formatAccountType(user, t.accountTypes)}</td>
                   <td>
                     {user.isSuperAdmin
                       ? t.users.allPermissions
@@ -154,7 +155,21 @@ function compareUsers(
       return a.permissions.length - b.permissions.length;
     case "status":
       return a.status.localeCompare(b.status, undefined, { sensitivity: "base" });
-    case "superAdmin":
-      return Number(a.isSuperAdmin) - Number(b.isSuperAdmin);
+    case "accountType":
+      return getAdminUserAccountType(a).localeCompare(getAdminUserAccountType(b));
+  }
+}
+
+function formatAccountType(
+  user: AdminUserWithPermissions,
+  labels: ReturnType<typeof useTranslation>["t"]["accountTypes"],
+): string {
+  switch (getAdminUserAccountType(user)) {
+    case "admin":
+      return labels.admin;
+    case "super_admin":
+      return labels.superAdmin;
+    case "user":
+      return labels.user;
   }
 }

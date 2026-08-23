@@ -10,6 +10,7 @@ import {
 import { AdminClientsScreen } from "./components/AdminClientsScreen";
 import { AdminContentScreen } from "./components/AdminContentScreen";
 import { AdminDashboard } from "./components/AdminDashboard";
+import { AdminDisplayScreen } from "./components/AdminDisplayScreen";
 import { AdminGroupsScreen } from "./components/AdminGroupsScreen";
 import { AdminShell } from "./components/AdminShell";
 import type { AdminScreen } from "./components/AdminShell";
@@ -18,7 +19,7 @@ import { AdminUsersScreen } from "./components/AdminUsersScreen";
 import { AuthScreen } from "./components/AuthScreen";
 import { LoadingScreen } from "./components/LoadingScreen";
 import { useTranslation } from "./i18n";
-import type { AdminAuthResponse, AdminUser } from "../../shared/adminContracts";
+import type { AdminAccess, AdminAuthResponse, AdminUser } from "../../shared/adminContracts";
 import type { DashboardResponse, HealthResponse } from "../../shared/dashboardContracts";
 import "./App.css";
 
@@ -31,6 +32,7 @@ export function App() {
   const [apiStatus, setApiStatus] = useState<ApiStatus>("checking");
   const [authError, setAuthError] = useState<string | null>(null);
   const [authMode, setAuthMode] = useState<AuthMode>("checking");
+  const [currentAccess, setCurrentAccess] = useState<AdminAccess | null>(null);
   const [currentUser, setCurrentUser] = useState<AdminUser | null>(null);
   const [dashboard, setDashboard] = useState<DashboardResponse | null>(null);
   const [health, setHealth] = useState<HealthResponse | null>(null);
@@ -47,6 +49,7 @@ export function App() {
         }
 
         if (session) {
+          setCurrentAccess(session.access);
           setCurrentUser(session.user);
           setAuthMode("authenticated");
           return;
@@ -111,11 +114,13 @@ export function App() {
 
   function handleAuthenticated(response: AdminAuthResponse): void {
     setAuthError(null);
+    setCurrentAccess(response.access);
     setCurrentUser(response.user);
     setAuthMode("authenticated");
   }
 
   function handleSessionExpired(): void {
+    setCurrentAccess(null);
     setCurrentUser(null);
     setDashboard(null);
     setHealth(null);
@@ -128,6 +133,7 @@ export function App() {
     try {
       await logoutAdmin();
     } finally {
+      setCurrentAccess(null);
       setCurrentUser(null);
       setDashboard(null);
       setHealth(null);
@@ -148,9 +154,10 @@ export function App() {
     );
   }
 
-  if (authMode === "authenticated" && currentUser) {
+  if (authMode === "authenticated" && currentAccess && currentUser) {
     return (
       <AdminShell
+        access={currentAccess}
         activeScreen={activeScreen}
         apiStatus={apiStatus}
         currentUser={currentUser}
@@ -159,6 +166,7 @@ export function App() {
       >
         {renderAdminScreen(activeScreen, {
           currentUser,
+          access: currentAccess,
           dashboard,
           health,
           apiStatus,
@@ -173,6 +181,7 @@ export function App() {
 }
 
 interface AdminScreenRenderState {
+  access: AdminAccess;
   apiStatus: ApiStatus;
   currentUser: AdminUser;
   dashboard: DashboardResponse | null;
@@ -192,16 +201,19 @@ function renderAdminScreen(activeScreen: AdminScreen, state: AdminScreenRenderSt
     case "dashboard":
       return (
         <AdminDashboard
+          access={state.access}
           dashboard={state.dashboard}
-          health={state.health}
           onNavigate={state.onNavigate}
         />
       );
+    case "display":
+      return <AdminDisplayScreen access={state.access} onUnauthorized={state.onUnauthorized} />;
     case "groups":
       return <AdminGroupsScreen onUnauthorized={state.onUnauthorized} />;
     case "settings":
       return (
         <AdminSettingsScreen
+          access={state.access}
           apiStatus={state.apiStatus}
           currentUser={state.currentUser}
           health={state.health}

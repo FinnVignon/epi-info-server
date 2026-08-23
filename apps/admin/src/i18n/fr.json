@@ -31,8 +31,15 @@
     "working": "Traitement"
   },
 
+  "accountTypes": {
+    "user": "Utilisateur",
+    "admin": "Administrateur",
+    "superAdmin": "Super administrateur"
+  },
+
   "nav": {
     "dashboard": "Tableau de bord",
+    "display": "Afficher",
     "users": "Utilisateurs",
     "content": "Contenus",
     "screens": "Écrans",
@@ -42,7 +49,10 @@
     "sections": "Sections d'administration",
     "openMenu": "Ouvrir la navigation",
     "closeMenu": "Fermer la navigation",
-    "changeLanguage": "Changer de langue"
+    "changeLanguage": "Changer de langue",
+    "workspace": "Espace de travail",
+    "administration": "Administration",
+    "preferences": "Préférences"
   },
 
   "shell": {
@@ -57,6 +67,11 @@
 
   "settings": {
     "languageTitle": "Langue",
+    "appearanceTitle": "Apparence",
+    "theme": "Thème",
+    "themeLight": "Clair",
+    "themeDark": "Sombre",
+    "themeSystem": "Système",
     "accountTitle": "Compte",
     "systemTitle": "Système",
     "displayName": "Nom affiché",
@@ -75,6 +90,14 @@
     "allScreens": "Tous les écrans"
   },
 
+  "display": {
+    "targetType": "Cible d'affichage",
+    "groups": "Groupes",
+    "screens": "Écrans",
+    "allScreens": "Tous les écrans",
+    "unavailable": "Aucune cible d'affichage n'est disponible pour ce compte."
+  },
+
   "auth": {
     "loginTitle": "Connexion administrateur",
     "bootstrapTitle": "Créer le premier administrateur",
@@ -90,6 +113,8 @@
   },
 
   "dashboard": {
+    "displayContent": "Afficher un contenu",
+    "displayTargets": "Groupes, écrans ou tous les écrans",
     "serverTitle": "État du système",
     "service": "Service",
     "database": "Base de données",
@@ -122,6 +147,8 @@
     "colStatus": "Statut",
     "colSuperAdmin": "Super admin",
     "colPermissions": "Permissions",
+    "accountType": "Type de compte",
+    "accountPermissionsRequired": "Ajoutez les permissions requises pour ce type de compte.",
     "yes": "Oui",
     "no": "Non",
     "allPermissions": "Toutes",
@@ -252,7 +279,8 @@
     "errorStatus": "Impossible de mettre à jour le statut de l'écran",
     "noticeUpdated": "Écran mis à jour.",
     "noticeEnabled": "Écran activé.",
-    "noticeDisabled": "Écran désactivé."
+    "noticeDisabled": "Écran désactivé.",
+    "managementUnavailable": "La permission de gérer les écrans est requise."
   },
 
   "groups": {
@@ -290,13 +318,14 @@
     "errorDelete": "Impossible de supprimer le groupe",
     "errorAddMember": "Impossible d'ajouter l'écran au groupe",
     "errorRemoveMember": "Impossible de retirer l'écran du groupe",
-    "errorRefreshClients": "Impossible d'actualiser les écrans autorisés"
+    "errorRefreshClients": "Impossible d'actualiser les écrans autorisés",
+    "managementUnavailable": "La permission de gérer les groupes est requise."
   },
 
   "assignment": {
-    "title": "Assignation d'affichage",
-    "groupTitle": "Assignation du groupe",
-    "globalTitle": "Tous les écrans",
+    "title": "Afficher sur un écran",
+    "groupTitle": "Afficher sur un groupe",
+    "globalTitle": "Afficher sur tous les écrans",
     "target": "Cible",
     "clientTarget": "Écran",
     "groupTarget": "Groupe",
@@ -315,14 +344,14 @@
     "fitLabel": "Ajustement",
     "fitContain": "Contenu dans l'écran",
     "fitCover": "Remplir l'écran",
-    "noAssets": "Importez une image ou une vidéo active avant de créer une assignation.",
-    "assigning": "Assignation en cours…",
+    "noAssets": "Importez une image ou une vidéo active avant de l'afficher.",
+    "assigning": "Envoi en cours…",
     "assignButton": "Afficher le contenu",
     "errorInvalidContent": "Choisissez un contenu valide avant l'envoi.",
-    "errorLoad": "Impossible de charger les options d'assignation",
-    "errorAssign": "Impossible d'assigner le contenu",
-    "noticeSent": "{manifest} envoyé à {target}. Les écrans concernés le téléchargeront, le vérifieront et l'activeront à leur prochaine synchronisation.",
-    "unavailableGlobal": "La permission d'assignation globale est requise pour gérer tous les écrans."
+    "errorLoad": "Impossible de charger les options d'affichage",
+    "errorAssign": "Impossible d'envoyer le contenu",
+    "noticeSent": "{manifest} envoyé à {target}. Les écrans concernés le téléchargeront, le vérifieront et l'afficheront à leur prochaine synchronisation.",
+    "unavailableGlobal": "La permission d'afficher sur tous les écrans est requise."
   },
 
   "api": {

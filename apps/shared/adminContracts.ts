@@ -13,6 +13,19 @@ export interface AdminUser {
   updatedAt: string;
 }
 
+export type AdminAccountType = "admin" | "super_admin" | "user";
+
+export interface AdminAccess {
+  accountType: AdminAccountType;
+  canAssignAllScreens: boolean;
+  canAssignGroups: boolean;
+  canAssignScreens: boolean;
+  canManageContent: boolean;
+  canManageGroups: boolean;
+  canManageScreens: boolean;
+  canManageUsers: boolean;
+}
+
 export type AssetType = "image" | "video";
 export type AssetStatus = "active" | "archived";
 
@@ -93,6 +106,7 @@ export interface AdminSessionSummary {
 }
 
 export interface AdminAuthResponse {
+  access: AdminAccess;
   session: AdminSessionSummary;
   user: AdminUser;
 }
@@ -166,9 +180,9 @@ export interface AssignmentGlobalTargetResponse {
 }
 
 export interface CreateAdminUserRequest {
+  accountType: Exclude<AdminAccountType, "super_admin">;
   displayName: string;
   email: string;
-  isSuperAdmin?: boolean;
   password: string;
   permissions?: AdminPermissionGrant[];
 }

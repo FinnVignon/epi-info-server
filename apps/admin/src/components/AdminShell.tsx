@@ -2,12 +2,20 @@ import { Languages, LogOut, Menu, X } from "lucide-react";
 import { useState, type ReactNode } from "react";
 
 import { AdminNavigation } from "./AdminNavigation";
-import type { AdminUser } from "../../../shared/adminContracts";
+import type { AdminAccess, AdminUser } from "../../../shared/adminContracts";
 import { useTranslation } from "../i18n";
 
-export type AdminScreen = "content" | "dashboard" | "groups" | "screens" | "settings" | "users";
+export type AdminScreen =
+  | "content"
+  | "dashboard"
+  | "display"
+  | "groups"
+  | "screens"
+  | "settings"
+  | "users";
 
 interface AdminShellProps {
+  access: AdminAccess;
   activeScreen: AdminScreen;
   apiStatus: "checking" | "ok" | "error";
   children: ReactNode;
@@ -17,6 +25,7 @@ interface AdminShellProps {
 }
 
 export function AdminShell({
+  access,
   activeScreen,
   apiStatus,
   children,
@@ -54,11 +63,7 @@ export function AdminShell({
           </button>
         </div>
 
-        <AdminNavigation
-          activeScreen={activeScreen}
-          currentUser={currentUser}
-          onNavigate={handleNavigate}
-        />
+        <AdminNavigation access={access} activeScreen={activeScreen} onNavigate={handleNavigate} />
 
         <div className="sidebar-account">
           <span className="account-avatar" aria-hidden="true">
@@ -148,6 +153,8 @@ function getScreenTitle(
       return navigation.content;
     case "dashboard":
       return navigation.dashboard;
+    case "display":
+      return navigation.display;
     case "groups":
       return navigation.groups;
     case "screens":

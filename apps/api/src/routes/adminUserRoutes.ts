@@ -89,7 +89,7 @@ export function createAdminUserRouter(pool: Pool, config: ServerConfig): Router 
         displayName: body.displayName,
         email: body.email,
         id: randomUUID(),
-        isSuperAdmin: body.isSuperAdmin ?? false,
+        isSuperAdmin: false,
         passwordHash: await hashAdminPassword(body.password, {
           bcryptRounds: config.adminAuth.passwordBcryptRounds,
         }),

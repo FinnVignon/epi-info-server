@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import { formatPermissionTarget, PermissionEditor } from "./PermissionEditor";
 import { permissionToGrant } from "../utils/adminPermissions";
+import { getAdminUserAccountType } from "../utils/adminAccountType";
 import { formatDate } from "../utils/formatDate";
 import type {
   AdminPermissionGrant,
@@ -93,8 +94,8 @@ export function AdminUserDetail({
           </strong>
         </p>
         <p>
-          <span>{t.users.superAdminLabel}</span>
-          <strong>{user.isSuperAdmin ? t.users.yes : t.users.no}</strong>
+          <span>{t.users.accountType}</span>
+          <strong>{formatAccountType(user, t.accountTypes)}</strong>
         </p>
         <p>
           <span>{t.users.lastLogin}</span>
@@ -182,4 +183,18 @@ export function AdminUserDetail({
       ) : null}
     </article>
   );
+}
+
+function formatAccountType(
+  user: AdminUserWithPermissions,
+  labels: ReturnType<typeof useTranslation>["t"]["accountTypes"],
+): string {
+  switch (getAdminUserAccountType(user)) {
+    case "admin":
+      return labels.admin;
+    case "super_admin":
+      return labels.superAdmin;
+    case "user":
+      return labels.user;
+  }
 }
