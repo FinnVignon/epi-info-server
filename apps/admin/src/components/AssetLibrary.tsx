@@ -7,12 +7,12 @@ import { AssetTable } from "./AssetTable";
 import { AssetUploadForm } from "./AssetUploadForm";
 import type { AdminUser, Asset, AssetStatus } from "../../../shared/adminContracts";
 
-interface AdminAssetsScreenProps {
+interface AssetLibraryProps {
   currentUser: AdminUser;
   onUnauthorized: () => void;
 }
 
-export function AdminAssetsScreen({ currentUser, onUnauthorized }: AdminAssetsScreenProps) {
+export function AssetLibrary({ currentUser, onUnauthorized }: AssetLibraryProps) {
   const { t } = useTranslation();
   const [assets, setAssets] = useState<Asset[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +30,6 @@ export function AdminAssetsScreen({ currentUser, onUnauthorized }: AdminAssetsSc
 
     try {
       const response = await listAssets();
-
       setAssets(response.assets);
     } catch (loadError) {
       handleApiError(loadError, t.assets.errorLoad);
@@ -91,7 +90,7 @@ export function AdminAssetsScreen({ currentUser, onUnauthorized }: AdminAssetsSc
   }
 
   return (
-    <section className="content assets-layout">
+    <div className="asset-library-layout">
       {error || notice ? (
         <div className="screen-alerts">
           {error ? <p className="form-error">{error}</p> : null}
@@ -107,6 +106,6 @@ export function AdminAssetsScreen({ currentUser, onUnauthorized }: AdminAssetsSc
         onRefresh={() => void loadAssets()}
         onStatusChange={(asset, status) => void handleAssetStatusChange(asset, status)}
       />
-    </section>
+    </div>
   );
 }

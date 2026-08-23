@@ -69,6 +69,12 @@
     "database": "Base de données"
   },
 
+  "content": {
+    "views": "Vues des contenus",
+    "library": "Bibliothèque",
+    "allScreens": "Tous les écrans"
+  },
+
   "auth": {
     "loginTitle": "Connexion administrateur",
     "bootstrapTitle": "Créer le premier administrateur",
@@ -183,8 +189,8 @@
   },
 
   "assets": {
-    "title": "Contenus",
-    "uploadTitle": "Importer un contenu",
+    "title": "Bibliothèque de médias",
+    "uploadTitle": "Importer un média",
     "nameLabel": "Nom",
     "fileLabel": "Fichier",
     "uploadButton": "Importer",
@@ -297,7 +303,7 @@
     "noTarget": "Aucune cible {target} autorisée n'est disponible.",
     "noClient": "Aucun écran autorisé disponible.",
     "clientLabel": "Écran",
-    "assetLabel": "Contenu",
+    "assetLabel": "Média",
     "contentLabel": "Contenu",
     "contentAsset": "Image ou vidéo importée",
     "contentLiveWebLink": "Lien web en direct",

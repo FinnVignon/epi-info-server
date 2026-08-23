@@ -69,6 +69,12 @@
     "database": "Database"
   },
 
+  "content": {
+    "views": "Content views",
+    "library": "Library",
+    "allScreens": "All screens"
+  },
+
   "auth": {
     "loginTitle": "Admin sign in",
     "bootstrapTitle": "Create the first administrator",
@@ -183,8 +189,8 @@
   },
 
   "assets": {
-    "title": "Assets",
-    "uploadTitle": "Upload Asset",
+    "title": "Media library",
+    "uploadTitle": "Upload media",
     "nameLabel": "Name",
     "fileLabel": "File",
     "uploadButton": "Upload",
@@ -288,7 +294,7 @@
   "assignment": {
     "title": "Display Assignment",
     "groupTitle": "Group Display Assignment",
-    "globalTitle": "All Displays",
+    "globalTitle": "All screens",
     "target": "Target",
     "clientTarget": "Screen",
     "groupTarget": "Group",
@@ -297,7 +303,7 @@
     "noTarget": "No permitted {target} is available.",
     "noClient": "No permitted screen is available.",
     "clientLabel": "Screen",
-    "assetLabel": "Asset",
+    "assetLabel": "Media",
     "contentLabel": "Content",
     "contentAsset": "Uploaded image or video",
     "contentLiveWebLink": "Live web link",

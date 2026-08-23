@@ -7,8 +7,8 @@ import {
   loadDashboardData,
   logoutAdmin,
 } from "./api/adminApi";
-import { AdminAssetsScreen } from "./components/AdminAssetsScreen";
 import { AdminClientsScreen } from "./components/AdminClientsScreen";
+import { AdminContentScreen } from "./components/AdminContentScreen";
 import { AdminDashboard } from "./components/AdminDashboard";
 import { AdminGroupsScreen } from "./components/AdminGroupsScreen";
 import { AdminShell } from "./components/AdminShell";
@@ -185,7 +185,7 @@ function renderAdminScreen(activeScreen: AdminScreen, state: AdminScreenRenderSt
   switch (activeScreen) {
     case "content":
       return (
-        <AdminAssetsScreen currentUser={state.currentUser} onUnauthorized={state.onUnauthorized} />
+        <AdminContentScreen currentUser={state.currentUser} onUnauthorized={state.onUnauthorized} />
       );
     case "screens":
       return <AdminClientsScreen onUnauthorized={state.onUnauthorized} />;

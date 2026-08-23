@@ -513,6 +513,46 @@ select:focus-visible {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.content.content-workspace {
+  gap: 18px;
+}
+
+.workspace-tabs {
+  border-bottom: 1px solid #d8e0e7;
+  display: flex;
+  gap: 18px;
+}
+
+.workspace-tabs button {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  color: #5d6b78;
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 700;
+  gap: 7px;
+  margin-bottom: -1px;
+  min-height: 42px;
+  padding: 8px 2px;
+}
+
+.workspace-tabs button.active {
+  border-bottom-color: #2d6cdf;
+  color: #172026;
+}
+
+.asset-library-layout {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(300px, 0.6fr) minmax(520px, 1.4fr);
+}
+
+.all-screens-layout {
+  max-width: 760px;
+}
+
 .settings-panel {
   align-self: start;
 }
@@ -1427,6 +1467,10 @@ select:focus-visible {
   }
 
   .content.assets-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .asset-library-layout {
     grid-template-columns: 1fr;
   }
 
