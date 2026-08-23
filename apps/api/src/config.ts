@@ -14,6 +14,7 @@ export interface ServerConfig {
   };
   assetUploadMaxBytes: number;
   assetStoragePath: string;
+  databaseMigrationsPath: string;
   clientAuth: {
     enrollmentTokenTtlMinutes: number;
     heartbeatIntervalSeconds: number;
@@ -29,6 +30,10 @@ export interface ServerConfig {
   };
   port: number;
   publicBaseUrl: string;
+  temporaryRecordCleanup: {
+    intervalHours: number;
+    usedEnrollmentTokenRetentionDays: number;
+  };
 }
 
 function readNumber(name: string, fallback: number): number {
@@ -81,6 +86,7 @@ export function readConfig(): ServerConfig {
     },
     assetUploadMaxBytes: readPositiveNumber("ASSET_UPLOAD_MAX_BYTES", 500 * 1024 * 1024),
     assetStoragePath: process.env.ASSET_STORAGE_PATH ?? "./data/assets",
+    databaseMigrationsPath: process.env.DATABASE_MIGRATIONS_PATH ?? "docker/mysql/migrations",
     clientAuth: {
       enrollmentTokenTtlMinutes: readPositiveNumber("CLIENT_ENROLLMENT_TOKEN_TTL_MINUTES", 15),
       heartbeatIntervalSeconds: readPositiveNumber("CLIENT_HEARTBEAT_INTERVAL_SECONDS", 30),
@@ -96,5 +102,12 @@ export function readConfig(): ServerConfig {
     },
     port: readNumber("SERVER_PORT", 4000),
     publicBaseUrl: process.env.PUBLIC_BASE_URL ?? "http://localhost:4000",
+    temporaryRecordCleanup: {
+      intervalHours: readPositiveNumber("TEMPORARY_RECORD_CLEANUP_INTERVAL_HOURS", 24),
+      usedEnrollmentTokenRetentionDays: readPositiveNumber(
+        "USED_ENROLLMENT_TOKEN_RETENTION_DAYS",
+        30,
+      ),
+    },
   };
 }

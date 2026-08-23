@@ -9,7 +9,11 @@ import {
   safeAdminUser,
   setAdminSessionCookie,
 } from "../auth/adminSessionResponses.js";
-import { hashAdminPassword, verifyAdminPassword } from "../auth/passwords.js";
+import {
+  adminPasswordHashNeedsUpgrade,
+  hashAdminPassword,
+  verifyAdminPassword,
+} from "../auth/passwords.js";
 import { ServerConfig } from "../config.js";
 import {
   countAdminUsers,
@@ -18,6 +22,7 @@ import {
   findAdminUserByEmail,
   MysqlNamedLockTimeoutError,
   updateAdminLastLogin,
+  updateAdminUserPasswordHash,
   withMysqlNamedLock,
 } from "../database.js";
 import type { BootstrapBody, LoginBody } from "./adminAuthRequestParsers.js";
@@ -130,6 +135,16 @@ export function createAdminAuthRouter(pool: Pool, config: ServerConfig): Router 
       if (!(await verifyAdminPassword(body.password, user.passwordHash))) {
         response.status(401).json({ error: "Invalid email or password" });
         return;
+      }
+
+      if (adminPasswordHashNeedsUpgrade(user.passwordHash, config.adminAuth.passwordBcryptRounds)) {
+        await updateAdminUserPasswordHash(
+          pool,
+          user.id,
+          await hashAdminPassword(body.password, {
+            bcryptRounds: config.adminAuth.passwordBcryptRounds,
+          }),
+        );
       }
 
       const session = await createAdminSessionResponse(pool, config, user.id);

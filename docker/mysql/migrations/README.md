@@ -1,17 +1,22 @@
-# Database Migration Notes
+# Database Migrations
 
-The project currently uses:
+The API applies the ordered SQL files in this directory before it starts listening. This is the
+same path for repository builds and published Docker images, so fresh installations do not depend
+on a host-mounted MySQL initialization directory.
 
-- `docker/mysql/init/001_schema.sql` for fresh Docker volumes;
-- focused startup compatibility checks in TypeScript for existing local volumes.
+Applied filenames and SHA-256 checksums are stored in `schema_migrations`. Startup fails when an
+already-applied migration has been edited.
 
-Until a dedicated migration runner is added, every database change must follow this checklist:
+For every database change:
 
-1. Update `docker/mysql/init/001_schema.sql` so new installations get the current schema.
-2. Add or update a focused startup compatibility check when an existing local volume needs to be upgraded.
-3. Keep the compatibility code in the database module for the affected domain.
-4. Back up the server with `npm run backup:docker` before testing the schema change on real data.
-5. Verify restore with `npm run restore:docker -- <backup-directory> --yes` on a non-production copy before relying on the backup.
-6. Document the new table, column, index, or constraint in the implementation plan or context docs.
+1. Add a new migration with the next zero-padded number, for example `002_add_schedule.sql`.
+2. Make the migration safe to retry. MySQL commits many DDL statements implicitly, so a failed
+   migration can be partially applied before it is recorded.
+3. Do not edit an applied migration. Add a corrective migration instead.
+4. Keep `001_initial_schema.sql` representative of the initial V1 schema.
+5. Back up real data before applying a new migration and verify restoration on a non-production
+   copy.
+6. Add integration coverage for both a blank database and an existing database.
 
-Do not make manual database edits that are not represented in source control. If a schema change cannot be safely represented by the current startup compatibility pattern, add a real migration runner before making that change.
+The focused TypeScript compatibility checks remain temporarily for databases created before the
+migration runner. New schema changes should be represented by SQL migrations.

@@ -63,7 +63,7 @@ docker network create epi-info-network
 Pull the published image:
 
 ```sh
-docker pull shortplanet/epi-info-server:1.0.0
+docker pull shortplanet/epi-info-server:1.0.1
 ```
 
 Create `docker-compose.yml`:
@@ -72,6 +72,7 @@ Create `docker-compose.yml`:
 services:
   mysql:
     image: mysql:8.4
+    restart: unless-stopped
     command: ["--bind-address=0.0.0.0"]
     environment:
       MYSQL_DATABASE: epi_info
@@ -91,7 +92,8 @@ services:
       - mysql-data:/var/lib/mysql
 
   server:
-    image: shortplanet/epi-info-server:1.0.0
+    image: shortplanet/epi-info-server:1.0.1
+    restart: unless-stopped
     depends_on:
       mysql:
         condition: service_healthy
@@ -102,6 +104,7 @@ services:
       MYSQL_DATABASE: epi_info
       MYSQL_USER: epi_info
       MYSQL_PASSWORD: change_this_database_password
+      DATABASE_MIGRATIONS_PATH: /app/database/migrations
       ASSET_STORAGE_PATH: /data/assets
       PUBLIC_BASE_URL: http://localhost:4000
       ADMIN_DIST_PATH: /app/dist/admin
@@ -109,6 +112,18 @@ services:
       - "4000:4000"
     volumes:
       - server-assets:/data/assets
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:4000/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
     networks:
       default:
       epi-info:
@@ -138,6 +153,8 @@ http://localhost:4000
 ```
 
 MySQL data and uploaded assets are stored in Docker volumes, so they survive container restarts.
+The server applies its bundled database migrations automatically on first startup and before later
+versions begin serving requests.
 
 Archived assets are kept for 30 days by default, then deleted automatically once they no longer apply to any active client.
 
@@ -154,20 +171,42 @@ ADMIN_ALLOWED_ORIGINS=https://screens.example.com
 
 ## Backup And Restore
 
-Create a backup of the MySQL database and uploaded assets:
+Repository installations already contain the backup scripts. For a Docker Hub-only installation,
+extract them from the running server image once:
+
+```sh
+mkdir -p scripts
+docker cp "$(docker compose ps -q server):/app/scripts/backup-server-data.sh" scripts/
+docker cp "$(docker compose ps -q server):/app/scripts/restore-server-data.sh" scripts/
+chmod +x scripts/*.sh
+```
+
+For a repository installation, create a backup with:
 
 ```sh
 npm run backup:docker
+```
+
+For a Docker Hub-only installation, run the extracted script directly:
+
+```sh
+scripts/backup-server-data.sh
 ```
 
 Backups are written to `backups/<timestamp>/` by default. The `backups/` folder is ignored by Git.
 
 Backups contain admin account data, password hashes, sessions, client credentials, and uploaded media. Keep them private.
 
-Restore a backup:
+For a repository installation, restore a backup with:
 
 ```sh
 npm run restore:docker -- backups/<timestamp> --yes
+```
+
+For a Docker Hub-only installation:
+
+```sh
+scripts/restore-server-data.sh backups/<timestamp> --yes
 ```
 
 Restore replaces the current server database tables and uploaded asset files. Stop clients or avoid changing assignments while restoring.
@@ -182,7 +221,7 @@ Restore replaces the current server database tables and uploaded asset files. St
 
 After the client enrolls, it appears in the admin panel and can receive individual, group, or global display assignments.
 
-## Content Supported In 1.0
+## Content Supported In 1.0.x
 
 - uploaded images;
 - uploaded videos;
@@ -231,3 +270,6 @@ docker compose down
 ```
 
 To reset local server data, remove the Docker volumes intentionally.
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for code boundaries, [CONTRIBUTING.md](CONTRIBUTING.md)
+for the development workflow, and [SECURITY.md](SECURITY.md) for vulnerability reporting.

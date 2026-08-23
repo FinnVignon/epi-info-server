@@ -125,4 +125,7 @@ export type { DatabaseHealth, DatabaseHealthStatus } from "./database/health.js"
 
 export { isDuplicateEntryError } from "./database/utils.js";
 
+export { deleteExpiredTemporaryRecords } from "./database/temporaryRecords.js";
+export type { TemporaryRecordCleanupSummary } from "./database/temporaryRecords.js";
+
 export { createDatabasePool } from "./database/pool.js";

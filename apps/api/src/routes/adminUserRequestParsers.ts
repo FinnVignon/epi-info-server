@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 
 import { isValidAdminEmail, normalizeAdminEmail } from "../auth/adminCredentials.js";
-import { isValidAdminPassword } from "../auth/passwords.js";
+import { readAdminPasswordValidationError } from "../auth/passwords.js";
 import type { CreateAdminPermissionInput } from "../database.js";
 import type {
   AdminPermissionAction,
@@ -46,12 +46,18 @@ export function readCreateUserBody(
     return "Display name must be at least 2 characters";
   }
 
+  if (displayName.length > 255) {
+    return "Display name must not exceed 255 characters";
+  }
+
   if (!isValidAdminEmail(email)) {
     return "A valid email is required";
   }
 
-  if (!isValidAdminPassword(body.password)) {
-    return "Password must be at least 10 characters";
+  const passwordError = readAdminPasswordValidationError(body.password);
+
+  if (passwordError) {
+    return passwordError;
   }
 
   if (body.isSuperAdmin !== undefined && typeof body.isSuperAdmin !== "boolean") {
@@ -80,8 +86,10 @@ export function readPasswordBody(
     return "Password is required";
   }
 
-  if (!isValidAdminPassword(body.password)) {
-    return "Password must be at least 10 characters";
+  const passwordError = readAdminPasswordValidationError(body.password);
+
+  if (passwordError) {
+    return passwordError;
   }
 
   return {
@@ -100,6 +108,10 @@ export function readProfileBody(
 
   if (displayName.length < 2) {
     return "Display name must be at least 2 characters";
+  }
+
+  if (displayName.length > 255) {
+    return "Display name must not exceed 255 characters";
   }
 
   return {

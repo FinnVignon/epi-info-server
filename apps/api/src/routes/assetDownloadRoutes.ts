@@ -9,10 +9,15 @@ function readAssetId(params: { assetId?: string }): string | null {
   return typeof params.assetId === "string" && params.assetId.length > 0 ? params.assetId : null;
 }
 
-export function createAssetDownloadRouter(pool: Pool, sessionCookieName: string): Router {
+export interface AssetDownloadRouterOptions {
+  assetStoragePath: string;
+  sessionCookieName: string;
+}
+
+export function createAssetDownloadRouter(pool: Pool, options: AssetDownloadRouterOptions): Router {
   const router = Router();
 
-  router.use(createAdminAuthMiddleware(pool, sessionCookieName));
+  router.use(createAdminAuthMiddleware(pool, options.sessionCookieName));
 
   router.get("/:assetId", async (request, response, next) => {
     try {
@@ -30,7 +35,7 @@ export function createAssetDownloadRouter(pool: Pool, sessionCookieName: string)
         return;
       }
 
-      await sendStoredAsset(response, next, asset, "private");
+      await sendStoredAsset(response, next, asset, "private", options.assetStoragePath);
     } catch (error) {
       next(error);
     }
