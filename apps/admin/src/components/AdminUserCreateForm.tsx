@@ -36,7 +36,7 @@ export function AdminUserCreateForm({ onCreate }: AdminUserCreateFormProps) {
   }
 
   return (
-    <article className="panel">
+    <article className="panel users-create-panel">
       <h2>{t.users.createTitle}</h2>
       <form className="form-grid" onSubmit={(event) => void handleSubmit(event)}>
         <label>

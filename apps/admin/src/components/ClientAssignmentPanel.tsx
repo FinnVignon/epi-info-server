@@ -16,6 +16,7 @@ export function ClientAssignmentPanel({
   return (
     <DisplayAssignmentPanel
       assignContent={assignContentToClient}
+      hideTargetSelector={preferredClientId !== null}
       loadTargets={loadClientTargets}
       onUnauthorized={onUnauthorized}
       panelClassName="client-assignment-panel"
