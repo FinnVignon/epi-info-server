@@ -63,11 +63,9 @@ export type {
 } from "./database/assets.js";
 
 export {
-  createClientEnrollmentToken,
   ensureClientConnectionSchema,
   findClientCredentialById,
   recordClientHeartbeat,
-  registerClientWithEnrollmentToken,
 } from "./database/clientConnections.js";
 
 export {
@@ -85,12 +83,7 @@ export type {
   ActivateClientPairingInput,
   ActivateClientPairingResult,
 } from "./database/clientPairingActivation.js";
-export type {
-  ClientCredentialRecord,
-  CreateClientEnrollmentTokenInput,
-  RegisterClientInput,
-  RegisterClientResult,
-} from "./database/clientConnections.js";
+export type { ClientCredentialRecord } from "./database/clientConnections.js";
 
 export {
   findClientById,

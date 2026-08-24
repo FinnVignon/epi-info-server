@@ -16,7 +16,6 @@ export interface ServerConfig {
   assetStoragePath: string;
   databaseMigrationsPath: string;
   clientAuth: {
-    enrollmentTokenTtlMinutes: number;
     heartbeatIntervalSeconds: number;
     offlineAfterSeconds: number;
     pairingPollIntervalSeconds: number;
@@ -34,7 +33,6 @@ export interface ServerConfig {
   publicBaseUrl: string;
   temporaryRecordCleanup: {
     intervalHours: number;
-    usedEnrollmentTokenRetentionDays: number;
   };
 }
 
@@ -90,7 +88,6 @@ export function readConfig(): ServerConfig {
     assetStoragePath: process.env.ASSET_STORAGE_PATH ?? "./data/assets",
     databaseMigrationsPath: process.env.DATABASE_MIGRATIONS_PATH ?? "docker/mysql/migrations",
     clientAuth: {
-      enrollmentTokenTtlMinutes: readPositiveNumber("CLIENT_ENROLLMENT_TOKEN_TTL_MINUTES", 15),
       heartbeatIntervalSeconds: readPositiveNumber("CLIENT_HEARTBEAT_INTERVAL_SECONDS", 30),
       offlineAfterSeconds: readPositiveNumber("CLIENT_OFFLINE_AFTER_SECONDS", 90),
       pairingPollIntervalSeconds: readPositiveNumber("CLIENT_PAIRING_POLL_INTERVAL_SECONDS", 5),
@@ -108,10 +105,6 @@ export function readConfig(): ServerConfig {
     publicBaseUrl: process.env.PUBLIC_BASE_URL ?? "http://localhost:4000",
     temporaryRecordCleanup: {
       intervalHours: readPositiveNumber("TEMPORARY_RECORD_CLEANUP_INTERVAL_HOURS", 24),
-      usedEnrollmentTokenRetentionDays: readPositiveNumber(
-        "USED_ENROLLMENT_TOKEN_RETENTION_DAYS",
-        30,
-      ),
     },
   };
 }

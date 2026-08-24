@@ -51,26 +51,6 @@ export async function ensureClientConnectionSchema(
       "CREATE UNIQUE INDEX clients_credential_hash_unique ON clients (credential_hash)",
     );
   }
-
-  await pool.execute(`
-    CREATE TABLE IF NOT EXISTS client_enrollment_tokens (
-      id VARCHAR(64) PRIMARY KEY,
-      token_hash CHAR(64) NOT NULL,
-      created_by_user_id VARCHAR(64) NULL,
-      expires_at TIMESTAMP NOT NULL,
-      used_at TIMESTAMP NULL,
-      used_by_client_id VARCHAR(64) NULL,
-      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      UNIQUE KEY client_enrollment_tokens_hash_unique (token_hash),
-      INDEX client_enrollment_tokens_expires_at_index (expires_at),
-      CONSTRAINT client_enrollment_tokens_created_by_user_id_fk
-        FOREIGN KEY (created_by_user_id) REFERENCES admin_users (id)
-        ON DELETE SET NULL,
-      CONSTRAINT client_enrollment_tokens_used_by_client_id_fk
-        FOREIGN KEY (used_by_client_id) REFERENCES clients (id)
-        ON DELETE SET NULL
-    )
-  `);
 }
 
 async function getClientColumns(pool: Pool, databaseName: string): Promise<Set<string>> {

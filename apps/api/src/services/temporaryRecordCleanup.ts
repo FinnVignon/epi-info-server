@@ -5,7 +5,6 @@ import { startPeriodicTask } from "./periodicTask.js";
 
 export interface TemporaryRecordCleanupOptions {
   intervalHours: number;
-  usedEnrollmentTokenRetentionDays: number;
 }
 
 export function startTemporaryRecordCleanup(
@@ -16,16 +15,12 @@ export function startTemporaryRecordCleanup(
     intervalMs: options.intervalHours * 60 * 60 * 1000,
     name: "Temporary database record cleanup",
     task: async () => {
-      const summary = await deleteExpiredTemporaryRecords(
-        pool,
-        options.usedEnrollmentTokenRetentionDays,
-      );
-      const deletedCount = summary.deletedEnrollmentTokens + summary.deletedSessions;
-      const totalDeletedCount = deletedCount + summary.deletedPairingSessions;
+      const summary = await deleteExpiredTemporaryRecords(pool);
+      const totalDeletedCount = summary.deletedSessions + summary.deletedPairingSessions;
 
       if (totalDeletedCount > 0) {
         console.info(
-          `Deleted ${summary.deletedSessions} expired admin session(s), ${summary.deletedEnrollmentTokens} expired or old enrollment token(s), and ${summary.deletedPairingSessions} expired pairing session(s)`,
+          `Deleted ${summary.deletedSessions} expired admin session(s) and ${summary.deletedPairingSessions} expired pairing session(s)`,
         );
       }
     },

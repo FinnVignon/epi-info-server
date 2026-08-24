@@ -20,7 +20,6 @@ import { createAdminAuthRouter } from "./routes/adminAuthRoutes.js";
 import { createAdminAssetRouter } from "./routes/adminAssetRoutes.js";
 import { createAdminAssignmentRouter } from "./routes/adminAssignmentRoutes.js";
 import { createAdminClientRouter } from "./routes/adminClientRoutes.js";
-import { createAdminClientEnrollmentRouter } from "./routes/adminClientEnrollmentRoutes.js";
 import { createAdminClientPairingRouter } from "./routes/adminClientPairingRoutes.js";
 import { createAdminGroupRouter } from "./routes/adminGroupRoutes.js";
 import { createAdminUserRouter } from "./routes/adminUserRoutes.js";
@@ -92,10 +91,6 @@ app.use(
   createAdminAssignmentRouter(mysqlPool, config, clientLiveUpdates),
 );
 app.use("/api/admin/clients", createAdminClientRouter(mysqlPool, config));
-app.use(
-  "/api/admin/client-enrollment-tokens",
-  createAdminClientEnrollmentRouter(mysqlPool, config),
-);
 app.use("/api/admin/client-pairings", createAdminClientPairingRouter(mysqlPool, config));
 app.use("/api/admin/groups", createAdminGroupRouter(mysqlPool, config));
 app.use("/api/admin/users", createAdminUserRouter(mysqlPool, config));

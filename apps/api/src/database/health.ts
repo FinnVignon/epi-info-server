@@ -5,7 +5,6 @@ export const DATABASE_TABLES = [
   "admin_permissions",
   "admin_sessions",
   "clients",
-  "client_enrollment_tokens",
   "client_pairing_sessions",
   "display_groups",
   "client_groups",
