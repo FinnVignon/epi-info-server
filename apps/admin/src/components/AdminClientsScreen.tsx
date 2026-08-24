@@ -5,7 +5,6 @@ import { ApiError } from "../api/adminApi";
 import { useTemporaryNotice } from "../hooks/useTemporaryNotice";
 import { AdminFeedback } from "./AdminFeedback";
 import { ClientDetail } from "./ClientDetail";
-import { ClientEnrollmentPanel } from "./ClientEnrollmentPanel";
 import { ClientPairingPanel } from "./ClientPairingPanel";
 import { ClientTable } from "./ClientTable";
 import type { ManagedClient } from "../../../shared/clientContracts";
@@ -139,7 +138,6 @@ export function AdminClientsScreen({ onUnauthorized }: AdminClientsScreenProps) 
               onStatusChange={(client) => void handleStatusChange(client)}
               onUpdateProfile={handleUpdateProfile}
             />
-            {canEnrollClients ? <ClientEnrollmentPanel onUnauthorized={onUnauthorized} /> : null}
           </div>
         </>
       ) : (

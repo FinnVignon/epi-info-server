@@ -6,27 +6,6 @@
   padding-top: 16px;
 }
 
-.client-enrollment-panel {
-  align-self: start;
-}
-
-.client-enrollment-panel summary {
-  color: var(--color-text);
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.advanced-enrollment-content {
-  display: grid;
-  gap: 12px;
-  margin-top: 14px;
-}
-
-.advanced-enrollment-content > button {
-  justify-self: start;
-}
-
 .pairing-panel-heading > div {
   min-width: 0;
 }
@@ -75,33 +54,8 @@
   box-shadow: 0 0 0 3px var(--focus-shadow);
 }
 
-.pairing-request-summary {
-  background: var(--color-surface-subtle);
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  display: grid;
-  gap: 10px;
+.pairing-review-intro {
   margin: 16px 0;
-  padding: 12px;
-}
-
-.pairing-request-summary div {
-  display: flex;
-  gap: 12px;
-  justify-content: space-between;
-}
-
-.pairing-request-summary dt {
-  color: var(--color-muted);
-  font-size: 12px;
-}
-
-.pairing-request-summary dd {
-  color: var(--color-text);
-  font-size: 13px;
-  margin: 0;
-  overflow-wrap: anywhere;
-  text-align: right;
 }
 
 .pairing-approval-form {
@@ -113,42 +67,6 @@
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 16px;
-}
-
-.enrollment-token-result {
-  background: var(--color-surface-subtle);
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  display: grid;
-  gap: 12px;
-  margin-top: 16px;
-  padding: 14px;
-}
-
-.enrollment-token-result > div {
-  display: grid;
-  gap: 6px;
-}
-
-.enrollment-token-result span {
-  color: var(--color-text-soft);
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.enrollment-token-result code {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border-strong);
-  border-radius: 4px;
-  color: var(--color-text);
-  font-size: 13px;
-  overflow-wrap: anywhere;
-  padding: 10px;
-  user-select: all;
-}
-
-.enrollment-token-result .secondary-button {
-  justify-self: start;
 }
 
 .clients-detail-panel .panel-header > div {

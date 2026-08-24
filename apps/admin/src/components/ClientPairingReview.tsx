@@ -1,10 +1,7 @@
-import { ArrowLeft, Check, X } from "lucide-react";
+import { ArrowLeft, Check } from "lucide-react";
 
-import type {
-  AdminClientPairing,
-  ClientPairingGroupOption,
-} from "../../../shared/clientPairingContracts";
-import { formatTranslation, useTranslation } from "../i18n";
+import type { ClientPairingGroupOption } from "../../../shared/clientPairingContracts";
+import { useTranslation } from "../i18n";
 
 interface ClientPairingReviewProps {
   groupId: string;
@@ -15,8 +12,6 @@ interface ClientPairingReviewProps {
   onBack: () => void;
   onGroupChange: (groupId: string) => void;
   onNameChange: (name: string) => void;
-  onReject: () => void;
-  pairing: AdminClientPairing;
 }
 
 export function ClientPairingReview({
@@ -28,31 +23,12 @@ export function ClientPairingReview({
   onBack,
   onGroupChange,
   onNameChange,
-  onReject,
-  pairing,
 }: ClientPairingReviewProps) {
   const { t } = useTranslation();
 
   return (
     <div className="pairing-review">
-      <dl className="pairing-request-summary">
-        <div>
-          <dt>{t.clients.pairingRequestedName}</dt>
-          <dd>{pairing.requestedName}</dd>
-        </div>
-        <div>
-          <dt>{t.clients.pairingSoftware}</dt>
-          <dd>{pairing.softwareVersion ?? t.common.unknown}</dd>
-        </div>
-        <div>
-          <dt>{t.clients.pairingExpires}</dt>
-          <dd>
-            {formatTranslation(t.clients.tokenExpires, {
-              date: new Date(pairing.expiresAt).toLocaleString(),
-            })}
-          </dd>
-        </div>
-      </dl>
+      <p className="metric pairing-review-intro">{t.clients.pairingReady}</p>
 
       <div className="form-grid compact-form pairing-approval-form">
         <label>
@@ -92,10 +68,6 @@ export function ClientPairingReview({
         >
           <Check aria-hidden="true" size={16} />
           {isWorking ? t.common.working : t.clients.pairingApprove}
-        </button>
-        <button className="danger-button" disabled={isWorking} onClick={onReject} type="button">
-          <X aria-hidden="true" size={16} />
-          {t.clients.pairingReject}
         </button>
         <button className="secondary-button" disabled={isWorking} onClick={onBack} type="button">
           <ArrowLeft aria-hidden="true" size={16} />

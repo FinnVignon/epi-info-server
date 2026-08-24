@@ -24,13 +24,6 @@ export async function approveClientPairing(
   );
 }
 
-export async function rejectClientPairing(pairingId: string): Promise<ClientPairingActionResponse> {
-  return postJson<ClientPairingActionResponse>(
-    `${PAIRING_API_URL}/${encodeURIComponent(pairingId)}/reject`,
-    {},
-  );
-}
-
 function postJson<T>(url: string, body: unknown): Promise<T> {
   return fetch(url, {
     body: JSON.stringify(body),

@@ -1,11 +1,7 @@
 import { MonitorUp, Search } from "lucide-react";
 import { useState } from "react";
 
-import {
-  approveClientPairing,
-  lookupClientPairing,
-  rejectClientPairing,
-} from "../api/adminClientPairingsApi";
+import { approveClientPairing, lookupClientPairing } from "../api/adminClientPairingsApi";
 import { ApiError } from "../api/adminApi";
 import { useTemporaryNotice } from "../hooks/useTemporaryNotice";
 import { useTranslation } from "../i18n";
@@ -69,23 +65,6 @@ export function ClientPairingPanel({ onApproved, onUnauthorized }: ClientPairing
     }
   }
 
-  async function handleReject(): Promise<void> {
-    if (!pairing) return;
-    setError(null);
-    setNotice(null);
-    setIsWorking(true);
-
-    try {
-      await rejectClientPairing(pairing.id);
-      resetReview();
-      setNotice(t.clients.pairingNoticeRejected);
-    } catch (rejectionError) {
-      handleError(rejectionError, t.clients.pairingErrorReject);
-    } finally {
-      setIsWorking(false);
-    }
-  }
-
   function handleError(apiError: unknown, fallback: string): void {
     if (apiError instanceof ApiError && apiError.status === 401) {
       onUnauthorized();
@@ -125,8 +104,6 @@ export function ClientPairingPanel({ onApproved, onUnauthorized }: ClientPairing
           onBack={resetReview}
           onGroupChange={setGroupId}
           onNameChange={setName}
-          onReject={() => void handleReject()}
-          pairing={pairing}
         />
       ) : (
         <form

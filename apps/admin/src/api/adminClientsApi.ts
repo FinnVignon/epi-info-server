@@ -1,19 +1,10 @@
 import type {
   ClientListResponse,
   ClientResponse,
-  CreateClientEnrollmentTokenResponse,
   UpdateClientProfileRequest,
   UpdateClientStatusRequest,
 } from "../../../shared/clientContracts";
 import { readJsonResponse } from "./adminApi";
-
-export async function createClientEnrollmentToken(): Promise<CreateClientEnrollmentTokenResponse> {
-  return readJsonResponse<CreateClientEnrollmentTokenResponse>(
-    await fetch("/api/admin/client-enrollment-tokens", {
-      method: "POST",
-    }),
-  );
-}
 
 export async function listClients(): Promise<ClientListResponse> {
   return readJsonResponse<ClientListResponse>(await fetch("/api/admin/clients"));
