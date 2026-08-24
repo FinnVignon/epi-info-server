@@ -21,10 +21,12 @@ import { createAdminAssetRouter } from "./routes/adminAssetRoutes.js";
 import { createAdminAssignmentRouter } from "./routes/adminAssignmentRoutes.js";
 import { createAdminClientRouter } from "./routes/adminClientRoutes.js";
 import { createAdminClientEnrollmentRouter } from "./routes/adminClientEnrollmentRoutes.js";
+import { createAdminClientPairingRouter } from "./routes/adminClientPairingRoutes.js";
 import { createAdminGroupRouter } from "./routes/adminGroupRoutes.js";
 import { createAdminUserRouter } from "./routes/adminUserRoutes.js";
 import { createAssetDownloadRouter } from "./routes/assetDownloadRoutes.js";
 import { createClientConnectionRouter } from "./routes/clientConnectionRoutes.js";
+import { createClientPairingRouter } from "./routes/clientPairingRoutes.js";
 import { createClientManifestRouter } from "./routes/clientManifestRoutes.js";
 import { startArchivedAssetCleanup } from "./services/assetCleanup.js";
 import { startTemporaryRecordCleanup } from "./services/temporaryRecordCleanup.js";
@@ -94,10 +96,12 @@ app.use(
   "/api/admin/client-enrollment-tokens",
   createAdminClientEnrollmentRouter(mysqlPool, config),
 );
+app.use("/api/admin/client-pairings", createAdminClientPairingRouter(mysqlPool, config));
 app.use("/api/admin/groups", createAdminGroupRouter(mysqlPool, config));
 app.use("/api/admin/users", createAdminUserRouter(mysqlPool, config));
 app.use("/api/admin", createAdminAuthRouter(mysqlPool, config));
 app.use("/api/clients", createClientConnectionRouter(mysqlPool, config));
+app.use("/api/clients/pairing-sessions", createClientPairingRouter(mysqlPool, config));
 app.use("/api/clients", createClientManifestRouter(mysqlPool, config.assetStoragePath));
 
 if (config.adminDistPath) {

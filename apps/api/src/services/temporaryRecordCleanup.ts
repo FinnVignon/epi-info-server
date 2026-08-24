@@ -21,10 +21,11 @@ export function startTemporaryRecordCleanup(
         options.usedEnrollmentTokenRetentionDays,
       );
       const deletedCount = summary.deletedEnrollmentTokens + summary.deletedSessions;
+      const totalDeletedCount = deletedCount + summary.deletedPairingSessions;
 
-      if (deletedCount > 0) {
+      if (totalDeletedCount > 0) {
         console.info(
-          `Deleted ${summary.deletedSessions} expired admin session(s) and ${summary.deletedEnrollmentTokens} expired or old enrollment token(s)`,
+          `Deleted ${summary.deletedSessions} expired admin session(s), ${summary.deletedEnrollmentTokens} expired or old enrollment token(s), and ${summary.deletedPairingSessions} expired pairing session(s)`,
         );
       }
     },

@@ -19,6 +19,8 @@ export interface ServerConfig {
     enrollmentTokenTtlMinutes: number;
     heartbeatIntervalSeconds: number;
     offlineAfterSeconds: number;
+    pairingPollIntervalSeconds: number;
+    pairingSessionTtlMinutes: number;
   };
   mysql: {
     database: string;
@@ -91,6 +93,8 @@ export function readConfig(): ServerConfig {
       enrollmentTokenTtlMinutes: readPositiveNumber("CLIENT_ENROLLMENT_TOKEN_TTL_MINUTES", 15),
       heartbeatIntervalSeconds: readPositiveNumber("CLIENT_HEARTBEAT_INTERVAL_SECONDS", 30),
       offlineAfterSeconds: readPositiveNumber("CLIENT_OFFLINE_AFTER_SECONDS", 90),
+      pairingPollIntervalSeconds: readPositiveNumber("CLIENT_PAIRING_POLL_INTERVAL_SECONDS", 5),
+      pairingSessionTtlMinutes: readPositiveNumber("CLIENT_PAIRING_SESSION_TTL_MINUTES", 10),
     },
     mysql: {
       database: process.env.MYSQL_DATABASE ?? "epi_info",

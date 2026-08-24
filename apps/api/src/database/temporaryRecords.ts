@@ -2,6 +2,7 @@ import type { Pool, ResultSetHeader } from "mysql2/promise";
 
 export interface TemporaryRecordCleanupSummary {
   deletedEnrollmentTokens: number;
+  deletedPairingSessions: number;
   deletedSessions: number;
 }
 
@@ -23,9 +24,13 @@ export async function deleteExpiredTemporaryRecords(
     `,
     [usedEnrollmentTokenRetentionDays],
   );
+  const [pairingSessionResult] = await pool.execute<ResultSetHeader>(
+    "DELETE FROM client_pairing_sessions WHERE expires_at <= NOW(6)",
+  );
 
   return {
     deletedEnrollmentTokens: enrollmentTokenResult.affectedRows,
+    deletedPairingSessions: pairingSessionResult.affectedRows,
     deletedSessions: sessionResult.affectedRows,
   };
 }

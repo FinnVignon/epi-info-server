@@ -69,6 +69,22 @@ export {
   recordClientHeartbeat,
   registerClientWithEnrollmentToken,
 } from "./database/clientConnections.js";
+
+export {
+  createClientPairingSession,
+  findPendingClientPairingByUserCode,
+  listClientPairingGroupOptions,
+} from "./database/clientPairingSessions.js";
+export type { CreateClientPairingSessionInput } from "./database/clientPairingSessions.js";
+
+export { approveClientPairing, rejectClientPairing } from "./database/clientPairingDecisions.js";
+export type { ApproveClientPairingInput } from "./database/clientPairingDecisions.js";
+
+export { activateClientPairing } from "./database/clientPairingActivation.js";
+export type {
+  ActivateClientPairingInput,
+  ActivateClientPairingResult,
+} from "./database/clientPairingActivation.js";
 export type {
   ClientCredentialRecord,
   CreateClientEnrollmentTokenInput,
