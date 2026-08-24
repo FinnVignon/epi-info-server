@@ -12,12 +12,6 @@ Use this repository to run the API, admin UI, MySQL database, asset storage, and
 
 ## Run From The Repository
 
-Create the shared Docker network once:
-
-```sh
-docker network create epi-info-network
-```
-
 Clone or update the repository, then start the server stack:
 
 ```sh
@@ -52,12 +46,6 @@ Create a folder for the server deployment:
 ```sh
 mkdir epi-info-server
 cd epi-info-server
-```
-
-Create the shared Docker network once:
-
-```sh
-docker network create epi-info-network
 ```
 
 Pull the published image:
@@ -106,7 +94,7 @@ services:
       MYSQL_PASSWORD: change_this_database_password
       DATABASE_MIGRATIONS_PATH: /app/database/migrations
       ASSET_STORAGE_PATH: /data/assets
-      PUBLIC_BASE_URL: http://localhost:4000
+      PUBLIC_BASE_URL: http://YOUR_SERVER_IP:4000
       ADMIN_DIST_PATH: /app/dist/admin
     ports:
       - "4000:4000"
@@ -124,21 +112,13 @@ services:
       timeout: 5s
       start_period: 15s
       retries: 3
-    networks:
-      default:
-      epi-info:
-        aliases:
-          - epi-info-server
-
 volumes:
   mysql-data:
   server-assets:
-
-networks:
-  epi-info:
-    external: true
-    name: epi-info-network
 ```
+
+Replace `YOUR_SERVER_IP` with the address other computers use to reach the server. Also replace the
+two example database passwords with private values.
 
 Start the server:
 
@@ -222,9 +202,6 @@ Restore replaces the current server database tables and uploaded asset files. St
 
 The client receives and stores its permanent credential automatically. After it connects, it appears
 in the admin panel and can receive individual, group, or global display assignments.
-
-The long enrollment token under Advanced connection options is retained only for recovery and
-compatibility. Normal installation does not require copying it to the client.
 
 ## Content Supported In 1.0.x
 
