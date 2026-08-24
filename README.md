@@ -215,11 +215,16 @@ Restore replaces the current server database tables and uploaded asset files. St
 
 1. Start this server.
 2. Log in to the admin panel.
-3. Open the `Clients` page.
-4. Generate an enrollment token.
-5. Put that token in the client `.env` file before first client startup.
+3. Start a new client with this server's reachable address in `SERVER_BASE_URL`.
+4. Open `Screens` in the admin panel and choose `Add a screen`.
+5. Enter the eight-character code shown by the client, choose its name and optional group, then
+   approve it.
 
-After the client enrolls, it appears in the admin panel and can receive individual, group, or global display assignments.
+The client receives and stores its permanent credential automatically. After it connects, it appears
+in the admin panel and can receive individual, group, or global display assignments.
+
+The long enrollment token under Advanced connection options is retained only for recovery and
+compatibility. Normal installation does not require copying it to the client.
 
 ## Content Supported In 1.0.x
 
