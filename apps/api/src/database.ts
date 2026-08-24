@@ -63,18 +63,27 @@ export type {
 } from "./database/assets.js";
 
 export {
-  createClientEnrollmentToken,
   ensureClientConnectionSchema,
   findClientCredentialById,
   recordClientHeartbeat,
-  registerClientWithEnrollmentToken,
 } from "./database/clientConnections.js";
+
+export {
+  createClientPairingSession,
+  findPendingClientPairingByUserCode,
+  listClientPairingGroupOptions,
+} from "./database/clientPairingSessions.js";
+export type { CreateClientPairingSessionInput } from "./database/clientPairingSessions.js";
+
+export { approveClientPairing, rejectClientPairing } from "./database/clientPairingDecisions.js";
+export type { ApproveClientPairingInput } from "./database/clientPairingDecisions.js";
+
+export { activateClientPairing } from "./database/clientPairingActivation.js";
 export type {
-  ClientCredentialRecord,
-  CreateClientEnrollmentTokenInput,
-  RegisterClientInput,
-  RegisterClientResult,
-} from "./database/clientConnections.js";
+  ActivateClientPairingInput,
+  ActivateClientPairingResult,
+} from "./database/clientPairingActivation.js";
+export type { ClientCredentialRecord } from "./database/clientConnections.js";
 
 export {
   findClientById,

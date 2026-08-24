@@ -1,41 +1,4 @@
-import type {
-  ClientHeartbeatRequest,
-  RegisterClientRequest,
-} from "../../../shared/clientContracts.js";
-
-export function readRegistrationBody(
-  body: Partial<RegisterClientRequest>,
-): RegisterClientRequest | string {
-  if (typeof body.enrollmentToken !== "string" || body.enrollmentToken.length < 32) {
-    return "A valid enrollment token is required";
-  }
-
-  if (body.enrollmentToken.length > 512) {
-    return "Enrollment token is too long";
-  }
-
-  if (typeof body.name !== "string" || body.name.trim().length < 2) {
-    return "Client name must be at least 2 characters";
-  }
-
-  const name = body.name.trim();
-
-  if (name.length > 255) {
-    return "Client name must not exceed 255 characters";
-  }
-
-  const softwareVersion = readOptionalText(body.softwareVersion, 64, "Software version");
-
-  if ("error" in softwareVersion) {
-    return softwareVersion.error;
-  }
-
-  return {
-    enrollmentToken: body.enrollmentToken,
-    name,
-    ...(softwareVersion.value ? { softwareVersion: softwareVersion.value } : {}),
-  };
-}
+import type { ClientHeartbeatRequest } from "../../../shared/clientContracts.js";
 
 export function readHeartbeatBody(
   body: Partial<ClientHeartbeatRequest>,

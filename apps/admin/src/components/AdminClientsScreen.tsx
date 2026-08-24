@@ -5,7 +5,7 @@ import { ApiError } from "../api/adminApi";
 import { useTemporaryNotice } from "../hooks/useTemporaryNotice";
 import { AdminFeedback } from "./AdminFeedback";
 import { ClientDetail } from "./ClientDetail";
-import { ClientEnrollmentPanel } from "./ClientEnrollmentPanel";
+import { ClientPairingPanel } from "./ClientPairingPanel";
 import { ClientTable } from "./ClientTable";
 import type { ManagedClient } from "../../../shared/clientContracts";
 import { useTranslation } from "../i18n";
@@ -126,13 +126,18 @@ export function AdminClientsScreen({ onUnauthorized }: AdminClientsScreenProps) 
             selectedClientId={selectedClient?.id ?? null}
           />
           <div className="screens-side-column">
+            {canEnrollClients ? (
+              <ClientPairingPanel
+                onApproved={() => window.setTimeout(() => void loadClients(), 6000)}
+                onUnauthorized={onUnauthorized}
+              />
+            ) : null}
             <ClientDetail
               client={selectedClient}
               isSaving={isSaving}
               onStatusChange={(client) => void handleStatusChange(client)}
               onUpdateProfile={handleUpdateProfile}
             />
-            {canEnrollClients ? <ClientEnrollmentPanel onUnauthorized={onUnauthorized} /> : null}
           </div>
         </>
       ) : (

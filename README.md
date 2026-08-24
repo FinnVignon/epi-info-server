@@ -12,12 +12,6 @@ Use this repository to run the API, admin UI, MySQL database, asset storage, and
 
 ## Run From The Repository
 
-Create the shared Docker network once:
-
-```sh
-docker network create epi-info-network
-```
-
 Clone or update the repository, then start the server stack:
 
 ```sh
@@ -52,12 +46,6 @@ Create a folder for the server deployment:
 ```sh
 mkdir epi-info-server
 cd epi-info-server
-```
-
-Create the shared Docker network once:
-
-```sh
-docker network create epi-info-network
 ```
 
 Pull the published image:
@@ -106,7 +94,7 @@ services:
       MYSQL_PASSWORD: change_this_database_password
       DATABASE_MIGRATIONS_PATH: /app/database/migrations
       ASSET_STORAGE_PATH: /data/assets
-      PUBLIC_BASE_URL: http://localhost:4000
+      PUBLIC_BASE_URL: http://YOUR_SERVER_IP:4000
       ADMIN_DIST_PATH: /app/dist/admin
     ports:
       - "4000:4000"
@@ -124,21 +112,13 @@ services:
       timeout: 5s
       start_period: 15s
       retries: 3
-    networks:
-      default:
-      epi-info:
-        aliases:
-          - epi-info-server
-
 volumes:
   mysql-data:
   server-assets:
-
-networks:
-  epi-info:
-    external: true
-    name: epi-info-network
 ```
+
+Replace `YOUR_SERVER_IP` with the address other computers use to reach the server. Also replace the
+two example database passwords with private values.
 
 Start the server:
 
@@ -215,11 +195,13 @@ Restore replaces the current server database tables and uploaded asset files. St
 
 1. Start this server.
 2. Log in to the admin panel.
-3. Open the `Clients` page.
-4. Generate an enrollment token.
-5. Put that token in the client `.env` file before first client startup.
+3. Start a new client with this server's reachable address in `SERVER_BASE_URL`.
+4. Open `Screens` in the admin panel and choose `Add a screen`.
+5. Enter the eight-character code shown by the client, choose its name and optional group, then
+   approve it.
 
-After the client enrolls, it appears in the admin panel and can receive individual, group, or global display assignments.
+The client receives and stores its permanent credential automatically. After it connects, it appears
+in the admin panel and can receive individual, group, or global display assignments.
 
 ## Content Supported In 1.0.x
 

@@ -6,44 +6,67 @@
   padding-top: 16px;
 }
 
-.client-enrollment-panel {
-  align-self: start;
+.pairing-panel-heading > div {
+  min-width: 0;
 }
 
-.enrollment-token-result {
-  background: var(--color-surface-subtle);
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
+.pairing-panel-heading .metric {
+  margin-top: 4px;
+}
+
+.pairing-code-form {
+  align-items: end;
   display: grid;
-  gap: 12px;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) auto;
   margin-top: 16px;
-  padding: 14px;
 }
 
-.enrollment-token-result > div {
+.pairing-code-form label {
   display: grid;
   gap: 6px;
 }
 
-.enrollment-token-result span {
+.pairing-code-form label span {
   color: var(--color-text-soft);
   font-size: 13px;
   font-weight: 600;
 }
 
-.enrollment-token-result code {
-  background: var(--color-surface);
+.pairing-code-form input {
+  background: var(--color-input-bg);
   border: 1px solid var(--color-border-strong);
-  border-radius: 4px;
+  border-radius: 5px;
   color: var(--color-text);
-  font-size: 13px;
-  overflow-wrap: anywhere;
-  padding: 10px;
-  user-select: all;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0;
+  min-height: 42px;
+  outline: none;
+  padding: 8px 10px;
+  text-transform: uppercase;
+  width: 100%;
 }
 
-.enrollment-token-result .secondary-button {
-  justify-self: start;
+.pairing-code-form input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--focus-shadow);
+}
+
+.pairing-review-intro {
+  margin: 16px 0;
+}
+
+.pairing-approval-form {
+  grid-template-columns: 1fr;
+}
+
+.pairing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
 }
 
 .clients-detail-panel .panel-header > div {

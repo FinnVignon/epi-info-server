@@ -109,6 +109,15 @@
   .form-grid.compact-form {
     grid-template-columns: 1fr;
   }
+
+  .pairing-code-form {
+    align-items: stretch;
+    grid-template-columns: 1fr;
+  }
+
+  .pairing-code-form button {
+    justify-content: center;
+  }
 }
 
 @media (max-width: 480px) {
