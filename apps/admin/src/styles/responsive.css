@@ -1,0 +1,158 @@
+@media (max-width: 860px) {
+  .app-shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admin-sidebar {
+    box-shadow: 8px 0 24px var(--shadow-drawer);
+    position: fixed;
+    transform: translateX(-105%);
+    transition: transform 160ms ease;
+    width: min(280px, 86vw);
+  }
+
+  .admin-sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-close,
+  .mobile-menu {
+    display: inline-flex !important;
+  }
+
+  .navigation-backdrop {
+    background: var(--color-backdrop);
+    border: 0;
+    display: block;
+    inset: 0;
+    padding: 0;
+    position: fixed;
+    z-index: 25;
+  }
+
+  .topbar {
+    height: 60px;
+    padding: 0 16px;
+  }
+
+  .page-heading {
+    flex: 1;
+  }
+
+  .content {
+    grid-template-columns: 1fr;
+    padding: 16px;
+  }
+
+  .content.users-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .content.assets-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .asset-library-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .content.clients-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .content.groups-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .content.settings-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dashboard-status-panel,
+  .dashboard-screens-panel,
+  .dashboard-groups-panel {
+    grid-column: 1 / -1;
+  }
+
+  .users-list-panel {
+    grid-row: auto;
+  }
+
+  .clients-list-panel {
+    grid-row: auto;
+  }
+
+  .groups-list-panel {
+    grid-row: auto;
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .table-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .topbar-actions {
+    justify-content: flex-end;
+  }
+
+  .form-grid.compact-form {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-shell {
+    align-items: start;
+    padding: 16px;
+  }
+
+  .auth-panel {
+    padding: 18px;
+  }
+
+  .checkbox-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .panel-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .api-indicator {
+    display: none;
+  }
+
+  .topbar .icon-button-label {
+    display: none;
+  }
+
+  .settings-details > div {
+    gap: 4px;
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .target-tabs {
+    grid-template-columns: 1fr;
+  }
+
+  .segmented-control.theme-control {
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+}

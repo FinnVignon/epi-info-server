@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { bootstrapAdmin, loginAdmin } from "../api/adminApi";
+import { StatusMessage } from "./AdminFeedback";
 import type { AdminAuthResponse } from "../../../shared/adminContracts";
 import { useTranslation } from "../i18n";
 
@@ -84,7 +85,7 @@ export function AuthScreen({ error, mode, onAuthenticated, onError }: AuthScreen
             />
           </label>
 
-          {error ? <p className="form-error">{error}</p> : null}
+          {error ? <StatusMessage kind="error">{error}</StatusMessage> : null}
 
           <button className="primary-button" disabled={isSubmitting} type="submit">
             {isSubmitting

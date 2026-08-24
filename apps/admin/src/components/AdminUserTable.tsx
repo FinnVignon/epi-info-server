@@ -1,10 +1,12 @@
 import { useMemo, useState } from "react";
 
+import { RefreshButton } from "./RefreshButton";
+import { SortableTableHeader, type SortDirection } from "./SortableTableHeader";
+import { getAdminUserAccountType } from "../utils/adminAccountType";
 import type { AdminUserWithPermissions } from "../../../shared/adminContracts";
 import { useTranslation } from "../i18n";
 
-type SortDirection = "asc" | "desc";
-type SortKey = "displayName" | "permissions" | "status" | "superAdmin";
+type SortKey = "accountType" | "displayName" | "permissions" | "status";
 
 interface AdminUserTableProps {
   isLoading: boolean;
@@ -55,9 +57,7 @@ export function AdminUserTable({
     <article className="panel users-list-panel">
       <div className="panel-header">
         <h2>{t.users.title}</h2>
-        <button className="secondary-button" onClick={onRefresh} type="button">
-          {t.users.refresh}
-        </button>
+        <RefreshButton label={t.users.refresh} onClick={onRefresh} />
       </div>
 
       <label className="table-search">
@@ -76,28 +76,28 @@ export function AdminUserTable({
           <table className="data-table">
             <thead>
               <tr>
-                <SortableHeader
+                <SortableTableHeader
                   activeSortKey={sortKey}
                   direction={sortDirection}
                   label={t.users.colName}
                   onSort={handleSort}
                   sortKey="displayName"
                 />
-                <SortableHeader
+                <SortableTableHeader
                   activeSortKey={sortKey}
                   direction={sortDirection}
                   label={t.users.colStatus}
                   onSort={handleSort}
                   sortKey="status"
                 />
-                <SortableHeader
+                <SortableTableHeader
                   activeSortKey={sortKey}
                   direction={sortDirection}
-                  label={t.users.colSuperAdmin}
+                  label={t.users.accountType}
                   onSort={handleSort}
-                  sortKey="superAdmin"
+                  sortKey="accountType"
                 />
-                <SortableHeader
+                <SortableTableHeader
                   activeSortKey={sortKey}
                   direction={sortDirection}
                   label={t.users.colPermissions}
@@ -120,9 +120,11 @@ export function AdminUserTable({
                     </button>
                   </td>
                   <td>
-                    <span className={`status-pill ${user.status}`}>{user.status}</span>
+                    <span className={`status-pill ${user.status}`}>
+                      {user.status === "active" ? t.users.statusActive : t.users.statusInactive}
+                    </span>
                   </td>
-                  <td>{user.isSuperAdmin ? t.users.yes : t.users.no}</td>
+                  <td>{formatAccountType(user, t.accountTypes)}</td>
                   <td>
                     {user.isSuperAdmin
                       ? t.users.allPermissions
@@ -141,30 +143,6 @@ export function AdminUserTable({
   );
 }
 
-interface SortableHeaderProps {
-  activeSortKey: SortKey;
-  direction: SortDirection;
-  label: string;
-  onSort: (sortKey: SortKey) => void;
-  sortKey: SortKey;
-}
-
-function SortableHeader({ activeSortKey, direction, label, onSort, sortKey }: SortableHeaderProps) {
-  const isActive = activeSortKey === sortKey;
-  return (
-    <th>
-      <button
-        className={`sort-button ${isActive ? "active" : ""}`}
-        onClick={() => onSort(sortKey)}
-        type="button"
-      >
-        <span>{label}</span>
-        <small>{isActive ? (direction === "asc" ? "↑" : "↓") : ""}</small>
-      </button>
-    </th>
-  );
-}
-
 function compareUsers(
   a: AdminUserWithPermissions,
   b: AdminUserWithPermissions,
@@ -177,7 +155,21 @@ function compareUsers(
       return a.permissions.length - b.permissions.length;
     case "status":
       return a.status.localeCompare(b.status, undefined, { sensitivity: "base" });
-    case "superAdmin":
-      return Number(a.isSuperAdmin) - Number(b.isSuperAdmin);
+    case "accountType":
+      return getAdminUserAccountType(a).localeCompare(getAdminUserAccountType(b));
+  }
+}
+
+function formatAccountType(
+  user: AdminUserWithPermissions,
+  labels: ReturnType<typeof useTranslation>["t"]["accountTypes"],
+): string {
+  switch (getAdminUserAccountType(user)) {
+    case "admin":
+      return labels.admin;
+    case "super_admin":
+      return labels.superAdmin;
+    case "user":
+      return labels.user;
   }
 }

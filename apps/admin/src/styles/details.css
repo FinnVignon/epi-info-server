@@ -1,0 +1,48 @@
+.advanced-details {
+  border-top: 1px solid var(--color-border);
+  margin-top: 16px;
+  padding-top: 14px;
+}
+
+.advanced-details summary {
+  color: var(--color-muted);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.advanced-details dl {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0 0;
+}
+
+.advanced-details dl > div {
+  display: grid;
+  gap: 3px;
+}
+
+.advanced-details dt {
+  color: var(--color-muted);
+  font-size: 11px;
+}
+
+.advanced-details dd {
+  color: var(--color-text-soft);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 11px;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.groups-side-column {
+  align-self: start;
+  display: grid;
+  gap: 16px;
+}
+
+.screens-side-column {
+  align-self: start;
+  display: grid;
+  gap: 16px;
+}

@@ -270,6 +270,3 @@ docker compose down
 ```
 
 To reset local server data, remove the Docker volumes intentionally.
-
-See [ARCHITECTURE.md](ARCHITECTURE.md) for code boundaries, [CONTRIBUTING.md](CONTRIBUTING.md)
-for the development workflow, and [SECURITY.md](SECURITY.md) for vulnerability reporting.

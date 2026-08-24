@@ -1,81 +1,117 @@
-import { SUPPORTED_MANIFEST_ITEM_TYPES } from "../../../shared/contracts";
-import type { DashboardResponse, HealthResponse } from "../../../shared/dashboardContracts";
+import { Activity, ArrowRight, Monitor, MonitorCheck, MonitorPlay, UsersRound } from "lucide-react";
+
+import type { AdminScreen } from "./AdminShell";
+import type { AdminAccess } from "../../../shared/adminContracts";
+import type { DashboardResponse } from "../../../shared/dashboardContracts";
 import { useTranslation } from "../i18n";
 
 interface AdminDashboardProps {
+  access: AdminAccess;
   dashboard: DashboardResponse | null;
-  health: HealthResponse | null;
+  onNavigate: (screen: AdminScreen) => void;
 }
 
-export function AdminDashboard({ dashboard, health }: AdminDashboardProps) {
+export function AdminDashboard({ access, dashboard, onNavigate }: AdminDashboardProps) {
   const { t } = useTranslation();
+  const clients = dashboard?.clients ?? [];
+  const groups = dashboard?.groups ?? [];
+  const onlineCount = clients.filter((client) => client.status === "online").length;
+  const needsAttentionCount = clients.filter((client) => client.status !== "online").length;
+  const canDisplay =
+    access.canAssignAllScreens || access.canAssignGroups || access.canAssignScreens;
 
   return (
-    <section className="content">
-      <article className="panel">
-        <h2>{t.dashboard.serverTitle}</h2>
-        <p className="metric">
-          {t.dashboard.service} : {health?.service ?? t.dashboard.notConnected}
-        </p>
-        <p className="metric">
-          {t.dashboard.database} : {health?.database.status ?? t.dashboard.unknown}
-        </p>
-        {health?.database.missingTables.length ? (
-          <p className="metric">
-            {t.dashboard.missingTables} : {health.database.missingTables.join(", ")}
-          </p>
-        ) : null}
+    <section className="content dashboard-layout">
+      {canDisplay ? (
+        <button
+          className="dashboard-primary-action"
+          onClick={() => onNavigate("display")}
+          type="button"
+        >
+          <span className="dashboard-primary-icon">
+            <MonitorPlay aria-hidden="true" size={22} />
+          </span>
+          <span>
+            <strong>{t.dashboard.displayContent}</strong>
+            <small>{t.dashboard.displayTargets}</small>
+          </span>
+          <ArrowRight aria-hidden="true" size={18} />
+        </button>
+      ) : null}
+
+      <div className="dashboard-metrics">
+        <DashboardMetric icon={Monitor} label={t.dashboard.screensTotal} value={clients.length} />
+        <DashboardMetric
+          icon={MonitorCheck}
+          label={t.dashboard.screensOnline}
+          tone="positive"
+          value={onlineCount}
+        />
+        <DashboardMetric
+          icon={Activity}
+          label={t.dashboard.needsAttention}
+          tone={needsAttentionCount ? "warning" : "neutral"}
+          value={needsAttentionCount}
+        />
+        <DashboardMetric icon={UsersRound} label={t.dashboard.groupsTitle} value={groups.length} />
+      </div>
+
+      <article className="panel dashboard-screens-panel">
+        <h2>{t.dashboard.screensTitle}</h2>
+        {clients.length ? (
+          <ul className="summary-list operational-list">
+            {clients.slice(0, 8).map((client) => (
+              <li key={client.id}>
+                <span>{client.name}</span>
+                <small className={`connection-text ${client.status}`}>
+                  {t.dashboard[client.status]}
+                </small>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="metric">{t.dashboard.noScreens}</p>
+        )}
       </article>
 
-      <article className="panel">
-        <h2>{t.dashboard.displayTypesTitle}</h2>
-        <div className="content-types">
-          {(health?.supportedManifestItemTypes ?? SUPPORTED_MANIFEST_ITEM_TYPES).map((type) => (
-            <span className="content-type" key={type}>
-              {type}
-            </span>
-          ))}
-        </div>
-      </article>
-
-      <article className="panel">
-        <h2>{t.dashboard.clientsGroupsTitle}</h2>
-        <div className="summary-grid">
-          <section>
-            <h3>{t.dashboard.clientsTitle}</h3>
-            {dashboard?.clients.length ? (
-              <ul className="summary-list">
-                {dashboard.clients.map((client) => (
-                  <li key={client.id}>
-                    <span>{client.name}</span>
-                    <small>{client.status}</small>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="metric">{t.dashboard.noClients}</p>
-            )}
-          </section>
-
-          <section>
-            <h3>{t.dashboard.groupsTitle}</h3>
-            {dashboard?.groups.length ? (
-              <ul className="summary-list">
-                {dashboard.groups.map((group) => (
-                  <li key={group.id}>
-                    <span>{group.name}</span>
-                    <small>
-                      {group.clientCount} {t.dashboard.clientCount}
-                    </small>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="metric">{t.dashboard.noGroups}</p>
-            )}
-          </section>
-        </div>
+      <article className="panel dashboard-groups-panel">
+        <h2>{t.dashboard.groupsTitle}</h2>
+        {groups.length ? (
+          <ul className="summary-list operational-list">
+            {groups.slice(0, 8).map((group) => (
+              <li key={group.id}>
+                <span>{group.name}</span>
+                <small>
+                  {group.clientCount} {t.dashboard.screenCount}
+                </small>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="metric">{t.dashboard.noGroups}</p>
+        )}
       </article>
     </section>
+  );
+}
+
+interface DashboardMetricProps {
+  icon: typeof Monitor;
+  label: string;
+  tone?: "neutral" | "positive" | "warning";
+  value: number;
+}
+
+function DashboardMetric({ icon: Icon, label, tone = "neutral", value }: DashboardMetricProps) {
+  return (
+    <article className={`dashboard-metric ${tone}`}>
+      <span className="dashboard-metric-icon">
+        <Icon aria-hidden="true" size={19} />
+      </span>
+      <span>
+        <strong>{value}</strong>
+        <small>{label}</small>
+      </span>
+    </article>
   );
 }

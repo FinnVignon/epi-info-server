@@ -31,21 +31,71 @@
     "working": "Traitement"
   },
 
+  "accountTypes": {
+    "user": "Utilisateur",
+    "admin": "Administrateur",
+    "superAdmin": "Super administrateur"
+  },
+
   "nav": {
     "dashboard": "Tableau de bord",
-    "global": "Tous les écrans",
+    "display": "Afficher",
     "users": "Utilisateurs",
-    "assets": "Contenus",
-    "clients": "Clients",
+    "content": "Contenus",
+    "screens": "Écrans",
     "groups": "Groupes",
+    "settings": "Paramètres",
     "logout": "Déconnexion",
-    "sections": "Sections admin"
+    "sections": "Sections d'administration",
+    "openMenu": "Ouvrir la navigation",
+    "closeMenu": "Fermer la navigation",
+    "changeLanguage": "Changer de langue",
+    "workspace": "Espace de travail",
+    "administration": "Administration",
+    "preferences": "Préférences"
+  },
+
+  "shell": {
+    "controlPanel": "Panneau de contrôle"
   },
 
   "apiStatus": {
     "checking": "vérification",
     "ok": "connectée",
     "error": "erreur"
+  },
+
+  "settings": {
+    "languageTitle": "Langue",
+    "appearanceTitle": "Apparence",
+    "theme": "Thème",
+    "themeLight": "Clair",
+    "themeDark": "Sombre",
+    "themeSystem": "Système",
+    "accountTitle": "Compte",
+    "systemTitle": "Système",
+    "displayName": "Nom affiché",
+    "email": "Adresse e-mail",
+    "access": "Accès",
+    "superAdmin": "Super administrateur",
+    "scopedAccess": "Administrateur limité",
+    "api": "API",
+    "service": "Service",
+    "database": "Base de données"
+  },
+
+  "content": {
+    "views": "Vues des contenus",
+    "library": "Bibliothèque",
+    "allScreens": "Tous les écrans"
+  },
+
+  "display": {
+    "targetType": "Cible d'affichage",
+    "groups": "Groupes",
+    "screens": "Écrans",
+    "allScreens": "Tous les écrans",
+    "unavailable": "Aucune cible d'affichage n'est disponible pour ce compte."
   },
 
   "auth": {
@@ -63,19 +113,26 @@
   },
 
   "dashboard": {
-    "serverTitle": "Serveur",
+    "displayContent": "Afficher un contenu",
+    "displayTargets": "Groupes, écrans ou tous les écrans",
+    "serverTitle": "État du système",
     "service": "Service",
     "database": "Base de données",
     "missingTables": "Tables manquantes",
-    "notConnected": "non connecté",
-    "unknown": "inconnu",
-    "displayTypesTitle": "Types d'affichage",
-    "clientsGroupsTitle": "Clients et groupes",
-    "clientsTitle": "Clients",
+    "notConnected": "Non connecté",
+    "unknown": "Inconnu",
+    "online": "En ligne",
+    "offline": "Hors ligne",
+    "screensTotal": "Écrans au total",
+    "screensOnline": "Écrans en ligne",
+    "needsAttention": "À vérifier",
+    "screensTitle": "Écrans",
     "groupsTitle": "Groupes",
-    "noClients": "Aucun client enregistré.",
+    "viewScreens": "Voir les écrans",
+    "viewGroups": "Voir les groupes",
+    "noScreens": "Aucun écran enregistré.",
     "noGroups": "Aucun groupe créé.",
-    "clientCount": "client(s)"
+    "screenCount": "écran(s)"
   },
 
   "users": {
@@ -90,6 +147,8 @@
     "colStatus": "Statut",
     "colSuperAdmin": "Super admin",
     "colPermissions": "Permissions",
+    "accountType": "Type de compte",
+    "accountPermissionsRequired": "Ajoutez les permissions requises pour ce type de compte.",
     "yes": "Oui",
     "no": "Non",
     "allPermissions": "Toutes",
@@ -139,11 +198,11 @@
     "scope": "Portée",
     "scopeGlobal": "Global",
     "scopeGroup": "Groupe",
-    "scopeClient": "Client",
+    "scopeClient": "Écran",
     "groupId": "ID du groupe",
-    "clientId": "ID du client",
+    "clientId": "ID de l'écran",
     "actionUsers": "Utilisateurs",
-    "actionClients": "Clients",
+    "actionClients": "Écrans",
     "actionGroups": "Groupes",
     "actionContent": "Contenu",
     "actionAssignments": "Assignations",
@@ -153,12 +212,12 @@
     "errorDuplicate": "Cette cible possède déjà un droit d'accès.",
     "targetGlobal": "Global",
     "targetGroup": "Groupe",
-    "targetClient": "Client"
+    "targetClient": "Écran"
   },
 
   "assets": {
-    "title": "Contenus",
-    "uploadTitle": "Importer un contenu",
+    "title": "Bibliothèque de médias",
+    "uploadTitle": "Importer un média",
     "nameLabel": "Nom",
     "fileLabel": "Fichier",
     "uploadButton": "Importer",
@@ -182,8 +241,9 @@
   },
 
   "clients": {
-    "title": "Clients",
-    "searchPlaceholder": "Nom, ID ou logiciel",
+    "title": "Écrans",
+    "screenCount": "{count} écran(s)",
+    "searchPlaceholder": "Nom ou logiciel",
     "connection": "Connexion",
     "connectionOnline": "En ligne",
     "connectionOffline": "Hors ligne",
@@ -191,18 +251,20 @@
     "access": "Accès",
     "software": "Logiciel",
     "lastSeen": "Dernière activité",
-    "loading": "Chargement des clients…",
-    "noClients": "Aucun client enregistré.",
-    "noMatch": "Aucun client trouvé.",
-    "selectClient": "Sélectionnez un client.",
+    "loading": "Chargement des écrans…",
+    "noClients": "Aucun écran enregistré.",
+    "noMatch": "Aucun écran trouvé.",
+    "selectClient": "Sélectionnez un écran.",
     "clientSoftware": "Logiciel client",
     "manifest": "Manifeste",
     "lastSync": "Dernière synchronisation",
-    "clientName": "Nom du client",
+    "clientName": "Nom de l'écran",
+    "technicalDetails": "Détails techniques",
+    "screenId": "ID de l'écran",
     "lastError": "Dernière erreur",
     "disable": "Désactiver",
     "enable": "Activer",
-    "connectTitle": "Connecter un client",
+    "connectTitle": "Connecter un écran",
     "generateToken": "Générer un jeton",
     "generating": "Génération",
     "enrollmentToken": "Jeton d'inscription",
@@ -212,12 +274,13 @@
     "noticeTokenCopied": "Jeton d'inscription copié.",
     "errorToken": "Impossible de créer un jeton d'inscription",
     "errorTokenCopy": "Impossible de copier le jeton. Sélectionnez-le manuellement.",
-    "errorLoad": "Impossible de charger les clients",
-    "errorUpdate": "Impossible de mettre à jour le client",
-    "errorStatus": "Impossible de mettre à jour le statut du client",
-    "noticeUpdated": "Client mis à jour.",
-    "noticeEnabled": "Client activé.",
-    "noticeDisabled": "Client désactivé."
+    "errorLoad": "Impossible de charger les écrans",
+    "errorUpdate": "Impossible de mettre à jour l'écran",
+    "errorStatus": "Impossible de mettre à jour le statut de l'écran",
+    "noticeUpdated": "Écran mis à jour.",
+    "noticeEnabled": "Écran activé.",
+    "noticeDisabled": "Écran désactivé.",
+    "managementUnavailable": "La permission de gérer les écrans est requise."
   },
 
   "groups": {
@@ -233,42 +296,45 @@
     "selectGroup": "Sélectionnez un groupe.",
     "createTitle": "Créer un groupe",
     "groupName": "Nom du groupe",
+    "technicalDetails": "Détails techniques",
+    "groupId": "ID du groupe",
     "createButton": "Créer le groupe",
     "creating": "Création",
     "deleteConfirm": "Supprimer le groupe « {name} » ?",
-    "removeClientTitle": "Retirer le client du groupe",
-    "permissionRequired": "La permission de gérer les clients est requise",
-    "noMembers": "Ce groupe ne contient aucun client.",
-    "addClient": "Ajouter un client",
-    "noAdditionalClients": "Aucun autre client autorisé n'est disponible.",
+    "removeClientTitle": "Retirer l'écran du groupe",
+    "permissionRequired": "La permission de gérer les écrans est requise",
+    "noMembers": "Ce groupe ne contient aucun écran.",
+    "addClient": "Ajouter un écran",
+    "noAdditionalClients": "Aucun autre écran autorisé n'est disponible.",
     "noticeCreated": "Groupe créé.",
     "noticeUpdated": "Groupe mis à jour.",
     "noticeDeleted": "Groupe supprimé.",
-    "noticeMemberAdded": "Client ajouté au groupe.",
-    "noticeMemberRemoved": "Client retiré du groupe.",
+    "noticeMemberAdded": "Écran ajouté au groupe.",
+    "noticeMemberRemoved": "Écran retiré du groupe.",
     "errorLoad": "Impossible de charger les groupes",
     "errorLoadDetail": "Impossible de charger le groupe",
     "errorCreate": "Impossible de créer le groupe",
     "errorUpdate": "Impossible de mettre à jour le groupe",
     "errorDelete": "Impossible de supprimer le groupe",
-    "errorAddMember": "Impossible d'ajouter le client au groupe",
-    "errorRemoveMember": "Impossible de retirer le client du groupe",
-    "errorRefreshClients": "Impossible d'actualiser les clients autorisés"
+    "errorAddMember": "Impossible d'ajouter l'écran au groupe",
+    "errorRemoveMember": "Impossible de retirer l'écran du groupe",
+    "errorRefreshClients": "Impossible d'actualiser les écrans autorisés",
+    "managementUnavailable": "La permission de gérer les groupes est requise."
   },
 
   "assignment": {
-    "title": "Assignation d'affichage",
-    "groupTitle": "Assignation du groupe",
-    "globalTitle": "Tous les écrans",
+    "title": "Afficher sur un écran",
+    "groupTitle": "Afficher sur un groupe",
+    "globalTitle": "Afficher sur tous les écrans",
     "target": "Cible",
-    "clientTarget": "Client",
+    "clientTarget": "Écran",
     "groupTarget": "Groupe",
     "globalTarget": "Cible",
     "targetSummary": "Cible : {target}",
     "noTarget": "Aucune cible {target} autorisée n'est disponible.",
-    "noClient": "Aucun client autorisé disponible.",
-    "clientLabel": "Client",
-    "assetLabel": "Contenu",
+    "noClient": "Aucun écran autorisé disponible.",
+    "clientLabel": "Écran",
+    "assetLabel": "Média",
     "contentLabel": "Contenu",
     "contentAsset": "Image ou vidéo importée",
     "contentLiveWebLink": "Lien web en direct",
@@ -278,14 +344,14 @@
     "fitLabel": "Ajustement",
     "fitContain": "Contenu dans l'écran",
     "fitCover": "Remplir l'écran",
-    "noAssets": "Importez une image ou une vidéo active avant de créer une assignation.",
-    "assigning": "Assignation en cours…",
+    "noAssets": "Importez une image ou une vidéo active avant de l'afficher.",
+    "assigning": "Envoi en cours…",
     "assignButton": "Afficher le contenu",
     "errorInvalidContent": "Choisissez un contenu valide avant l'envoi.",
-    "errorLoad": "Impossible de charger les options d'assignation",
-    "errorAssign": "Impossible d'assigner le contenu",
-    "noticeSent": "{manifest} envoyé à {target}. Les écrans concernés le téléchargeront, le vérifieront et l'activeront à leur prochaine synchronisation.",
-    "unavailableGlobal": "La permission d'assignation globale est requise pour gérer tous les écrans."
+    "errorLoad": "Impossible de charger les options d'affichage",
+    "errorAssign": "Impossible d'envoyer le contenu",
+    "noticeSent": "{manifest} envoyé à {target}. Les écrans concernés le téléchargeront, le vérifieront et l'afficheront à leur prochaine synchronisation.",
+    "unavailableGlobal": "La permission d'afficher sur tous les écrans est requise."
   },
 
   "api": {

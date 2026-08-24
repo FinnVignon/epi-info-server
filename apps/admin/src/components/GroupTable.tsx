@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
 
+import { RefreshButton } from "./RefreshButton";
+import { SortableTableHeader, type SortDirection } from "./SortableTableHeader";
 import { useTranslation } from "../i18n";
 import { formatDate } from "../utils/formatDate";
 import type { DisplayGroup } from "../../../shared/groupContracts";
 
-type SortDirection = "asc" | "desc";
 type SortKey = "members" | "name" | "updated";
 
 interface GroupTableProps {
@@ -57,9 +58,7 @@ export function GroupTable({
     <article className="panel groups-list-panel">
       <div className="panel-header">
         <h2>{t.groups.title}</h2>
-        <button className="secondary-button" onClick={onRefresh} type="button">
-          {t.common.refresh}
-        </button>
+        <RefreshButton label={t.common.refresh} onClick={onRefresh} />
       </div>
 
       <label className="table-search">
@@ -78,21 +77,21 @@ export function GroupTable({
           <table className="data-table groups-table">
             <thead>
               <tr>
-                <SortableHeader
+                <SortableTableHeader
                   activeSortKey={sortKey}
                   direction={sortDirection}
                   label={t.common.name}
                   onSort={handleSort}
                   sortKey="name"
                 />
-                <SortableHeader
+                <SortableTableHeader
                   activeSortKey={sortKey}
                   direction={sortDirection}
                   label={t.groups.members}
                   onSort={handleSort}
                   sortKey="members"
                 />
-                <SortableHeader
+                <SortableTableHeader
                   activeSortKey={sortKey}
                   direction={sortDirection}
                   label={t.groups.updated}
@@ -111,7 +110,6 @@ export function GroupTable({
                   <td>
                     <button className="table-link" type="button">
                       <span>{group.name}</span>
-                      <small>{shortGroupId(group.id)}</small>
                     </button>
                   </td>
                   <td>{group.memberCount}</td>
@@ -126,32 +124,6 @@ export function GroupTable({
         <p className="metric">{t.groups.noGroups}</p>
       )}
     </article>
-  );
-}
-
-interface SortableHeaderProps {
-  activeSortKey: SortKey;
-  direction: SortDirection;
-  label: string;
-  onSort: (sortKey: SortKey) => void;
-  sortKey: SortKey;
-}
-
-function SortableHeader({ activeSortKey, direction, label, onSort, sortKey }: SortableHeaderProps) {
-  const { t } = useTranslation();
-  const isActive = activeSortKey === sortKey;
-
-  return (
-    <th>
-      <button
-        className={`sort-button ${isActive ? "active" : ""}`}
-        onClick={() => onSort(sortKey)}
-        type="button"
-      >
-        <span>{label}</span>
-        <small>{isActive ? (direction === "asc" ? t.common.up : t.common.down) : ""}</small>
-      </button>
-    </th>
   );
 }
 
@@ -170,8 +142,4 @@ function compareGroups(
     case "updated":
       return Date.parse(firstGroup.updatedAt) - Date.parse(secondGroup.updatedAt);
   }
-}
-
-function shortGroupId(groupId: string): string {
-  return groupId.length > 16 ? `${groupId.slice(0, 8)}...${groupId.slice(-4)}` : groupId;
 }

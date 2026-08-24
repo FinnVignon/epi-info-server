@@ -1,0 +1,55 @@
+.status-pill {
+  border: 1px solid var(--color-border-strong);
+  border-radius: 999px;
+  color: var(--color-text-soft);
+  font-size: 13px;
+  padding: 6px 10px;
+}
+
+.status-pill.ok {
+  background: var(--color-success-bg);
+  border-color: var(--color-success-border);
+  color: var(--color-success-text);
+}
+
+.status-pill.error {
+  background: var(--color-error-bg);
+  border-color: var(--color-error-border);
+  color: var(--color-error-text);
+}
+
+.status-pill.active {
+  background: var(--color-success-bg);
+  border-color: var(--color-success-border);
+  color: var(--color-success-text);
+}
+
+.status-pill.disabled {
+  background: var(--color-page);
+  border-color: var(--color-border-strong);
+  color: var(--color-muted);
+}
+
+.status-pill.archived {
+  background: var(--color-page);
+  border-color: var(--color-border-strong);
+  color: var(--color-muted);
+}
+
+.status-pill.online {
+  background: var(--color-success-bg);
+  border-color: var(--color-success-border);
+  color: var(--color-success-text);
+}
+
+.status-pill.offline {
+  background: var(--color-error-bg);
+  border-color: var(--color-error-border);
+  color: var(--color-error-text);
+}
+
+.status-pill.unknown {
+  background: var(--color-page);
+  border-color: var(--color-border-strong);
+  color: var(--color-muted);
+}

@@ -11,6 +11,8 @@ import {
 } from "../api/adminUsersApi";
 import { permissionToGrant } from "../utils/adminPermissions";
 import { useTranslation } from "../i18n";
+import { useTemporaryNotice } from "../hooks/useTemporaryNotice";
+import { AdminFeedback } from "./AdminFeedback";
 import { AdminUserCreateForm } from "./AdminUserCreateForm";
 import { AdminUserDetail } from "./AdminUserDetail";
 import { AdminUserTable } from "./AdminUserTable";
@@ -31,7 +33,7 @@ export function AdminUsersScreen({ currentUser, onUnauthorized }: AdminUsersScre
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSavingPermissions, setIsSavingPermissions] = useState(false);
-  const [notice, setNotice] = useState<string | null>(null);
+  const [notice, setNotice] = useTemporaryNotice();
   const [permissionDraft, setPermissionDraft] = useState<AdminPermissionGrant[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [users, setUsers] = useState<AdminUserWithPermissions[]>([]);
@@ -196,12 +198,7 @@ export function AdminUsersScreen({ currentUser, onUnauthorized }: AdminUsersScre
 
   return (
     <section className="content users-layout">
-      {error || notice ? (
-        <div className="screen-alerts">
-          {error ? <p className="form-error">{error}</p> : null}
-          {notice ? <p className="form-notice">{notice}</p> : null}
-        </div>
-      ) : null}
+      <AdminFeedback className="screen-alerts" error={error} notice={notice} />
 
       <AdminUserTable
         isLoading={isLoading}

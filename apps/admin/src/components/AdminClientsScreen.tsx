@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 
 import { listClients, updateClientProfile, updateClientStatus } from "../api/adminClientsApi";
 import { ApiError } from "../api/adminApi";
-import { ClientAssignmentPanel } from "./ClientAssignmentPanel";
+import { useTemporaryNotice } from "../hooks/useTemporaryNotice";
+import { AdminFeedback } from "./AdminFeedback";
 import { ClientDetail } from "./ClientDetail";
 import { ClientEnrollmentPanel } from "./ClientEnrollmentPanel";
 import { ClientTable } from "./ClientTable";
@@ -21,7 +22,7 @@ export function AdminClientsScreen({ onUnauthorized }: AdminClientsScreenProps) 
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [notice, setNotice] = useState<string | null>(null);
+  const [notice, setNotice] = useTemporaryNotice();
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const selectedClient = useMemo(
     () => clients.find((client) => client.id === selectedClientId) ?? clients[0] ?? null,
@@ -112,15 +113,8 @@ export function AdminClientsScreen({ onUnauthorized }: AdminClientsScreenProps) 
   }
 
   return (
-    <section
-      className={`content clients-layout ${canManageClients === false ? "assignment-only" : ""}`}
-    >
-      {error || notice ? (
-        <div className="screen-alerts">
-          {error ? <p className="form-error">{error}</p> : null}
-          {notice ? <p className="form-notice">{notice}</p> : null}
-        </div>
-      ) : null}
+    <section className="content clients-layout">
+      <AdminFeedback className="screen-alerts" error={error} notice={notice} />
 
       {canManageClients !== false ? (
         <>
@@ -131,20 +125,21 @@ export function AdminClientsScreen({ onUnauthorized }: AdminClientsScreenProps) 
             onSelectClient={setSelectedClientId}
             selectedClientId={selectedClient?.id ?? null}
           />
-          <ClientDetail
-            client={selectedClient}
-            isSaving={isSaving}
-            onStatusChange={(client) => void handleStatusChange(client)}
-            onUpdateProfile={handleUpdateProfile}
-          />
-          {canEnrollClients ? <ClientEnrollmentPanel onUnauthorized={onUnauthorized} /> : null}
+          <div className="screens-side-column">
+            <ClientDetail
+              client={selectedClient}
+              isSaving={isSaving}
+              onStatusChange={(client) => void handleStatusChange(client)}
+              onUpdateProfile={handleUpdateProfile}
+            />
+            {canEnrollClients ? <ClientEnrollmentPanel onUnauthorized={onUnauthorized} /> : null}
+          </div>
         </>
-      ) : null}
-
-      <ClientAssignmentPanel
-        onUnauthorized={onUnauthorized}
-        preferredClientId={selectedClient?.id ?? null}
-      />
+      ) : (
+        <article className="panel">
+          <p className="metric">{t.clients.managementUnavailable}</p>
+        </article>
+      )}
     </section>
   );
 }

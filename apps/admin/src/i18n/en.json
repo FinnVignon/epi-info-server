@@ -31,21 +31,71 @@
     "working": "Working"
   },
 
+  "accountTypes": {
+    "user": "User",
+    "admin": "Admin",
+    "superAdmin": "Super admin"
+  },
+
   "nav": {
     "dashboard": "Dashboard",
-    "global": "All displays",
+    "display": "Display",
     "users": "Users",
-    "assets": "Assets",
-    "clients": "Clients",
+    "content": "Content",
+    "screens": "Screens",
     "groups": "Groups",
+    "settings": "Settings",
     "logout": "Log out",
-    "sections": "Admin sections"
+    "sections": "Admin sections",
+    "openMenu": "Open navigation",
+    "closeMenu": "Close navigation",
+    "changeLanguage": "Change language",
+    "workspace": "Workspace",
+    "administration": "Administration",
+    "preferences": "Preferences"
+  },
+
+  "shell": {
+    "controlPanel": "Control panel"
   },
 
   "apiStatus": {
     "checking": "checking",
     "ok": "ok",
     "error": "error"
+  },
+
+  "settings": {
+    "languageTitle": "Language",
+    "appearanceTitle": "Appearance",
+    "theme": "Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeSystem": "System",
+    "accountTitle": "Account",
+    "systemTitle": "System",
+    "displayName": "Display name",
+    "email": "Email",
+    "access": "Access",
+    "superAdmin": "Super administrator",
+    "scopedAccess": "Scoped administrator",
+    "api": "API",
+    "service": "Service",
+    "database": "Database"
+  },
+
+  "content": {
+    "views": "Content views",
+    "library": "Library",
+    "allScreens": "All screens"
+  },
+
+  "display": {
+    "targetType": "Display target",
+    "groups": "Groups",
+    "screens": "Screens",
+    "allScreens": "All screens",
+    "unavailable": "No display targets are available for this account."
   },
 
   "auth": {
@@ -63,19 +113,26 @@
   },
 
   "dashboard": {
-    "serverTitle": "Server",
+    "displayContent": "Display content",
+    "displayTargets": "Groups, screens, or all screens",
+    "serverTitle": "System health",
     "service": "Service",
     "database": "Database",
     "missingTables": "Missing tables",
-    "notConnected": "not connected",
-    "unknown": "unknown",
-    "displayTypesTitle": "Display Types",
-    "clientsGroupsTitle": "Clients And Groups",
-    "clientsTitle": "Clients",
+    "notConnected": "Not connected",
+    "unknown": "Unknown",
+    "online": "Online",
+    "offline": "Offline",
+    "screensTotal": "Total screens",
+    "screensOnline": "Online screens",
+    "needsAttention": "Needs attention",
+    "screensTitle": "Screens",
     "groupsTitle": "Groups",
-    "noClients": "No clients registered yet.",
+    "viewScreens": "View screens",
+    "viewGroups": "View groups",
+    "noScreens": "No screens registered yet.",
     "noGroups": "No groups created yet.",
-    "clientCount": "clients"
+    "screenCount": "screens"
   },
 
   "users": {
@@ -90,6 +147,8 @@
     "colStatus": "Status",
     "colSuperAdmin": "Super admin",
     "colPermissions": "Permissions",
+    "accountType": "Account type",
+    "accountPermissionsRequired": "Add the permissions required for this account type.",
     "yes": "Yes",
     "no": "No",
     "allPermissions": "All",
@@ -139,11 +198,11 @@
     "scope": "Scope",
     "scopeGlobal": "Global",
     "scopeGroup": "Group",
-    "scopeClient": "Client",
+    "scopeClient": "Screen",
     "groupId": "Group id",
-    "clientId": "Client id",
+    "clientId": "Screen id",
     "actionUsers": "Users",
-    "actionClients": "Clients",
+    "actionClients": "Screens",
     "actionGroups": "Groups",
     "actionContent": "Content",
     "actionAssignments": "Assignments",
@@ -153,12 +212,12 @@
     "errorDuplicate": "That target already has a permission grant.",
     "targetGlobal": "Global",
     "targetGroup": "Group",
-    "targetClient": "Client"
+    "targetClient": "Screen"
   },
 
   "assets": {
-    "title": "Assets",
-    "uploadTitle": "Upload Asset",
+    "title": "Media library",
+    "uploadTitle": "Upload media",
     "nameLabel": "Name",
     "fileLabel": "File",
     "uploadButton": "Upload",
@@ -182,8 +241,9 @@
   },
 
   "clients": {
-    "title": "Clients",
-    "searchPlaceholder": "Name, ID, or software",
+    "title": "Screens",
+    "screenCount": "{count} screens",
+    "searchPlaceholder": "Name or software",
     "connection": "Connection",
     "connectionOnline": "Online",
     "connectionOffline": "Offline",
@@ -191,18 +251,20 @@
     "access": "Access",
     "software": "Software",
     "lastSeen": "Last seen",
-    "loading": "Loading clients...",
-    "noClients": "No clients registered yet.",
-    "noMatch": "No matching clients.",
-    "selectClient": "Select a client.",
+    "loading": "Loading screens...",
+    "noClients": "No screens registered yet.",
+    "noMatch": "No matching screens.",
+    "selectClient": "Select a screen.",
     "clientSoftware": "Client software",
     "manifest": "Manifest",
     "lastSync": "Last sync",
-    "clientName": "Client name",
+    "clientName": "Screen name",
+    "technicalDetails": "Technical details",
+    "screenId": "Screen ID",
     "lastError": "Last Error",
     "disable": "Disable",
     "enable": "Enable",
-    "connectTitle": "Connect A Client",
+    "connectTitle": "Connect a screen",
     "generateToken": "Generate token",
     "generating": "Generating",
     "enrollmentToken": "Enrollment token",
@@ -212,12 +274,13 @@
     "noticeTokenCopied": "Enrollment token copied.",
     "errorToken": "Unable to create an enrollment token",
     "errorTokenCopy": "Unable to copy the token. Select it manually.",
-    "errorLoad": "Unable to load clients",
-    "errorUpdate": "Unable to update client",
-    "errorStatus": "Unable to update client status",
-    "noticeUpdated": "Client updated.",
-    "noticeEnabled": "Client enabled.",
-    "noticeDisabled": "Client disabled."
+    "errorLoad": "Unable to load screens",
+    "errorUpdate": "Unable to update screen",
+    "errorStatus": "Unable to update screen status",
+    "noticeUpdated": "Screen updated.",
+    "noticeEnabled": "Screen enabled.",
+    "noticeDisabled": "Screen disabled.",
+    "managementUnavailable": "Screen management permission is required."
   },
 
   "groups": {
@@ -233,42 +296,45 @@
     "selectGroup": "Select a group.",
     "createTitle": "Create Group",
     "groupName": "Group name",
+    "technicalDetails": "Technical details",
+    "groupId": "Group ID",
     "createButton": "Create group",
     "creating": "Creating",
     "deleteConfirm": "Delete the group \"{name}\"?",
-    "removeClientTitle": "Remove client from group",
-    "permissionRequired": "Client management permission is required",
-    "noMembers": "This group has no clients.",
-    "addClient": "Add client",
-    "noAdditionalClients": "No additional permitted clients are available.",
+    "removeClientTitle": "Remove screen from group",
+    "permissionRequired": "Screen management permission is required",
+    "noMembers": "This group has no screens.",
+    "addClient": "Add screen",
+    "noAdditionalClients": "No additional permitted screens are available.",
     "noticeCreated": "Group created.",
     "noticeUpdated": "Group updated.",
     "noticeDeleted": "Group deleted.",
-    "noticeMemberAdded": "Client added to group.",
-    "noticeMemberRemoved": "Client removed from group.",
+    "noticeMemberAdded": "Screen added to group.",
+    "noticeMemberRemoved": "Screen removed from group.",
     "errorLoad": "Unable to load groups",
     "errorLoadDetail": "Unable to load group",
     "errorCreate": "Unable to create group",
     "errorUpdate": "Unable to update group",
     "errorDelete": "Unable to delete group",
-    "errorAddMember": "Unable to add client to group",
-    "errorRemoveMember": "Unable to remove client from group",
-    "errorRefreshClients": "Unable to refresh permitted clients"
+    "errorAddMember": "Unable to add screen to group",
+    "errorRemoveMember": "Unable to remove screen from group",
+    "errorRefreshClients": "Unable to refresh permitted screens",
+    "managementUnavailable": "Group management permission is required."
   },
 
   "assignment": {
-    "title": "Display Assignment",
-    "groupTitle": "Group Display Assignment",
-    "globalTitle": "All Displays",
+    "title": "Display on a screen",
+    "groupTitle": "Display on a group",
+    "globalTitle": "Display on all screens",
     "target": "Target",
-    "clientTarget": "Client",
+    "clientTarget": "Screen",
     "groupTarget": "Group",
     "globalTarget": "Target",
     "targetSummary": "Target: {target}",
     "noTarget": "No permitted {target} is available.",
-    "noClient": "No permitted client is available.",
-    "clientLabel": "Client",
-    "assetLabel": "Asset",
+    "noClient": "No permitted screen is available.",
+    "clientLabel": "Screen",
+    "assetLabel": "Media",
     "contentLabel": "Content",
     "contentAsset": "Uploaded image or video",
     "contentLiveWebLink": "Live web link",
@@ -278,14 +344,14 @@
     "fitLabel": "Fit",
     "fitContain": "Contain",
     "fitCover": "Cover",
-    "noAssets": "Upload an active image or video before creating an assignment.",
-    "assigning": "Assigning",
+    "noAssets": "Upload an active image or video before displaying it.",
+    "assigning": "Sending",
     "assignButton": "Display content",
     "errorInvalidContent": "Choose valid display content before sending.",
-    "errorLoad": "Unable to load assignment options",
-    "errorAssign": "Unable to assign display content",
-    "noticeSent": "{manifest} sent to {target}. Affected displays will download, verify, and activate it on their next sync.",
-    "unavailableGlobal": "Global assignment permission is required to manage all displays."
+    "errorLoad": "Unable to load display options",
+    "errorAssign": "Unable to send display content",
+    "noticeSent": "{manifest} sent to {target}. Affected screens will download, verify, and display it on their next sync.",
+    "unavailableGlobal": "Permission to display on all screens is required."
   },
 
   "api": {

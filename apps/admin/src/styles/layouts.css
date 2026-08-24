@@ -1,0 +1,130 @@
+.content {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0 auto;
+  max-width: 1600px;
+  padding: 24px;
+  width: 100%;
+}
+
+.content.single-column {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.content.users-layout {
+  grid-template-columns: minmax(420px, 1.3fr) minmax(320px, 0.8fr);
+}
+
+.content.assets-layout {
+  grid-template-columns: minmax(320px, 0.7fr) minmax(480px, 1.3fr);
+}
+
+.content.clients-layout {
+  grid-template-columns: minmax(560px, 1.45fr) minmax(340px, 0.75fr);
+}
+
+.content.clients-layout.assignment-only {
+  grid-template-columns: minmax(320px, 720px);
+}
+
+.content.groups-layout {
+  grid-template-columns: minmax(460px, 1fr) minmax(380px, 1fr);
+}
+
+.content.groups-layout.assignment-only {
+  grid-template-columns: minmax(320px, 720px);
+}
+
+.content.global-assignment-layout {
+  grid-template-columns: minmax(320px, 720px);
+}
+
+.content.settings-layout {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.content.content-workspace {
+  gap: 18px;
+}
+
+.content.display-layout {
+  max-width: 960px;
+}
+
+.target-tabs {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  display: grid;
+  gap: 4px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  max-width: 760px;
+  padding: 5px;
+}
+
+.target-tabs button {
+  align-items: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  color: var(--color-muted);
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 700;
+  gap: 8px;
+  justify-content: center;
+  min-height: 42px;
+  padding: 8px 12px;
+}
+
+.target-tabs button:hover {
+  background: var(--color-hover);
+  color: var(--color-text);
+}
+
+.target-tabs button.active {
+  background: var(--color-selection);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.display-assignment-workspace {
+  max-width: 760px;
+}
+
+.workspace-tabs {
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  gap: 18px;
+}
+
+.workspace-tabs button {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  color: var(--color-muted);
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 700;
+  gap: 7px;
+  margin-bottom: -1px;
+  min-height: 42px;
+  padding: 8px 2px;
+}
+
+.workspace-tabs button.active {
+  border-bottom-color: var(--color-primary);
+  color: var(--color-text);
+}
+
+.asset-library-layout {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(300px, 0.6fr) minmax(520px, 1.4fr);
+}
+
+.all-screens-layout {
+  max-width: 760px;
+}

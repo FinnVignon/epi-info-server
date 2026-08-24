@@ -1,0 +1,163 @@
+.dashboard-layout {
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+}
+
+.dashboard-metrics {
+  display: grid;
+  gap: 12px;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.dashboard-primary-action {
+  align-items: center;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  color: var(--color-text);
+  display: grid;
+  gap: 14px;
+  grid-column: 1 / -1;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  min-height: 84px;
+  padding: 16px;
+  text-align: left;
+}
+
+.dashboard-primary-action:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 2px 8px var(--shadow-soft);
+}
+
+.dashboard-primary-action > span:nth-child(2) {
+  display: grid;
+  gap: 3px;
+}
+
+.dashboard-primary-action strong {
+  font-size: 16px;
+}
+
+.dashboard-primary-action small {
+  color: var(--color-muted);
+  font-size: 12px;
+}
+
+.dashboard-primary-action > svg {
+  color: var(--color-primary);
+}
+
+.dashboard-primary-icon {
+  align-items: center;
+  background: var(--color-selection);
+  border-radius: 6px;
+  color: var(--color-primary);
+  display: inline-flex;
+  height: 42px;
+  justify-content: center;
+  width: 42px;
+}
+
+.dashboard-metric {
+  align-items: center;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  color: var(--color-text);
+  display: flex;
+  gap: 12px;
+  min-height: 76px;
+  padding: 14px;
+  text-align: left;
+}
+
+.dashboard-metric:hover {
+  border-color: var(--color-hover-border);
+  box-shadow: 0 2px 8px var(--shadow-soft);
+}
+
+.dashboard-metric-icon {
+  align-items: center;
+  background: var(--color-surface-muted);
+  border-radius: 6px;
+  color: var(--color-icon);
+  display: inline-flex;
+  flex: 0 0 38px;
+  height: 38px;
+  justify-content: center;
+}
+
+.dashboard-metric.positive .dashboard-metric-icon {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.dashboard-metric.warning .dashboard-metric-icon {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.dashboard-metric > span:last-child {
+  display: grid;
+  gap: 2px;
+}
+
+.dashboard-metric strong {
+  font-size: 21px;
+  line-height: 1;
+}
+
+.dashboard-metric small {
+  color: var(--color-muted);
+  font-size: 12px;
+}
+
+.dashboard-screens-panel,
+.dashboard-groups-panel {
+  align-self: start;
+  grid-column: span 6;
+}
+
+.panel-link {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: var(--color-primary);
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 700;
+  gap: 4px;
+  padding: 3px;
+}
+
+.status-text-error,
+.connection-text.offline {
+  color: var(--color-error-text) !important;
+}
+
+.connection-text.online {
+  color: var(--color-success-text) !important;
+}
+
+.connection-text.unknown {
+  color: var(--color-muted) !important;
+}
+
+.operational-list li {
+  background: transparent;
+  border-left: 0;
+  border-right: 0;
+  border-top: 1px solid var(--color-border-soft);
+  border-radius: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.operational-list li:first-child {
+  border-top: 0;
+}
+
+.panel-icon-button {
+  border-color: var(--color-border);
+  color: var(--color-text-soft);
+}

@@ -3,22 +3,24 @@ import { useEffect, useState } from "react";
 import { listAssets, updateAssetStatus, uploadAsset } from "../api/adminAssetsApi";
 import { ApiError } from "../api/adminApi";
 import { useTranslation } from "../i18n";
+import { useTemporaryNotice } from "../hooks/useTemporaryNotice";
+import { AdminFeedback } from "./AdminFeedback";
 import { AssetTable } from "./AssetTable";
 import { AssetUploadForm } from "./AssetUploadForm";
 import type { AdminUser, Asset, AssetStatus } from "../../../shared/adminContracts";
 
-interface AdminAssetsScreenProps {
+interface AssetLibraryProps {
   currentUser: AdminUser;
   onUnauthorized: () => void;
 }
 
-export function AdminAssetsScreen({ currentUser, onUnauthorized }: AdminAssetsScreenProps) {
+export function AssetLibrary({ currentUser, onUnauthorized }: AssetLibraryProps) {
   const { t } = useTranslation();
   const [assets, setAssets] = useState<Asset[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
-  const [notice, setNotice] = useState<string | null>(null);
+  const [notice, setNotice] = useTemporaryNotice();
 
   useEffect(() => {
     void loadAssets();
@@ -30,7 +32,6 @@ export function AdminAssetsScreen({ currentUser, onUnauthorized }: AdminAssetsSc
 
     try {
       const response = await listAssets();
-
       setAssets(response.assets);
     } catch (loadError) {
       handleApiError(loadError, t.assets.errorLoad);
@@ -91,13 +92,8 @@ export function AdminAssetsScreen({ currentUser, onUnauthorized }: AdminAssetsSc
   }
 
   return (
-    <section className="content assets-layout">
-      {error || notice ? (
-        <div className="screen-alerts">
-          {error ? <p className="form-error">{error}</p> : null}
-          {notice ? <p className="form-notice">{notice}</p> : null}
-        </div>
-      ) : null}
+    <div className="asset-library-layout">
+      <AdminFeedback className="screen-alerts" error={error} notice={notice} />
 
       <AssetUploadForm isUploading={isUploading} onUpload={handleUpload} />
       <AssetTable
@@ -107,6 +103,6 @@ export function AdminAssetsScreen({ currentUser, onUnauthorized }: AdminAssetsSc
         onRefresh={() => void loadAssets()}
         onStatusChange={(asset, status) => void handleAssetStatusChange(asset, status)}
       />
-    </section>
+    </div>
   );
 }

@@ -1,0 +1,145 @@
+.auth-shell {
+  align-items: center;
+  display: grid;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.auth-panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  margin: 0 auto;
+  max-width: 420px;
+  padding: 24px;
+  width: min(100%, 420px);
+}
+
+.auth-brand {
+  margin-bottom: 24px;
+}
+
+.brand {
+  display: grid;
+  gap: 2px;
+}
+
+.brand h1 {
+  font-size: 20px;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.brand span {
+  color: var(--color-muted);
+  font-size: 13px;
+}
+
+.auth-form {
+  display: grid;
+  gap: 16px;
+}
+
+.auth-form label {
+  display: grid;
+  gap: 6px;
+}
+
+.auth-form label span {
+  color: var(--color-text-soft);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.auth-form input {
+  background: var(--color-surface);
+  border: 1px solid var(--color-input-border);
+  border-radius: 6px;
+  color: var(--color-text);
+  min-height: 42px;
+  outline: none;
+  padding: 9px 10px;
+  width: 100%;
+}
+
+.auth-form input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--focus-shadow);
+}
+
+.form-error {
+  align-items: flex-start;
+  background: var(--color-error-bg);
+  border: 1px solid var(--color-error-border);
+  border-radius: 6px;
+  color: var(--color-error-text);
+  display: flex;
+  font-size: 13px;
+  gap: 8px;
+  margin: 0;
+  padding: 10px;
+}
+
+.form-notice {
+  align-items: flex-start;
+  background: var(--color-success-bg);
+  border: 1px solid var(--color-success-border);
+  border-radius: 6px;
+  color: var(--color-success-text);
+  display: flex;
+  font-size: 13px;
+  gap: 8px;
+  margin: 0;
+  padding: 10px;
+}
+
+.form-error svg,
+.form-notice svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.feedback-stack {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.primary-button,
+.secondary-button,
+.danger-button,
+.ghost-button {
+  align-items: center;
+  border-radius: 6px;
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 700;
+  justify-content: center;
+  min-height: 38px;
+  padding: 8px 12px;
+}
+
+.primary-button {
+  background: var(--color-primary);
+  border: 1px solid var(--color-primary-strong);
+  color: var(--color-on-primary);
+}
+
+.secondary-button {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text-soft);
+}
+
+.danger-button {
+  background: var(--color-surface);
+  border: 1px solid var(--color-danger-border);
+  color: var(--color-error-text);
+}
+
+.ghost-button {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--color-muted);
+  min-height: 32px;
+}

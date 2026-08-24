@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
+import { StatusMessage } from "./AdminFeedback";
 import type {
   AdminPermissionAction,
   AdminPermissionGrant,
@@ -7,32 +8,55 @@ import type {
 } from "../../../shared/adminContracts";
 import { useTranslation } from "../i18n";
 
+const DEFAULT_ACTIONS: AdminPermissionAction[] = ["manage_content"];
+
 interface PermissionEditorProps {
+  allowedActions?: AdminPermissionAction[];
   disabled?: boolean;
+  initialActions?: AdminPermissionAction[];
   onChange: (permissions: AdminPermissionGrant[]) => void;
   permissions: AdminPermissionGrant[];
 }
 
-export function PermissionEditor({ disabled, onChange, permissions }: PermissionEditorProps) {
+export function PermissionEditor({
+  allowedActions,
+  disabled,
+  initialActions = DEFAULT_ACTIONS,
+  onChange,
+  permissions,
+}: PermissionEditorProps) {
   const { t } = useTranslation();
-  const [draftActions, setDraftActions] = useState<AdminPermissionAction[]>(["manage_content"]);
+  const [draftActions, setDraftActions] = useState<AdminPermissionAction[]>(initialActions);
   const [draftError, setDraftError] = useState<string | null>(null);
   const [draftTargetId, setDraftTargetId] = useState("");
   const [draftTargetType, setDraftTargetType] = useState<AdminPermissionTargetType>("global");
 
-  const ACTION_OPTIONS: Array<{ label: string; value: AdminPermissionAction }> = [
+  const allActionOptions: Array<{ label: string; value: AdminPermissionAction }> = [
     { label: t.permissions.actionUsers, value: "manage_users" },
     { label: t.permissions.actionClients, value: "manage_clients" },
     { label: t.permissions.actionGroups, value: "manage_groups" },
     { label: t.permissions.actionContent, value: "manage_content" },
     { label: t.permissions.actionAssignments, value: "manage_assignments" },
   ];
+  const actionOptions = allActionOptions.filter(
+    (option) => !allowedActions || allowedActions.includes(option.value),
+  );
 
   const TARGET_OPTIONS: Array<{ label: string; value: AdminPermissionTargetType }> = [
     { label: t.permissions.scopeGlobal, value: "global" },
     { label: t.permissions.scopeGroup, value: "group" },
     { label: t.permissions.scopeClient, value: "client" },
   ];
+
+  useEffect(() => {
+    setDraftActions((currentActions) => {
+      const permittedActions = allowedActions
+        ? currentActions.filter((action) => allowedActions.includes(action))
+        : currentActions;
+
+      return permittedActions.length > 0 ? permittedActions : initialActions;
+    });
+  }, [allowedActions, initialActions]);
 
   function addPermission(): void {
     setDraftError(null);
@@ -74,7 +98,7 @@ export function PermissionEditor({ disabled, onChange, permissions }: Permission
   }
 
   function formatAction(action: AdminPermissionAction): string {
-    return ACTION_OPTIONS.find((o) => o.value === action)?.label ?? action;
+    return allActionOptions.find((option) => option.value === action)?.label ?? action;
   }
 
   return (
@@ -138,7 +162,7 @@ export function PermissionEditor({ disabled, onChange, permissions }: Permission
         ) : null}
 
         <div className="checkbox-grid">
-          {ACTION_OPTIONS.map((option) => (
+          {actionOptions.map((option) => (
             <label key={option.value}>
               <input
                 checked={draftActions.includes(option.value)}
@@ -151,7 +175,7 @@ export function PermissionEditor({ disabled, onChange, permissions }: Permission
           ))}
         </div>
 
-        {draftError ? <p className="form-error">{draftError}</p> : null}
+        {draftError ? <StatusMessage kind="error">{draftError}</StatusMessage> : null}
 
         <button
           className="secondary-button"
@@ -166,7 +190,6 @@ export function PermissionEditor({ disabled, onChange, permissions }: Permission
   );
 }
 
-// Ces fonctions sont exportées car utilisées dans AdminUserDetail
 export function formatPermissionTarget(
   permission: AdminPermissionGrant,
   t: { permissions: { targetGlobal: string; targetGroup: string; targetClient: string } },

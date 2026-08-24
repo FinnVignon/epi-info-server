@@ -36,6 +36,7 @@
     "@types/react-dom": "^18.2.22",
     "@types/ws": "^8.5.10",
     "@vitejs/plugin-react": "^6.0.2",
+    "lucide-react": "^0.468.0",
     "prettier": "^3.2.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

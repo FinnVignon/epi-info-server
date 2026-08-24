@@ -2,7 +2,9 @@ import { useState } from "react";
 
 import { createClientEnrollmentToken } from "../api/adminClientsApi";
 import { ApiError } from "../api/adminApi";
+import { useTemporaryNotice } from "../hooks/useTemporaryNotice";
 import { formatTranslation, useTranslation } from "../i18n";
+import { AdminFeedback } from "./AdminFeedback";
 import type { ClientEnrollmentToken } from "../../../shared/clientContracts";
 
 interface ClientEnrollmentPanelProps {
@@ -14,7 +16,7 @@ export function ClientEnrollmentPanel({ onUnauthorized }: ClientEnrollmentPanelP
   const [enrollmentToken, setEnrollmentToken] = useState<ClientEnrollmentToken | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
-  const [notice, setNotice] = useState<string | null>(null);
+  const [notice, setNotice] = useTemporaryNotice();
 
   async function handleCreateToken(): Promise<void> {
     setError(null);
@@ -66,8 +68,7 @@ export function ClientEnrollmentPanel({ onUnauthorized }: ClientEnrollmentPanelP
         </button>
       </div>
 
-      {error ? <p className="form-error">{error}</p> : null}
-      {notice ? <p className="form-notice">{notice}</p> : null}
+      <AdminFeedback error={error} notice={notice} />
 
       {enrollmentToken ? (
         <div className="enrollment-token-result">
