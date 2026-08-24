@@ -1,11 +1,11 @@
 import { useState } from "react";
 
-import { createClientEnrollmentToken } from "../api/adminClientsApi";
+import type { ClientEnrollmentToken } from "../../../shared/clientContracts";
 import { ApiError } from "../api/adminApi";
+import { createClientEnrollmentToken } from "../api/adminClientsApi";
 import { useTemporaryNotice } from "../hooks/useTemporaryNotice";
 import { formatTranslation, useTranslation } from "../i18n";
 import { AdminFeedback } from "./AdminFeedback";
-import type { ClientEnrollmentToken } from "../../../shared/clientContracts";
 
 interface ClientEnrollmentPanelProps {
   onUnauthorized: () => void;
@@ -41,9 +41,7 @@ export function ClientEnrollmentPanel({ onUnauthorized }: ClientEnrollmentPanelP
   }
 
   async function handleCopyToken(): Promise<void> {
-    if (!enrollmentToken) {
-      return;
-    }
+    if (!enrollmentToken) return;
 
     try {
       await navigator.clipboard.writeText(enrollmentToken.token);
@@ -55,37 +53,42 @@ export function ClientEnrollmentPanel({ onUnauthorized }: ClientEnrollmentPanelP
   }
 
   return (
-    <article className="panel client-enrollment-panel">
-      <div className="panel-header">
-        <h2>{t.clients.connectTitle}</h2>
+    <details className="panel client-enrollment-panel">
+      <summary>{t.clients.advancedSetup}</summary>
+      <div className="advanced-enrollment-content">
+        <p className="metric">{t.clients.advancedSetupDescription}</p>
         <button
-          className="primary-button"
+          className="secondary-button"
           disabled={isCreating}
           onClick={() => void handleCreateToken()}
           type="button"
         >
           {isCreating ? t.clients.generating : t.clients.generateToken}
         </button>
-      </div>
 
-      <AdminFeedback error={error} notice={notice} />
+        <AdminFeedback error={error} notice={notice} />
 
-      {enrollmentToken ? (
-        <div className="enrollment-token-result">
-          <div>
-            <span>{t.clients.enrollmentToken}</span>
-            <code>{enrollmentToken.token}</code>
+        {enrollmentToken ? (
+          <div className="enrollment-token-result">
+            <div>
+              <span>{t.clients.enrollmentToken}</span>
+              <code>{enrollmentToken.token}</code>
+            </div>
+            <p className="metric">
+              {formatTranslation(t.clients.tokenExpires, {
+                date: new Date(enrollmentToken.expiresAt).toLocaleString(),
+              })}
+            </p>
+            <button
+              className="secondary-button"
+              onClick={() => void handleCopyToken()}
+              type="button"
+            >
+              {t.clients.copyToken}
+            </button>
           </div>
-          <p className="metric">
-            {formatTranslation(t.clients.tokenExpires, {
-              date: new Date(enrollmentToken.expiresAt).toLocaleString(),
-            })}
-          </p>
-          <button className="secondary-button" onClick={() => void handleCopyToken()} type="button">
-            {t.clients.copyToken}
-          </button>
-        </div>
-      ) : null}
-    </article>
+        ) : null}
+      </div>
+    </details>
   );
 }
